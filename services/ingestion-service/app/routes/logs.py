@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+import httpx
 from app.schemas import LogCreate
 
 router = APIRouter(prefix="/logs", tags=["logs"])
