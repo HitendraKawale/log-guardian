@@ -1,28 +1,43 @@
+"""AI analysis service.
+
+Exposes a single ``/analyze`` endpoint that scores a log entry for anomalies,
+plus health and Prometheus metrics endpoints.
+"""
 from fastapi import FastAPI
-from pydantic import BaseModel
-import random
+from fastapi.responses import Response
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
-app = FastAPI()
+from .analyzer import analyze
+from .schemas import AnalyzeRequest, AnalyzeResponse
 
-class LogInput(BaseModel):
-    service_name: str
-    log_level: str
-    message: str
+app = FastAPI(title="Log Guardian AI Service", version="0.1.0")
 
-@app.get("/health")
-def health_check():
+ANALYZE_REQUESTS = Counter(
+    "ai_analyze_requests_total", "Total number of analyze requests"
+)
+ANOMALIES_DETECTED = Counter(
+    "ai_anomalies_detected_total", "Total number of logs flagged as anomalies"
+)
+ANOMALY_SCORE = Histogram(
+    "ai_anomaly_score", "Distribution of anomaly scores returned by the model"
+)
+
+
+@app.get("/health", tags=["Health"])
+def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
-@app.post("/analyze")
-async def analyze(log: LogInput):
-    anomaly_score = random.random
-    if anomaly_score > 0.8:
-        severity = "high"
-    elif anomaly_score > 0.5:
-        severity = "medium"
-    else:
-        severity = "low"
-    return {
-        "anomaly_score": anomaly_score,
-        predicted_severity": severity,
-    }
+
+@app.get("/metrics", tags=["Monitoring"])
+def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.post("/analyze", response_model=AnalyzeResponse, tags=["Analysis"])
+def analyze_log(request: AnalyzeRequest) -> AnalyzeResponse:
+    ANALYZE_REQUESTS.inc()
+    result = analyze(request)
+    ANOMALY_SCORE.observe(result.anomaly_score)
+    if result.is_anomaly:
+        ANOMALIES_DETECTED.inc()
+    return result

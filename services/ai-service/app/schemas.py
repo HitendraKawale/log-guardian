@@ -1,8 +1,12 @@
-"""Pydantic request/response schemas."""
+"""Request/response contracts for the AI analysis service.
+
+The ``AnalyzeRequest`` shape is intentionally identical to the ingestion
+service's ``LogCreate`` payload so the two services share one wire contract.
+"""
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 class LogLevel(str, Enum):
@@ -19,30 +23,14 @@ class Severity(str, Enum):
     HIGH = "high"
 
 
-class LogCreate(BaseModel):
+class AnalyzeRequest(BaseModel):
     service: str = Field(..., examples=["payment-api"])
     level: LogLevel
     message: str = Field(..., examples=["Database connection failed."])
     timestamp: datetime
 
 
-class AIResponse(BaseModel):
-    """Response contract returned by the AI service's /analyze endpoint."""
-
+class AnalyzeResponse(BaseModel):
     anomaly_score: float = Field(..., ge=0.0, le=1.0)
     is_anomaly: bool
     predicted_severity: Severity
-
-
-class LogResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    service: str
-    level: LogLevel
-    message: str
-    timestamp: datetime
-    status: str
-    anomaly_score: float | None = None
-    is_anomaly: bool | None = None
-    predicted_severity: Severity | None = None

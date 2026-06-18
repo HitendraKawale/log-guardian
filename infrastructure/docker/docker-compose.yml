@@ -1,0 +1,71 @@
+services:
+  ingestion-service:
+    build:
+      context: ../../services/ingestion-service
+      dockerfile: Dockerfile
+    container_name: lg-ingestion-service
+    ports:
+      - "8000:8000"
+    environment:
+      AI_SERVICE_URL: http://ai-service:8001
+      AI_TIMEOUT: "2"
+      DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
+    depends_on:
+      ai-service:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: ../../services/ai-service
+      dockerfile: Dockerfile
+    container_name: lg-ai-service
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: lg-postgres
+    environment:
+      POSTGRES_USER: logguardian
+      POSTGRES_PASSWORD: logguardian
+      POSTGRES_DB: logguardian
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logguardian"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: lg-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - ingestion-service
+      - ai-service
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: lg-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
