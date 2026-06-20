@@ -10,10 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from .config import settings
 from .database import init_db
 from .producer import start_producer, stop_producer
 from .routes import health, logs
+from .security import rate_limit_middleware
 
 
 @asynccontextmanager
@@ -30,6 +33,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(BaseHTTPMiddleware, dispatch=rate_limit_middleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

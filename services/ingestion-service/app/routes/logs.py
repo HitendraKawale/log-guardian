@@ -9,9 +9,11 @@ from ..database import get_session
 from ..models import Log
 from ..producer import publish_log
 from ..schemas import LogCreate, LogResponse
+from ..security import require_api_key
 from ..service import persist_log
 
-router = APIRouter(prefix="/logs", tags=["Logs"])
+# The whole router is gated by the API key (a no-op when none is configured).
+router = APIRouter(prefix="/logs", tags=["Logs"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("", response_model=LogResponse, status_code=status.HTTP_201_CREATED)

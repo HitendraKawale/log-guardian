@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # (the web dashboard). Defaults to any origin for easy local development.
     cors_allow_origins: str = "*"
 
+    # When set, every /logs request must carry this value in the X-API-Key
+    # header. Empty (the default) leaves the API open for local development.
+    api_key: str = ""
+
+    # Per-client-IP request cap per minute. 0 disables rate limiting.
+    rate_limit_per_minute: int = 0
+
     # Kafka streaming (optional). When disabled, the synchronous REST path is
     # the only way logs are ingested.
     kafka_enabled: bool = False
