@@ -4,6 +4,11 @@ AI-assisted log monitoring platform. Services ingest application logs, score eac
 entry for anomalies using an AI analysis service, persist the results, and expose
 metrics for Prometheus and Grafana.
 
+![Log Guardian dashboard](docs/images/dashboard.png)
+
+> Real-time dashboard — live anomaly scores, severity breakdown, filtering, and
+> inline human feedback that feeds model retraining.
+
 ```
                  ┌──────────────────┐        ┌──────────────────┐
    logs ───────▶ │ ingestion-service│ ─────▶ │    ai-service    │
@@ -15,6 +20,22 @@ metrics for Prometheus and Grafana.
                  │    PostgreSQL    │        │ Prometheus+Grafana│
                  └──────────────────┘        └──────────────────┘
 ```
+
+## Highlights
+
+- **ML anomaly scoring** — Random Forest (ROC-AUC 0.89) with a deterministic
+  fallback, a versioned model registry, and a human-feedback retraining loop
+  with score-drift detection.
+- **Streaming + sync ingestion** — a synchronous REST path and a Kafka-backed
+  async path share one scoring/persistence pipeline.
+- **Full observability** — OpenTelemetry traces across services *and through
+  Kafka* (Jaeger), Prometheus metrics + Alertmanager alerts, Grafana dashboards.
+- **Production-minded** — API-key auth, rate limiting, Alembic migrations,
+  health/readiness probes, and structured JSON logs correlated by trace ID.
+- **Ships anywhere** — Docker Compose (one command) and Kubernetes manifests
+  (kustomize, HPA, ingress) covering the full stack.
+- **Engineered well** — 49 automated tests, CI (tests + ruff + manifest
+  validation), and k6 load tests (~220 req/s, p95 ~24 ms).
 
 ## Services
 
