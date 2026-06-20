@@ -1,9 +1,10 @@
-.PHONY: help install test test-ai test-ingestion up down logs lint clean
+.PHONY: help install test test-ai test-ingestion up down logs lint format loadtest clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 COMPOSE := docker compose -f infrastructure/docker/docker-compose.yml
+BASE_URL ?= http://host.docker.internal:8000
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -22,6 +23,17 @@ test-ai: ## Run AI service tests
 
 test-ingestion: ## Run ingestion service tests
 	cd services/ingestion-service && ../../$(PY) -m pytest
+
+lint: ## Lint and check formatting with ruff
+	$(PY) -m ruff check services ml
+	$(PY) -m ruff format --check services ml
+
+format: ## Auto-fix lint issues and format with ruff
+	$(PY) -m ruff check --fix services ml
+	$(PY) -m ruff format services ml
+
+loadtest: ## Run the k6 load test (override BASE_URL to target a host)
+	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js
 
 up: ## Build and start the full stack with Docker Compose
 	$(COMPOSE) up --build -d

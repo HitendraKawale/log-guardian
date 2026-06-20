@@ -6,6 +6,25 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    name: lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff==0.8.4
+      - run: ruff check services ml
+      - run: ruff format --check services ml
+
+  manifests:
+    name: validate k8s manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: kubectl kustomize infrastructure/kubernetes > /dev/null
+
   test:
     name: ${{ matrix.service }} tests
     runs-on: ubuntu-latest
