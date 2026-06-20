@@ -12,12 +12,15 @@ services:
       DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
       KAFKA_ENABLED: "true"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     depends_on:
       ai-service:
         condition: service_started
       postgres:
         condition: service_healthy
       kafka:
+        condition: service_started
+      jaeger:
         condition: service_started
     restart: unless-stopped
 
@@ -31,10 +34,13 @@ services:
       AI_SERVICE_URL: http://ai-service:8001
       DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     depends_on:
       ingestion-service:
         condition: service_started
       kafka:
+        condition: service_started
+      jaeger:
         condition: service_started
     restart: unless-stopped
 
@@ -64,6 +70,21 @@ services:
     container_name: lg-ai-service
     ports:
       - "8001:8001"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    depends_on:
+      jaeger:
+        condition: service_started
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: lg-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4318:4318"    # OTLP HTTP receiver
     restart: unless-stopped
 
   frontend:

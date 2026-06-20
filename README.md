@@ -28,6 +28,7 @@ metrics for Prometheus and Grafana.
 | `log-consumer` | – | Consumes streamed logs, scores & persists them |
 | `prometheus` | 9090 | Scrape `/metrics`, evaluate alert rules |
 | `grafana` | 3000 | Provisioned dashboards (admin/admin) |
+| `jaeger` | 16686 | Distributed traces across the services |
 
 ## Quick start (Docker)
 
@@ -142,9 +143,19 @@ cd services/ingestion-service && alembic upgrade head
 ## Monitoring
 
 Prometheus scrapes both services and evaluates alert rules
-(`monitoring/prometheus/alerts.yml`: service down, high anomaly rate, no logs).
-Grafana auto-provisions the **Log Guardian** dashboard from
+(`monitoring/prometheus/alerts.yml`: service down, high anomaly rate, no logs,
+model drift). Grafana auto-provisions the **Log Guardian** dashboard from
 `monitoring/grafana/`.
+
+### Tracing & structured logs
+
+Both services are instrumented with **OpenTelemetry**. A request is traced end
+to end — incoming HTTP, the call to the AI service, and the database queries all
+appear as spans in one trace at <http://localhost:16686> (Jaeger). Streamed logs
+carry their trace context through Kafka, so the consumer's work joins the same
+trace. Logs are emitted as JSON with the active `trace_id`/`span_id` for
+correlation. Tracing is opt-in via `OTEL_EXPORTER_OTLP_ENDPOINT` (set in
+Compose; unset everywhere else, so tests and local runs are unaffected).
 
 ## Tests & CI
 
@@ -200,7 +211,7 @@ kubectl apply -k infrastructure/kubernetes
 - [x] Kubernetes manifests under `infrastructure/kubernetes`
 - [x] Kafka streaming ingestion
 - [x] Feedback loop: human labels → retrain → versioned registry → drift alerts
-- [ ] Distributed tracing across services (OpenTelemetry)
+- [x] Distributed tracing + structured logs (OpenTelemetry + Jaeger)
 - [ ] Kafka + monitoring stack manifests for Kubernetes
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.
