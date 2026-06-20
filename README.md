@@ -20,11 +20,12 @@ metrics for Prometheus and Grafana.
 
 | Service | Port | Responsibility |
 | --- | --- | --- |
+| `frontend` | 8080 | Web dashboard to watch logs & anomalies live |
 | `ingestion-service` | 8000 | Validate logs, call the AI service, persist, expose them |
-| `ai-service` | 8001 | Score a log's anomaly likelihood and severity |
+| `ai-service` | 8001 | Score a log with a trained model (heuristic fallback) |
 | `postgres` | 5432 | Durable log storage |
-| `prometheus` | 9090 | Scrape `/metrics` from both services |
-| `grafana` | 3000 | Dashboards (admin/admin) |
+| `prometheus` | 9090 | Scrape `/metrics`, evaluate alert rules |
+| `grafana` | 3000 | Provisioned dashboards (admin/admin) |
 
 ## Quick start (Docker)
 
@@ -34,7 +35,12 @@ make logs      # tail logs
 make down      # stop
 ```
 
-Then open the interactive API docs at <http://localhost:8000/docs>.
+Then open:
+
+- **Dashboard** — <http://localhost:8080>
+- **API docs** — <http://localhost:8000/docs>
+- **Grafana** — <http://localhost:3000> (admin/admin)
+- **Prometheus** — <http://localhost:9090>
 
 ## Quick start (local, no Docker)
 
@@ -91,7 +97,36 @@ AI service:
 - `POST /analyze` — score a log (`anomaly_score`, `is_anomaly`, `predicted_severity`)
 - `GET /health` · `GET /metrics`
 
-## Tests
+## Anomaly model
+
+The AI service scores logs with a `RandomForestClassifier` trained on synthetic
+labelled logs. If no model artifact is present it transparently falls back to a
+deterministic heuristic, so the service always works. Retrain with:
+
+```bash
+pip install -r ml/requirements.txt
+python ml/training/train.py     # writes services/ai-service/app/model/
+```
+
+See [`ml/README.md`](ml/README.md) for details.
+
+## Database migrations
+
+Schema is managed with Alembic (the container runs `alembic upgrade head` on
+start). Locally:
+
+```bash
+cd services/ingestion-service && alembic upgrade head
+```
+
+## Monitoring
+
+Prometheus scrapes both services and evaluates alert rules
+(`monitoring/prometheus/alerts.yml`: service down, high anomaly rate, no logs).
+Grafana auto-provisions the **Log Guardian** dashboard from
+`monitoring/grafana/`.
+
+## Tests & CI
 
 ```bash
 make test            # both suites
@@ -99,27 +134,34 @@ make test-ai
 make test-ingestion
 ```
 
+GitHub Actions (`.github/workflows/ci.yml`) runs both suites and a model-training
+smoke test on every push and PR.
+
 ## Repository layout
 
 ```
+frontend/              static web dashboard (served by nginx)
 services/
-  ingestion-service/   FastAPI app, DB models, AI client, tests
-  ai-service/          FastAPI app, heuristic analyzer, tests
+  ingestion-service/   FastAPI app, DB models, AI client, migrations, tests
+  ai-service/          FastAPI app, model + heuristic analyzer, tests
 infrastructure/
   docker/              docker-compose.yml
   kubernetes/          (placeholder for k8s manifests)
 monitoring/
-  prometheus/          scrape config
-  grafana/             (placeholder for dashboards)
-ml/                    datasets & training for a future learned model
+  prometheus/          scrape config + alert rules
+  grafana/             provisioned datasource + dashboard
+ml/                    synthetic data + model training pipeline
 docs/                  architecture notes
+.github/workflows/     CI
 ```
 
 ## Roadmap
 
-- Replace the heuristic analyzer with a trained model (see `ml/`).
-- Alembic migrations instead of `create_all`.
-- Grafana dashboards provisioned as code.
-- Kubernetes manifests under `infrastructure/kubernetes`.
+- [x] Trained model with heuristic fallback (`ml/`)
+- [x] Alembic migrations instead of `create_all`
+- [x] Grafana dashboards & Prometheus alerts provisioned as code
+- [x] Web dashboard
+- [ ] Kubernetes manifests under `infrastructure/kubernetes`
+- [ ] Stream ingestion (Kafka) and model retraining on real data
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.
