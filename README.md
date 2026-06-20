@@ -91,13 +91,17 @@ Ingestion service:
 
 - `POST /logs` — ingest and score a log (synchronous)
 - `POST /logs/stream` — publish a log to Kafka for async scoring (202)
-- `GET /logs?limit=&offset=` — list logs (newest first)
+- `GET /logs?limit=&offset=&service=&level=&anomalous=` — list/filter logs
 - `GET /logs/{id}` — fetch one log
+- `POST /logs/{id}/feedback` — attach a human label (`{"is_anomaly": bool}`)
+- `GET /feedback/export` — labelled examples for retraining
+- `GET /model/info` — active model version + metrics (proxied from the AI service)
 - `GET /health` · `GET /readiness` · `GET /metrics`
 
 AI service:
 
 - `POST /analyze` — score a log (`anomaly_score`, `is_anomaly`, `predicted_severity`)
+- `GET /model/info` — current model version, metric history, drift
 - `GET /health` · `GET /metrics`
 
 ## Anomaly model
@@ -110,6 +114,19 @@ deterministic heuristic, so the service always works. Retrain with:
 pip install -r ml/requirements.txt
 python ml/training/train.py     # writes services/ai-service/app/model/
 ```
+
+### Feedback loop (MLOps)
+
+The model improves from use:
+
+1. Reviewers label logs from the dashboard (anomaly / normal).
+2. Labels are stored and served at `GET /feedback/export`.
+3. `make retrain` folds them back in (oversampled), retrains, and registers a
+   new `synthetic+feedback` model version.
+4. Every version is tracked in `registry.json` (metrics + a score baseline); the
+   AI service serves the current one and reports it at `GET /model/info`.
+5. The AI service watches the live score distribution against that baseline and
+   fires a `ModelDrift` alert when it diverges.
 
 See [`ml/README.md`](ml/README.md) for details.
 
@@ -182,7 +199,8 @@ kubectl apply -k infrastructure/kubernetes
 - [x] Web dashboard
 - [x] Kubernetes manifests under `infrastructure/kubernetes`
 - [x] Kafka streaming ingestion
-- [ ] Model retraining on real (non-synthetic) data
+- [x] Feedback loop: human labels → retrain → versioned registry → drift alerts
+- [ ] Distributed tracing across services (OpenTelemetry)
 - [ ] Kafka + monitoring stack manifests for Kubernetes
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.
