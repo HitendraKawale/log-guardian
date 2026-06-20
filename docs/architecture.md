@@ -72,3 +72,21 @@ Prometheus scrapes both; Grafana visualizes them.
 | AI service down/slow | Log stored as `unscored`, request still succeeds (201) |
 | Database down | `/readiness` fails; ingestion returns 500 |
 | Invalid payload | 422 with validation detail |
+
+## Streaming
+
+Besides the synchronous `POST /logs`, an optional Kafka path decouples ingestion
+from scoring for higher throughput. `POST /logs/stream` publishes the raw log to
+the `logs.raw` topic and returns `202` immediately. The `log-consumer` worker
+(`app/consumer.py`, run as a separate process from the same image) consumes the
+topic and calls `persist_log` — the exact same scoring/persistence used by the
+REST route, so both paths are behaviourally identical. Kafka is gated behind
+`KAFKA_ENABLED` so the service runs fine without a broker.
+
+## Deployment
+
+- **Docker Compose** (`infrastructure/docker`) runs the full stack including
+  Kafka, the consumer, and the monitoring stack.
+- **Kubernetes** (`infrastructure/kubernetes`) deploys the core tier — Postgres,
+  AI service, ingestion (with a HorizontalPodAutoscaler) and frontend behind an
+  ingress. The ingestion image applies Alembic migrations on startup.
