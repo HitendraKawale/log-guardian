@@ -53,6 +53,25 @@ async def test_stream_disabled_returns_503(client):
     assert response.status_code == 503
 
 
+async def test_list_logs_filters(make_client):
+    anomaly = AIResponse(
+        anomaly_score=0.9, is_anomaly=True, predicted_severity=Severity.HIGH
+    )
+    async with make_client(anomaly) as client:
+        await client.post("/logs", json={**PAYLOAD, "service": "auth", "level": "INFO"})
+        await client.post("/logs", json={**PAYLOAD, "service": "gateway", "level": "ERROR"})
+
+        by_service = await client.get("/logs", params={"service": "auth"})
+        assert [r["service"] for r in by_service.json()] == ["auth"]
+
+        by_level = await client.get("/logs", params={"level": "ERROR"})
+        assert [r["level"] for r in by_level.json()] == ["ERROR"]
+
+        anomalous = await client.get("/logs", params={"anomalous": "true"})
+        assert len(anomalous.json()) == 2
+        assert all(r["is_anomaly"] for r in anomalous.json())
+
+
 async def test_list_logs_returns_newest_first(make_client):
     low = AIResponse(anomaly_score=0.1, is_anomaly=False, predicted_severity=Severity.LOW)
     async with make_client(low) as client:

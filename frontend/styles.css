@@ -35,6 +35,11 @@ body {
 .brand h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
 .tagline { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.key-input {
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 7px; padding: 7px 10px; font-size: 12px; width: 170px;
+}
 .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
 .dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
@@ -62,6 +67,31 @@ main { max-width: 1100px; margin: 0 auto; padding: 24px 28px 60px; }
   margin-bottom: 22px;
 }
 .panel h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.panel-head h2 { margin: 0; }
+
+.filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filters input[type="text"], .filters input:not([type]), .filters select {
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 7px; padding: 7px 10px; font-size: 12px;
+}
+.filters .chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.ghost {
+  background: transparent; border: 1px solid var(--border); color: var(--text);
+  border-radius: 7px; padding: 7px 12px; font-size: 12px; cursor: pointer;
+}
+.ghost:hover { background: var(--panel-2); }
+
+.severity-card { gap: 8px; }
+.sevbars { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+.sevbar-row { display: grid; grid-template-columns: 56px 1fr 22px; align-items: center; gap: 8px; }
+.sevbar-label { font-size: 11px; font-weight: 600; text-transform: capitalize; }
+.sevbar-track { height: 7px; background: var(--panel-2); border-radius: 5px; overflow: hidden; }
+.sevbar-fill { display: block; height: 100%; border-radius: 5px; }
+.fill-low { background: var(--green); }
+.fill-medium { background: var(--yellow); }
+.fill-high { background: var(--red); }
+.sevbar-count { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 
 .log-form { display: flex; gap: 10px; flex-wrap: wrap; }
 .log-form input, .log-form select {

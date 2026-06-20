@@ -15,9 +15,12 @@
         <p class="tagline">AI-assisted log anomaly monitoring</p>
       </div>
     </div>
-    <div class="status">
-      <span id="status-dot" class="dot"></span>
-      <span id="status-text">connecting&hellip;</span>
+    <div class="topbar-right">
+      <input id="api-key" class="key-input" type="password" placeholder="API key (optional)" />
+      <div class="status">
+        <span id="status-dot" class="dot"></span>
+        <span id="status-text">connecting&hellip;</span>
+      </div>
     </div>
   </header>
 
@@ -26,7 +29,10 @@
       <div class="card"><span class="label">Logs</span><span class="value" id="stat-total">0</span></div>
       <div class="card"><span class="label">Anomalies</span><span class="value danger" id="stat-anomalies">0</span></div>
       <div class="card"><span class="label">Anomaly rate</span><span class="value" id="stat-rate">0%</span></div>
-      <div class="card"><span class="label">Avg score</span><span class="value" id="stat-score">0.00</span></div>
+      <div class="card severity-card">
+        <span class="label">By severity</span>
+        <div class="sevbars" id="sevbars"></div>
+      </div>
     </section>
 
     <section class="panel">
@@ -44,7 +50,19 @@
     </section>
 
     <section class="panel">
-      <h2>Recent logs</h2>
+      <div class="panel-head">
+        <h2>Recent logs</h2>
+        <div class="filters">
+          <input id="f-service" placeholder="filter service&hellip;" />
+          <select id="f-level">
+            <option value="">All levels</option>
+            <option>DEBUG</option><option>INFO</option><option>WARNING</option>
+            <option>ERROR</option><option>CRITICAL</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="f-anomalous" /> anomalies only</label>
+          <button id="toggle-refresh" class="ghost" type="button">&#10073;&#10073; Pause</button>
+        </div>
+      </div>
       <table class="logs">
         <thead>
           <tr>

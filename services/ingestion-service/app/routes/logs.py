@@ -8,7 +8,7 @@ from ..config import settings
 from ..database import get_session
 from ..models import Log
 from ..producer import publish_log
-from ..schemas import LogCreate, LogResponse
+from ..schemas import LogCreate, LogLevel, LogResponse
 from ..security import require_api_key
 from ..service import persist_log
 
@@ -38,9 +38,19 @@ async def stream_log(log: LogCreate) -> dict[str, str]:
 async def list_logs(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
+    service: str | None = Query(None),
+    level: LogLevel | None = Query(None),
+    anomalous: bool | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ) -> list[Log]:
-    stmt = select(Log).order_by(Log.id.desc()).limit(limit).offset(offset)
+    stmt = select(Log)
+    if service:
+        stmt = stmt.where(Log.service == service)
+    if level:
+        stmt = stmt.where(Log.level == level.value)
+    if anomalous is not None:
+        stmt = stmt.where(Log.is_anomaly.is_(anomalous))
+    stmt = stmt.order_by(Log.id.desc()).limit(limit).offset(offset)
     result = await session.execute(stmt)
     return list(result.scalars().all())
 

@@ -5,9 +5,25 @@ const API_BASE =
 
 const $ = (id) => document.getElementById(id);
 
+let refreshTimer = null;
+let paused = false;
+
+// --- API key (persisted locally) ------------------------------------------
+const keyInput = $("api-key");
+keyInput.value = localStorage.getItem("lg_api_key") || "";
+keyInput.addEventListener("change", () => {
+  localStorage.setItem("lg_api_key", keyInput.value.trim());
+  refresh();
+});
+
+function authHeaders(extra = {}) {
+  const key = keyInput.value.trim();
+  return key ? { ...extra, "X-API-Key": key } : extra;
+}
+
+// --- rendering helpers ------------------------------------------------------
 function setStatus(online) {
-  const dot = $("status-dot");
-  dot.className = "dot " + (online ? "online" : "offline");
+  $("status-dot").className = "dot " + (online ? "online" : "offline");
   $("status-text").textContent = online ? "connected" : "offline";
 }
 
@@ -28,34 +44,21 @@ function scoreBar(score) {
 function renderStats(logs) {
   const total = logs.length;
   const anomalies = logs.filter((l) => l.is_anomaly).length;
-  const scored = logs.filter((l) => l.anomaly_score !== null);
-  const avg = scored.length
-    ? scored.reduce((s, l) => s + l.anomaly_score, 0) / scored.length
-    : 0;
   $("stat-total").textContent = total;
   $("stat-anomalies").textContent = anomalies;
   $("stat-rate").textContent = total ? Math.round((anomalies / total) * 100) + "%" : "0%";
-  $("stat-score").textContent = avg.toFixed(2);
-}
 
-function renderLogs(logs) {
-  const body = $("logs-body");
-  if (!logs.length) {
-    body.innerHTML = '<tr><td colspan="6" class="empty">No logs yet.</td></tr>';
-    return;
-  }
-  body.innerHTML = logs
-    .map((l) => {
-      const time = new Date(l.timestamp).toLocaleTimeString();
-      return `<tr class="${l.is_anomaly ? "anomaly" : ""}">
-        <td class="time">${time}</td>
-        <td>${l.service}</td>
-        <td><span class="badge lvl-${l.level}">${l.level}</span></td>
-        <td class="msg" title="${escapeHtml(l.message)}">${escapeHtml(l.message)}</td>
-        <td>${scoreBar(l.anomaly_score)}</td>
-        <td>${severityBadge(l.predicted_severity)}</td>
-      </tr>`;
-    })
+  const counts = { low: 0, medium: 0, high: 0 };
+  logs.forEach((l) => { if (l.predicted_severity) counts[l.predicted_severity]++; });
+  const max = Math.max(1, ...Object.values(counts));
+  $("sevbars").innerHTML = ["low", "medium", "high"]
+    .map(
+      (s) => `<div class="sevbar-row">
+        <span class="sevbar-label sev-${s}">${s}</span>
+        <span class="sevbar-track"><span class="sevbar-fill fill-${s}" style="width:${(counts[s] / max) * 100}%"></span></span>
+        <span class="sevbar-count">${counts[s]}</span>
+      </div>`
+    )
     .join("");
 }
 
@@ -65,9 +68,43 @@ function escapeHtml(s) {
   );
 }
 
+function renderLogs(logs) {
+  const body = $("logs-body");
+  if (!logs.length) {
+    body.innerHTML = '<tr><td colspan="6" class="empty">No logs match.</td></tr>';
+    return;
+  }
+  body.innerHTML = logs
+    .map((l) => {
+      const time = new Date(l.timestamp).toLocaleTimeString();
+      return `<tr class="${l.is_anomaly ? "anomaly" : ""}">
+        <td class="time">${time}</td>
+        <td>${escapeHtml(l.service)}</td>
+        <td><span class="badge lvl-${l.level}">${l.level}</span></td>
+        <td class="msg" title="${escapeHtml(l.message)}">${escapeHtml(l.message)}</td>
+        <td>${scoreBar(l.anomaly_score)}</td>
+        <td>${severityBadge(l.predicted_severity)}</td>
+      </tr>`;
+    })
+    .join("");
+}
+
+// --- data fetching ----------------------------------------------------------
+function queryString() {
+  const params = new URLSearchParams({ limit: "50" });
+  const service = $("f-service").value.trim();
+  const level = $("f-level").value;
+  if (service) params.set("service", service);
+  if (level) params.set("level", level);
+  if ($("f-anomalous").checked) params.set("anomalous", "true");
+  return params.toString();
+}
+
 async function refresh() {
   try {
-    const res = await fetch(`${API_BASE}/logs?limit=50`);
+    const res = await fetch(`${API_BASE}/logs?${queryString()}`, {
+      headers: authHeaders(),
+    });
     if (!res.ok) throw new Error(res.status);
     const logs = await res.json();
     setStatus(true);
@@ -77,6 +114,22 @@ async function refresh() {
     setStatus(false);
   }
 }
+
+// --- controls ---------------------------------------------------------------
+["f-service", "f-level", "f-anomalous"].forEach((id) =>
+  $(id).addEventListener("input", refresh)
+);
+
+$("toggle-refresh").addEventListener("click", () => {
+  paused = !paused;
+  $("toggle-refresh").innerHTML = paused ? "&#9654; Resume" : "&#10073;&#10073; Pause";
+  if (paused) {
+    clearInterval(refreshTimer);
+  } else {
+    refresh();
+    refreshTimer = setInterval(refresh, 3000);
+  }
+});
 
 $("log-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -91,14 +144,13 @@ $("log-form").addEventListener("submit", async (e) => {
   try {
     const res = await fetch(`${API_BASE}/logs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
+    if (res.status === 401) { msg.textContent = "Unauthorized — check the API key."; return; }
     if (!res.ok) throw new Error(res.status);
     const log = await res.json();
-    msg.textContent = `Ingested #${log.id} — ${log.status}, score ${
-      log.anomaly_score ?? "n/a"
-    }`;
+    msg.textContent = `Ingested #${log.id} — ${log.status}, score ${log.anomaly_score ?? "n/a"}`;
     refresh();
   } catch (err) {
     msg.textContent = "Failed to ingest log (is the API running?)";
@@ -106,4 +158,4 @@ $("log-form").addEventListener("submit", async (e) => {
 });
 
 refresh();
-setInterval(refresh, 3000);
+refreshTimer = setInterval(refresh, 3000);
