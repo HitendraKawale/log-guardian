@@ -36,6 +36,12 @@ body {
 .tagline { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
 .topbar-right { display: flex; align-items: center; gap: 16px; }
+.model-badge {
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  background: rgba(79, 157, 255, 0.1); border: 1px solid rgba(79, 157, 255, 0.3);
+  border-radius: 6px; padding: 4px 9px; white-space: nowrap;
+}
+.model-badge:empty { display: none; }
 .key-input {
   background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
   border-radius: 7px; padding: 7px 10px; font-size: 12px; width: 170px;
@@ -133,6 +139,15 @@ table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
 .sev-medium { background: #3a2f12; color: var(--yellow); }
 .sev-high { background: #3a1715; color: var(--red); }
 .sev-none { color: var(--muted); }
+
+.fb-buttons { display: inline-flex; gap: 6px; }
+.fb-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 6px; padding: 3px 9px; font-size: 11px; cursor: pointer;
+}
+.fb-btn.fb-anom:hover { border-color: var(--red); color: var(--red); }
+.fb-btn.fb-norm:hover { border-color: var(--green); color: var(--green); }
+.labeled { font-size: 11px; font-weight: 600; }
 
 .scorebar { position: relative; width: 90px; height: 8px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
 .scorebar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; }

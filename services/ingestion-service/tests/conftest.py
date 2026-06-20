@@ -17,6 +17,9 @@ class FakeAIClient(AIClient):
     async def analyze(self, log) -> AIResponse | None:
         return self._response
 
+    async def model_info(self) -> dict:
+        return {"analyzer": "model", "current_version": "v-test"}
+
 
 @pytest_asyncio.fixture
 async def engine():

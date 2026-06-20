@@ -16,6 +16,7 @@
       </div>
     </div>
     <div class="topbar-right">
+      <span id="model-badge" class="model-badge" title="active model"></span>
       <input id="api-key" class="key-input" type="password" placeholder="API key (optional)" />
       <div class="status">
         <span id="status-dot" class="dot"></span>
@@ -67,11 +68,11 @@
         <thead>
           <tr>
             <th>Time</th><th>Service</th><th>Level</th><th>Message</th>
-            <th>Score</th><th>Severity</th>
+            <th>Score</th><th>Severity</th><th>Feedback</th>
           </tr>
         </thead>
         <tbody id="logs-body">
-          <tr><td colspan="6" class="empty">No logs yet.</td></tr>
+          <tr><td colspan="7" class="empty">No logs yet.</td></tr>
         </tbody>
       </table>
     </section>

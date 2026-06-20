@@ -33,6 +33,16 @@ class AIClient:
             logger.warning("AI analysis unavailable: %s", exc)
             return None
 
+    async def model_info(self) -> dict | None:
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.get(f"{self._base_url}/model/info")
+                response.raise_for_status()
+                return response.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            logger.warning("AI model info unavailable: %s", exc)
+            return None
+
 
 def get_ai_client() -> AIClient:
     """FastAPI dependency. Overridable in tests."""

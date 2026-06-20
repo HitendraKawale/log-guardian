@@ -68,10 +68,21 @@ function escapeHtml(s) {
   );
 }
 
+function feedbackCell(l) {
+  if (l.true_label !== null && l.true_label !== undefined) {
+    const label = l.true_label ? "anomaly" : "normal";
+    return `<span class="labeled sev-${l.true_label ? "high" : "low"}">labeled: ${label}</span>`;
+  }
+  return `<span class="fb-buttons">
+    <button class="fb-btn fb-anom" data-id="${l.id}" data-anom="1" title="mark as anomaly">anomaly</button>
+    <button class="fb-btn fb-norm" data-id="${l.id}" data-anom="0" title="mark as normal">normal</button>
+  </span>`;
+}
+
 function renderLogs(logs) {
   const body = $("logs-body");
   if (!logs.length) {
-    body.innerHTML = '<tr><td colspan="6" class="empty">No logs match.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" class="empty">No logs match.</td></tr>';
     return;
   }
   body.innerHTML = logs
@@ -84,9 +95,50 @@ function renderLogs(logs) {
         <td class="msg" title="${escapeHtml(l.message)}">${escapeHtml(l.message)}</td>
         <td>${scoreBar(l.anomaly_score)}</td>
         <td>${severityBadge(l.predicted_severity)}</td>
+        <td>${feedbackCell(l)}</td>
       </tr>`;
     })
     .join("");
+}
+
+async function submitFeedback(id, isAnomaly) {
+  try {
+    await fetch(`${API_BASE}/logs/${id}/feedback`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ is_anomaly: isAnomaly }),
+    });
+    refresh();
+  } catch (err) {
+    /* ignore; next refresh will reflect state */
+  }
+}
+
+// Delegate clicks from the feedback buttons.
+$("logs-body").addEventListener("click", (e) => {
+  const btn = e.target.closest(".fb-btn");
+  if (!btn) return;
+  submitFeedback(Number(btn.dataset.id), btn.dataset.anom === "1");
+});
+
+async function refreshModel() {
+  try {
+    const res = await fetch(`${API_BASE}/model/info`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const info = await res.json();
+    const badge = $("model-badge");
+    if (info.current_version) {
+      const drift = info.drift ? ` · drift ${info.drift.drift}` : "";
+      badge.textContent = `model ${info.current_version}${drift}`;
+      badge.title = info.current && info.current.metrics
+        ? `ROC-AUC ${info.current.metrics.roc_auc} · ${info.current.source}`
+        : "";
+    } else {
+      badge.textContent = info.analyzer === "heuristic" ? "heuristic" : "";
+    }
+  } catch (err) {
+    /* leave badge as-is */
+  }
 }
 
 // --- data fetching ----------------------------------------------------------
@@ -158,4 +210,6 @@ $("log-form").addEventListener("submit", async (e) => {
 });
 
 refresh();
+refreshModel();
 refreshTimer = setInterval(refresh, 3000);
+setInterval(refreshModel, 15000);
