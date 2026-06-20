@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion up down logs lint format loadtest clean
+.PHONY: help install test test-ai test-ingestion up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -34,6 +34,12 @@ format: ## Auto-fix lint issues and format with ruff
 
 loadtest: ## Run the k6 load test (override BASE_URL to target a host)
 	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js
+
+train: ## Train the model on synthetic data and register it
+	$(PY) ml/training/train.py
+
+retrain: ## Retrain on synthetic + collected feedback (set INGESTION_URL)
+	$(PY) ml/training/retrain.py
 
 up: ## Build and start the full stack with Docker Compose
 	$(COMPOSE) up --build -d
