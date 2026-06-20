@@ -1,5 +1,7 @@
 """Log ingestion and retrieval endpoints."""
 
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,9 +11,9 @@ from ..config import settings
 from ..database import get_session
 from ..models import Log
 from ..producer import publish_log
-from ..schemas import LogCreate, LogLevel, LogResponse
+from ..schemas import FeedbackCreate, LogCreate, LogLevel, LogResponse
 from ..security import require_api_key
-from ..service import persist_log
+from ..service import FEEDBACK_DISAGREE, FEEDBACK_TOTAL, persist_log
 
 # The whole router is gated by the API key (a no-op when none is configured).
 router = APIRouter(prefix="/logs", tags=["Logs"], dependencies=[Depends(require_api_key)])
@@ -64,4 +66,27 @@ async def get_log(
     record = await session.get(Log, log_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Log not found")
+    return record
+
+
+@router.post("/{log_id}/feedback", response_model=LogResponse)
+async def submit_feedback(
+    log_id: int,
+    feedback: FeedbackCreate,
+    session: AsyncSession = Depends(get_session),
+) -> Log:
+    """Attach a human ground-truth label to a log (used for retraining)."""
+    record = await session.get(Log, log_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    disagrees = record.is_anomaly is not None and record.is_anomaly != feedback.is_anomaly
+    record.true_label = feedback.is_anomaly
+    record.feedback_at = datetime.now(UTC)
+    await session.commit()
+    await session.refresh(record)
+
+    FEEDBACK_TOTAL.inc()
+    if disagrees:
+        FEEDBACK_DISAGREE.inc()
     return record

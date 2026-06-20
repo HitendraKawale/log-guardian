@@ -15,7 +15,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from .config import settings
 from .database import init_db
 from .producer import start_producer, stop_producer
-from .routes import health, logs
+from .routes import feedback, health, logs
 from .security import rate_limit_middleware
 
 
@@ -43,6 +43,7 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(logs.router)
+app.include_router(feedback.router)
 
 
 @app.get("/metrics", tags=["Monitoring"])

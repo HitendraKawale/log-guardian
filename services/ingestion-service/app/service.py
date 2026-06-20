@@ -14,6 +14,11 @@ LOGS_INGESTED = Counter("ingestion_logs_total", "Total number of logs ingested")
 LOGS_ANOMALOUS = Counter(
     "ingestion_anomalous_logs_total", "Total number of logs flagged as anomalies"
 )
+FEEDBACK_TOTAL = Counter("ingestion_feedback_total", "Total human feedback labels submitted")
+FEEDBACK_DISAGREE = Counter(
+    "ingestion_feedback_disagreements_total",
+    "Feedback labels that disagreed with the model's prediction",
+)
 
 
 async def persist_log(session, log: LogCreate, ai: AIClient) -> Log:

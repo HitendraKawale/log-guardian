@@ -47,3 +47,22 @@ class LogResponse(BaseModel):
     anomaly_score: float | None = None
     is_anomaly: bool | None = None
     predicted_severity: Severity | None = None
+    true_label: bool | None = None
+
+
+class FeedbackCreate(BaseModel):
+    """Human-supplied ground truth for a log."""
+
+    is_anomaly: bool
+
+
+class LabeledLog(BaseModel):
+    """A training example exported from human feedback."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    service: str
+    level: LogLevel
+    message: str
+    timestamp: datetime
+    true_label: bool

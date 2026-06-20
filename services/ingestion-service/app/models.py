@@ -28,3 +28,7 @@ class Log(Base):
     predicted_severity: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    # Human-supplied ground truth, captured from the dashboard. Feeds retraining.
+    true_label: Mapped[bool | None] = mapped_column(nullable=True)
+    feedback_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
