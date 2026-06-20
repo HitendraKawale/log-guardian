@@ -10,10 +10,16 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_
 
 from .analyzer import active_analyzer, analyze
 from .drift import tracker
+from .logging_config import setup_logging
 from .model import current_version, load_registry
 from .schemas import AnalyzeRequest, AnalyzeResponse
+from .telemetry import setup_telemetry
+
+setup_logging()
 
 app = FastAPI(title="Log Guardian AI Service", version="0.1.0")
+
+setup_telemetry(app, service_name="ai-service")
 
 ANALYZE_REQUESTS = Counter("ai_analyze_requests_total", "Total number of analyze requests")
 ANOMALIES_DETECTED = Counter(

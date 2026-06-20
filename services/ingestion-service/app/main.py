@@ -13,10 +13,14 @@ from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .config import settings
-from .database import init_db
+from .database import engine, init_db
+from .logging_config import setup_logging
 from .producer import start_producer, stop_producer
 from .routes import feedback, health, logs, model
 from .security import rate_limit_middleware
+from .telemetry import setup_telemetry
+
+setup_logging()
 
 
 @asynccontextmanager
@@ -32,6 +36,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+setup_telemetry(app, service_name="ingestion-service", sqlalchemy_engine=engine)
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=rate_limit_middleware)
 app.add_middleware(
