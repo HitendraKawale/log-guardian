@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-consumer
+  namespace: log-guardian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-consumer
+  template:
+    metadata:
+      labels:
+        app: log-consumer
+    spec:
+      containers:
+        - name: log-consumer
+          image: log-guardian/ingestion-service:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "app.consumer"]
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

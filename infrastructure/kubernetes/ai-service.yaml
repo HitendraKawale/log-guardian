@@ -19,6 +19,12 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
           readinessProbe:
             httpGet:
               path: /health
