@@ -23,10 +23,7 @@ def tracing_enabled() -> bool:
     return bool(os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT") or os.getenv("OTEL_CONSOLE"))
 
 
-def setup_telemetry(app, service_name: str, sqlalchemy_engine=None) -> None:
-    if not tracing_enabled():
-        return
-
+def _build_provider(service_name: str) -> None:
     provider = TracerProvider(resource=Resource.create({"service.name": service_name}))
 
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
@@ -45,10 +42,8 @@ def setup_telemetry(app, service_name: str, sqlalchemy_engine=None) -> None:
 
     trace.set_tracer_provider(provider)
 
-    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-    FastAPIInstrumentor.instrument_app(app)
-
+def _instrument_clients(sqlalchemy_engine=None) -> None:
     from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
     HTTPXClientInstrumentor().instrument()
@@ -57,3 +52,22 @@ def setup_telemetry(app, service_name: str, sqlalchemy_engine=None) -> None:
         from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
         SQLAlchemyInstrumentor().instrument(engine=sqlalchemy_engine.sync_engine)
+
+
+def setup_telemetry(app, service_name: str, sqlalchemy_engine=None) -> None:
+    """Instrument the FastAPI app (and its outbound clients)."""
+    if not tracing_enabled():
+        return
+    _build_provider(service_name)
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    FastAPIInstrumentor.instrument_app(app)
+    _instrument_clients(sqlalchemy_engine)
+
+
+def setup_worker_telemetry(service_name: str, sqlalchemy_engine=None) -> None:
+    """Instrument the Kafka consumer (no FastAPI app)."""
+    if not tracing_enabled():
+        return
+    _build_provider(service_name)
+    _instrument_clients(sqlalchemy_engine)

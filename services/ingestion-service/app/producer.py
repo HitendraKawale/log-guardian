@@ -33,7 +33,20 @@ async def stop_producer() -> None:
         _producer = None
 
 
+def _trace_headers() -> list[tuple[str, bytes]]:
+    """Serialize the current trace context into Kafka headers (W3C traceparent)."""
+    from opentelemetry import propagate
+
+    carrier: dict[str, str] = {}
+    propagate.inject(carrier)
+    return [(key, value.encode("utf-8")) for key, value in carrier.items()]
+
+
 async def publish_log(log: LogCreate) -> None:
     if _producer is None:
         raise RuntimeError("Kafka producer is not running")
-    await _producer.send_and_wait(settings.kafka_topic, log.model_dump_json().encode("utf-8"))
+    await _producer.send_and_wait(
+        settings.kafka_topic,
+        log.model_dump_json().encode("utf-8"),
+        headers=_trace_headers(),
+    )
