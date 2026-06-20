@@ -1,0 +1,22 @@
+# Repo-wide tooling config for the Python services.
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "ml/datasets"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C4"]
+# E501: the formatter owns line length.
+# B008: FastAPI relies on Depends()/Query() calls in argument defaults.
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic migration env imports for side effects.
+"services/ingestion-service/migrations/*" = ["F401", "E402"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+exclude = "(\\.venv|migrations)"

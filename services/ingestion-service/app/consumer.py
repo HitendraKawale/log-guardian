@@ -5,6 +5,7 @@ the ingestion service. It reads raw logs off the topic, scores them via the AI
 service, and persists them — reusing ``persist_log`` so streamed and synchronous
 logs are handled identically.
 """
+
 import asyncio
 import json
 import logging

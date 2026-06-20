@@ -1,5 +1,6 @@
 """Database models."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -8,7 +9,7 @@ from .database import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Log(Base):
@@ -26,6 +27,4 @@ class Log(Base):
     is_anomaly: Mapped[bool | None] = mapped_column(nullable=True)
     predicted_severity: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=_utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

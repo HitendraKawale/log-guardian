@@ -4,6 +4,7 @@ The serialized model lives next to the service so it ships inside the Docker
 image. If the artifact is missing (e.g. it hasn't been trained yet) loading
 returns ``None`` and the service falls back to the heuristic scorer.
 """
+
 from __future__ import annotations
 
 import logging

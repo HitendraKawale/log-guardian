@@ -4,6 +4,7 @@ Calls are best-effort: if the AI service is slow or unavailable the ingestion
 path must still succeed, so failures are swallowed and surfaced as ``None``.
 The log is then persisted in an ``unscored`` state and can be re-scored later.
 """
+
 import logging
 
 import httpx

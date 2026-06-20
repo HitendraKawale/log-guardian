@@ -1,12 +1,11 @@
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import StaticPool
-
 from app.ai_client import AIClient, get_ai_client
 from app.database import Base, get_session
 from app.main import app
 from app.schemas import AIResponse, Severity
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 
 class FakeAIClient(AIClient):
@@ -54,8 +53,6 @@ async def make_client(engine):
 @pytest_asyncio.fixture
 async def client(make_client):
     """Default client: AI flags the log as a high-severity anomaly."""
-    anomaly = AIResponse(
-        anomaly_score=0.92, is_anomaly=True, predicted_severity=Severity.HIGH
-    )
+    anomaly = AIResponse(anomaly_score=0.92, is_anomaly=True, predicted_severity=Severity.HIGH)
     async with make_client(anomaly) as c:
         yield c

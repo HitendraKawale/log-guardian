@@ -4,6 +4,7 @@ The producer is a module-level singleton started/stopped with the app lifespan.
 When Kafka is disabled it stays ``None`` and ``publish_log`` is never reached
 (the route guards on ``settings.kafka_enabled``).
 """
+
 import logging
 
 from .config import settings
@@ -35,6 +36,4 @@ async def stop_producer() -> None:
 async def publish_log(log: LogCreate) -> None:
     if _producer is None:
         raise RuntimeError("Kafka producer is not running")
-    await _producer.send_and_wait(
-        settings.kafka_topic, log.model_dump_json().encode("utf-8")
-    )
+    await _producer.send_and_wait(settings.kafka_topic, log.model_dump_json().encode("utf-8"))

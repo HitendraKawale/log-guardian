@@ -1,8 +1,7 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker
-
 from app.ai_client import AIClient
 from app.consumer import process_record
 from app.schemas import AIResponse, Severity
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 RECORD = {
     "service": "gateway",
@@ -22,9 +21,7 @@ class _FakeAI(AIClient):
 
 async def test_process_record_persists_scored_log(engine):
     factory = async_sessionmaker(engine, expire_on_commit=False)
-    ai = _FakeAI(
-        AIResponse(anomaly_score=0.91, is_anomaly=True, predicted_severity=Severity.HIGH)
-    )
+    ai = _FakeAI(AIResponse(anomaly_score=0.91, is_anomaly=True, predicted_severity=Severity.HIGH))
     async with factory() as session:
         record = await process_record(RECORD, session, ai)
 

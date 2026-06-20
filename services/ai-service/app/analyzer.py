@@ -9,6 +9,7 @@ Two interchangeable strategies implement the same interface:
 
 ``analyze()`` dispatches to whichever strategy is active at import time.
 """
+
 from __future__ import annotations
 
 from .features import featurize, keyword_count
@@ -64,9 +65,7 @@ class ModelAnalyzer:
         self._model = model
 
     def analyze(self, request: AnalyzeRequest) -> AnalyzeResponse:
-        features = [
-            featurize(request.level.value, request.message, request.timestamp)
-        ]
+        features = [featurize(request.level.value, request.message, request.timestamp)]
         # Probability of the positive (anomaly) class.
         score = float(self._model.predict_proba(features)[0][1])
         return _build_response(score, self.threshold)

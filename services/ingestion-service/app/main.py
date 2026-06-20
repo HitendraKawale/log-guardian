@@ -3,13 +3,13 @@
 Accepts logs, enriches them with anomaly scores from the AI service, and
 persists them. Exposes health, readiness and Prometheus metrics endpoints.
 """
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
-
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .config import settings

@@ -3,6 +3,7 @@
 Both are opt-in via settings, so the service stays open and dependency-free for
 local development unless explicitly locked down.
 """
+
 import time
 from collections import defaultdict
 

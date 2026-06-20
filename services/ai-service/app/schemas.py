@@ -3,6 +3,7 @@
 The ``AnalyzeRequest`` shape is intentionally identical to the ingestion
 service's ``LogCreate`` payload so the two services share one wire contract.
 """
+
 from datetime import datetime
 from enum import Enum
 

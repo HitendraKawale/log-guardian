@@ -5,11 +5,12 @@ log's features (level, message content, time of day) and whether it is an
 anomaly. This stands in for real labelled production logs while the platform is
 being built.
 """
+
 from __future__ import annotations
 
 import math
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 _LEVEL_WEIGHTS = [0.30, 0.40, 0.15, 0.10, 0.05]
@@ -46,7 +47,7 @@ def _sigmoid(x: float) -> float:
 def generate(n: int = 4000, seed: int = 42) -> list[dict]:
     """Generate ``n`` labelled log records as dicts."""
     rng = random.Random(seed)
-    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    start = datetime(2026, 1, 1, tzinfo=UTC)
     records: list[dict] = []
 
     for _ in range(n):

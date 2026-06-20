@@ -1,5 +1,4 @@
 import pytest
-
 from app import security
 from app.config import settings
 

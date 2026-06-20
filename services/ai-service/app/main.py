@@ -3,6 +3,7 @@
 Exposes a single ``/analyze`` endpoint that scores a log entry for anomalies,
 plus health and Prometheus metrics endpoints.
 """
+
 from fastapi import FastAPI
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
@@ -12,9 +13,7 @@ from .schemas import AnalyzeRequest, AnalyzeResponse
 
 app = FastAPI(title="Log Guardian AI Service", version="0.1.0")
 
-ANALYZE_REQUESTS = Counter(
-    "ai_analyze_requests_total", "Total number of analyze requests"
-)
+ANALYZE_REQUESTS = Counter("ai_analyze_requests_total", "Total number of analyze requests")
 ANOMALIES_DETECTED = Counter(
     "ai_anomalies_detected_total", "Total number of logs flagged as anomalies"
 )

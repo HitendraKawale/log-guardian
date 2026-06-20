@@ -8,6 +8,7 @@ The model artifact is written into the AI service package so it ships inside
 the service's Docker image. Feature extraction is imported from the AI service
 to guarantee the exact same featurization is used for training and serving.
 """
+
 from __future__ import annotations
 
 import sys
@@ -19,7 +20,6 @@ AI_SERVICE = REPO_ROOT / "services" / "ai-service"
 sys.path.insert(0, str(AI_SERVICE))
 
 from app.features import FEATURE_NAMES, featurize  # noqa: E402
-
 from generate_data import generate  # noqa: E402
 
 MODEL_OUT = AI_SERVICE / "app" / "model" / "anomaly_model.joblib"
@@ -39,9 +39,7 @@ def main() -> None:
         X, y, test_size=0.25, random_state=42, stratify=y
     )
 
-    clf = RandomForestClassifier(
-        n_estimators=120, max_depth=8, random_state=42, n_jobs=-1
-    )
+    clf = RandomForestClassifier(n_estimators=120, max_depth=8, random_state=42, n_jobs=-1)
     clf.fit(X_train, y_train)
 
     proba = clf.predict_proba(X_test)[:, 1]

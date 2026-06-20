@@ -54,9 +54,7 @@ async def test_stream_disabled_returns_503(client):
 
 
 async def test_list_logs_filters(make_client):
-    anomaly = AIResponse(
-        anomaly_score=0.9, is_anomaly=True, predicted_severity=Severity.HIGH
-    )
+    anomaly = AIResponse(anomaly_score=0.9, is_anomaly=True, predicted_severity=Severity.HIGH)
     async with make_client(anomaly) as client:
         await client.post("/logs", json={**PAYLOAD, "service": "auth", "level": "INFO"})
         await client.post("/logs", json={**PAYLOAD, "service": "gateway", "level": "ERROR"})

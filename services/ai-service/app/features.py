@@ -4,6 +4,7 @@ This module is the single source of truth for how a raw log entry is turned
 into a numeric feature vector. Both the offline training pipeline (``ml/``) and
 the online serving path import it, guaranteeing train/serve consistency.
 """
+
 from __future__ import annotations
 
 from datetime import datetime

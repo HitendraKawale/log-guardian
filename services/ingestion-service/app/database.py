@@ -1,4 +1,5 @@
 """Async SQLAlchemy engine, session factory and FastAPI dependency."""
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (

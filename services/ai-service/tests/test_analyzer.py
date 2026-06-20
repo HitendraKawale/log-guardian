@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -13,7 +13,7 @@ def _req(level: LogLevel, message: str = "routine heartbeat") -> AnalyzeRequest:
         service="payment-api",
         level=level,
         message=message,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
 
@@ -43,9 +43,7 @@ def test_keyword_matching_is_case_insensitive():
 
 
 def test_score_is_clamped_to_one():
-    result = analyze(
-        _req(LogLevel.CRITICAL, "fatal panic: oom crash, deadlock, corrupt, segfault")
-    )
+    result = analyze(_req(LogLevel.CRITICAL, "fatal panic: oom crash, deadlock, corrupt, segfault"))
     assert result.anomaly_score <= 1.0
 
 

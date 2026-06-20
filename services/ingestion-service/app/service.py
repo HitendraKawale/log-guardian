@@ -3,6 +3,7 @@
 Keeping the "score it, store it, count it" step in one place means the
 synchronous API and the streaming worker behave identically.
 """
+
 from prometheus_client import Counter
 
 from .ai_client import AIClient
