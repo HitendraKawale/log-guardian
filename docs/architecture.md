@@ -28,17 +28,27 @@ Key design choices:
 
 ## AI service
 
-A stateless scorer. The current `analyzer.py` is a deterministic heuristic:
+A stateless scorer with two interchangeable strategies behind one interface:
 
-- Each log level contributes a baseline score.
-- Risk keywords in the message (`failed`, `timeout`, `refused`, ...) add to it.
-- The score is clamped to `[0, 1]`; `is_anomaly` and `predicted_severity` are
-  derived from thresholds.
+- **`ModelAnalyzer`** wraps a `RandomForestClassifier` trained under `ml/` and
+  uses its predicted probability as the anomaly score. The model loads from
+  `app/model/anomaly_model.joblib` at startup.
+- **`HeuristicAnalyzer`** is a deterministic fallback (level baseline + risk
+  keywords), used automatically when no model artifact is present. It keeps the
+  service useful out of the box and is what the deterministic tests pin.
 
-Being deterministic makes it fully testable and gives the platform a stable
-contract while a learned model is developed under `ml/`. Swapping in a real model
-only requires changing `analyze()` to keep the same `AnalyzeRequest` /
-`AnalyzeResponse` contract.
+Feature extraction (`features.py`) is shared between training and serving so the
+two never drift. Both strategies clamp the score to `[0, 1]` and derive
+`is_anomaly` / `predicted_severity` from thresholds, keeping the
+`AnalyzeRequest` / `AnalyzeResponse` contract stable. `GET /health` reports which
+strategy is active.
+
+## Frontend
+
+A dependency-free static dashboard (`frontend/`, served by nginx) that polls the
+ingestion API: stat cards, a live log table with colour-coded severity and score
+bars, and a form to ingest test logs. It talks to the API over CORS and takes an
+optional `?api=` override for the base URL.
 
 ## Shared contract
 
