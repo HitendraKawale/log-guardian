@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: log-guardian
+  namespace: log-guardian
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    # Dashboard. Point it at the API with ?api=http://api.log-guardian.local
+    - host: log-guardian.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    # Ingestion API.
+    - host: api.log-guardian.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ingestion-service
+                port:
+                  number: 8000

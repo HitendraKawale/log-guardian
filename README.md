@@ -24,6 +24,8 @@ metrics for Prometheus and Grafana.
 | `ingestion-service` | 8000 | Validate logs, call the AI service, persist, expose them |
 | `ai-service` | 8001 | Score a log with a trained model (heuristic fallback) |
 | `postgres` | 5432 | Durable log storage |
+| `kafka` | 9092 | Streaming ingestion buffer |
+| `log-consumer` | – | Consumes streamed logs, scores & persists them |
 | `prometheus` | 9090 | Scrape `/metrics`, evaluate alert rules |
 | `grafana` | 3000 | Provisioned dashboards (admin/admin) |
 
@@ -87,7 +89,8 @@ If the AI service is unavailable the log is still stored, with `status:
 
 Ingestion service:
 
-- `POST /logs` — ingest and score a log
+- `POST /logs` — ingest and score a log (synchronous)
+- `POST /logs/stream` — publish a log to Kafka for async scoring (202)
 - `GET /logs?limit=&offset=` — list logs (newest first)
 - `GET /logs/{id}` — fetch one log
 - `GET /health` · `GET /readiness` · `GET /metrics`
@@ -155,13 +158,31 @@ docs/                  architecture notes
 .github/workflows/     CI
 ```
 
+## Streaming
+
+A high-throughput async path: `POST /logs/stream` publishes to Kafka and returns
+immediately; the `log-consumer` worker scores and persists out of band, reusing
+the same `persist_log` logic as the synchronous route. Enabled via
+`KAFKA_ENABLED=true` (on by default in Compose).
+
+## Kubernetes
+
+Manifests for the core tier (Postgres, AI, ingestion + HPA, frontend, ingress)
+live in [`infrastructure/kubernetes`](infrastructure/kubernetes/README.md):
+
+```bash
+kubectl apply -k infrastructure/kubernetes
+```
+
 ## Roadmap
 
 - [x] Trained model with heuristic fallback (`ml/`)
 - [x] Alembic migrations instead of `create_all`
 - [x] Grafana dashboards & Prometheus alerts provisioned as code
 - [x] Web dashboard
-- [ ] Kubernetes manifests under `infrastructure/kubernetes`
-- [ ] Stream ingestion (Kafka) and model retraining on real data
+- [x] Kubernetes manifests under `infrastructure/kubernetes`
+- [x] Kafka streaming ingestion
+- [ ] Model retraining on real (non-synthetic) data
+- [ ] Kafka + monitoring stack manifests for Kubernetes
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.

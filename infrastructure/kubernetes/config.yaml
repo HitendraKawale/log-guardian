@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: log-guardian
+data:
+  AI_SERVICE_URL: "http://ai-service:8001"
+  AI_TIMEOUT: "2"
+  # Streaming is disabled in this core tier; add a Kafka deployment to enable it.
+  KAFKA_ENABLED: "false"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: log-guardian
+type: Opaque
+stringData:
+  POSTGRES_USER: logguardian
+  POSTGRES_PASSWORD: logguardian
+  POSTGRES_DB: logguardian
+  DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
