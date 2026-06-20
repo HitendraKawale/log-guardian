@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from .analyzer import active_analyzer, analyze
+from .drift import tracker
 from .model import current_version, load_registry
 from .schemas import AnalyzeRequest, AnalyzeResponse
 
@@ -42,6 +43,11 @@ def model_info() -> dict:
         "current_version": registry["current"],
         "current": current_version(),
         "history": registry["versions"][-10:],
+        "drift": {
+            "baseline_score": round(tracker.baseline, 4),
+            "recent_mean": round(tracker.recent_mean, 4),
+            "drift": round(tracker.drift, 4),
+        },
     }
 
 
@@ -50,6 +56,7 @@ def analyze_log(request: AnalyzeRequest) -> AnalyzeResponse:
     ANALYZE_REQUESTS.inc()
     result = analyze(request)
     ANOMALY_SCORE.observe(result.anomaly_score)
+    tracker.observe(result.anomaly_score)
     if result.is_anomaly:
         ANOMALIES_DETECTED.inc()
     return result

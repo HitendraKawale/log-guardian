@@ -30,3 +30,13 @@ groups:
         annotations:
           summary: "No logs ingested"
           description: "The ingestion service has received no logs for 10 minutes."
+
+      - alert: ModelDrift
+        # Recent score distribution has drifted from the training baseline.
+        expr: ai_score_drift > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model score drift detected"
+          description: "The recent mean anomaly score deviates from the training baseline; consider retraining."
