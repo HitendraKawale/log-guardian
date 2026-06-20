@@ -14,5 +14,13 @@ class Settings(BaseSettings):
     # service runs with zero external dependencies; Postgres is used in compose.
     database_url: str = "sqlite+aiosqlite:///./log_guardian.db"
 
+    # Comma-separated list of origins allowed to call the API from a browser
+    # (the web dashboard). Defaults to any origin for easy local development.
+    cors_allow_origins: str = "*"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_allow_origins.split(",")]
+
 
 settings = Settings()

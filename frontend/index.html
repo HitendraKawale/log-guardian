@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Guardian</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="shield">&#9683;</span>
+      <div>
+        <h1>Log Guardian</h1>
+        <p class="tagline">AI-assisted log anomaly monitoring</p>
+      </div>
+    </div>
+    <div class="status">
+      <span id="status-dot" class="dot"></span>
+      <span id="status-text">connecting&hellip;</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stats" id="stats">
+      <div class="card"><span class="label">Logs</span><span class="value" id="stat-total">0</span></div>
+      <div class="card"><span class="label">Anomalies</span><span class="value danger" id="stat-anomalies">0</span></div>
+      <div class="card"><span class="label">Anomaly rate</span><span class="value" id="stat-rate">0%</span></div>
+      <div class="card"><span class="label">Avg score</span><span class="value" id="stat-score">0.00</span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Send a test log</h2>
+      <form id="log-form" class="log-form">
+        <input name="service" placeholder="service (e.g. payment-api)" value="payment-api" required />
+        <select name="level">
+          <option>DEBUG</option><option>INFO</option><option selected>WARNING</option>
+          <option>ERROR</option><option>CRITICAL</option>
+        </select>
+        <input name="message" placeholder="message" value="Database connection refused, request failed" required />
+        <button type="submit">Ingest</button>
+      </form>
+      <p id="form-msg" class="form-msg"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Recent logs</h2>
+      <table class="logs">
+        <thead>
+          <tr>
+            <th>Time</th><th>Service</th><th>Level</th><th>Message</th>
+            <th>Score</th><th>Severity</th>
+          </tr>
+        </thead>
+        <tbody id="logs-body">
+          <tr><td colspan="6" class="empty">No logs yet.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

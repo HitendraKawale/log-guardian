@@ -26,6 +26,17 @@ services:
       - "8001:8001"
     restart: unless-stopped
 
+  frontend:
+    image: nginx:alpine
+    container_name: lg-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ../../frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - ingestion-service
+    restart: unless-stopped
+
   postgres:
     image: postgres:15
     container_name: lg-postgres

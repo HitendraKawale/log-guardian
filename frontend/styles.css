@@ -1,0 +1,112 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #1c2230;
+  --border: #2a3140;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #4f9dff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #11161f, var(--bg));
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+.shield { font-size: 30px; color: var(--accent); }
+.brand h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+.status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+main { max-width: 1100px; margin: 0 auto; padding: 24px 28px 60px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; }
+.card .value { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.card .value.danger { color: var(--red); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}
+.panel h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+
+.log-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.log-form input, .log-form select {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 9px 11px;
+  font-size: 13px;
+}
+.log-form input[name="message"] { flex: 1; min-width: 240px; }
+.log-form button {
+  background: var(--accent); color: #04122b; border: none;
+  border-radius: 7px; padding: 9px 18px; font-weight: 600; cursor: pointer;
+}
+.log-form button:hover { filter: brightness(1.08); }
+.form-msg { margin: 10px 0 0; font-size: 13px; color: var(--muted); min-height: 16px; }
+
+table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
+.logs th {
+  text-align: left; color: var(--muted); font-weight: 500;
+  padding: 8px 10px; border-bottom: 1px solid var(--border);
+  text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;
+}
+.logs td { padding: 10px; border-bottom: 1px solid #20262f; vertical-align: middle; }
+.logs tr.anomaly td { background: rgba(248, 81, 73, 0.07); }
+.logs .empty { text-align: center; color: var(--muted); padding: 22px; }
+.logs td.time, .logs td.msg { font-family: var(--mono); }
+.logs td.msg { max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+}
+.lvl-DEBUG, .lvl-INFO { background: #21323f; color: #79c0ff; }
+.lvl-WARNING { background: #3a2f12; color: var(--yellow); }
+.lvl-ERROR, .lvl-CRITICAL { background: #3a1715; color: var(--red); }
+.sev-low { background: #16331d; color: var(--green); }
+.sev-medium { background: #3a2f12; color: var(--yellow); }
+.sev-high { background: #3a1715; color: var(--red); }
+.sev-none { color: var(--muted); }
+
+.scorebar { position: relative; width: 90px; height: 8px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+.scorebar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; }
+
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
