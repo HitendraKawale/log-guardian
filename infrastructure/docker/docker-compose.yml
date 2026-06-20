@@ -106,6 +106,23 @@ services:
     depends_on:
       - ingestion-service
       - ai-service
+      - alertmanager
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: lg-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ../../monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    restart: unless-stopped
+
+  webhook-echo:
+    image: mendhak/http-https-echo:31
+    container_name: lg-webhook-echo
+    environment:
+      HTTP_PORT: "8080"
     restart: unless-stopped
 
   grafana:
