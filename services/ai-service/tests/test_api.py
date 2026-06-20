@@ -54,6 +54,17 @@ def test_clear_anomaly_is_flagged():
     assert body["predicted_severity"] == "high"
 
 
+def test_model_info_reports_version_and_metrics():
+    response = client.get("/model/info")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["analyzer"] in {"model", "heuristic"}
+    assert "current_version" in body
+    assert isinstance(body["history"], list)
+    if body["current"]:
+        assert "roc_auc" in body["current"]["metrics"]
+
+
 def test_analyze_rejects_invalid_level():
     payload = {**BENIGN, "level": "NOPE"}
     response = client.post("/analyze", json=payload)

@@ -1,0 +1,18 @@
+{
+  "current": "v20260620-090444",
+  "versions": [
+    {
+      "version": "v20260620-090444",
+      "created_at": "2026-06-20T09:04:44.419201+00:00",
+      "source": "synthetic",
+      "n_samples": 4000,
+      "metrics": {
+        "roc_auc": 0.8856,
+        "precision": 0.8381,
+        "recall": 0.6848,
+        "f1": 0.7537
+      },
+      "train_mean_score": 0.2579
+    }
+  ]
+}

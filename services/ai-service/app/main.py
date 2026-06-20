@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from .analyzer import active_analyzer, analyze
+from .model import current_version, load_registry
 from .schemas import AnalyzeRequest, AnalyzeResponse
 
 app = FastAPI(title="Log Guardian AI Service", version="0.1.0")
@@ -30,6 +31,18 @@ def health_check() -> dict[str, str]:
 @app.get("/metrics", tags=["Monitoring"])
 def metrics() -> Response:
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.get("/model/info", tags=["Model"])
+def model_info() -> dict:
+    """Current model version, its metrics, and recent training history."""
+    registry = load_registry()
+    return {
+        "analyzer": active_analyzer.name,
+        "current_version": registry["current"],
+        "current": current_version(),
+        "history": registry["versions"][-10:],
+    }
 
 
 @app.post("/analyze", response_model=AnalyzeResponse, tags=["Analysis"])

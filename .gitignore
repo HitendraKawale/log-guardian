@@ -23,6 +23,10 @@ htmlcov/
 *.sqlite3
 log_guardian.db
 
+# Versioned model artifacts (history is tracked in registry.json;
+# only the current anomaly_model.joblib is committed).
+services/ai-service/app/model/anomaly_model_v*.joblib
+
 # Environment
 .env
 
