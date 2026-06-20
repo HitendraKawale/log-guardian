@@ -30,6 +30,9 @@ services:
       dockerfile: Dockerfile
     container_name: lg-log-consumer
     command: ["python", "-m", "app.consumer"]
+    # Not a web server, so the image's HTTP healthcheck doesn't apply.
+    healthcheck:
+      disable: true
     environment:
       AI_SERVICE_URL: http://ai-service:8001
       DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
