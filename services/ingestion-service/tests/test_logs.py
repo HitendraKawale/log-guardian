@@ -47,6 +47,12 @@ async def test_get_missing_log_returns_404(client):
     assert response.status_code == 404
 
 
+async def test_stream_disabled_returns_503(client):
+    # Kafka is disabled by default in tests.
+    response = await client.post("/logs/stream", json=PAYLOAD)
+    assert response.status_code == 503
+
+
 async def test_list_logs_returns_newest_first(make_client):
     low = AIResponse(anomaly_score=0.1, is_anomaly=False, predicted_severity=Severity.LOW)
     async with make_client(low) as client:

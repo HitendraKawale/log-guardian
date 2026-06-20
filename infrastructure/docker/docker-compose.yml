@@ -10,11 +10,51 @@ services:
       AI_SERVICE_URL: http://ai-service:8001
       AI_TIMEOUT: "2"
       DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
+      KAFKA_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       ai-service:
         condition: service_started
       postgres:
         condition: service_healthy
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+
+  log-consumer:
+    build:
+      context: ../../services/ingestion-service
+      dockerfile: Dockerfile
+    container_name: lg-log-consumer
+    command: ["python", "-m", "app.consumer"]
+    environment:
+      AI_SERVICE_URL: http://ai-service:8001
+      DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      ingestion-service:
+        condition: service_started
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:3.8.0
+    container_name: lg-kafka
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+    ports:
+      - "9092:9092"
     restart: unless-stopped
 
   ai-service:

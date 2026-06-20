@@ -12,13 +12,16 @@ from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from .config import settings
 from .database import init_db
+from .producer import start_producer, stop_producer
 from .routes import health, logs
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    await start_producer()
     yield
+    await stop_producer()
 
 
 app = FastAPI(

@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # (the web dashboard). Defaults to any origin for easy local development.
     cors_allow_origins: str = "*"
 
+    # Kafka streaming (optional). When disabled, the synchronous REST path is
+    # the only way logs are ingested.
+    kafka_enabled: bool = False
+    kafka_bootstrap_servers: str = "kafka:9092"
+    kafka_topic: str = "logs.raw"
+    kafka_consumer_group: str = "log-scorer"
+
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.cors_allow_origins.split(",")]

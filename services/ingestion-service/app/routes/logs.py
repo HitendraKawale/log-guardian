@@ -1,20 +1,17 @@
 """Log ingestion and retrieval endpoints."""
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from prometheus_client import Counter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..ai_client import AIClient, get_ai_client
+from ..config import settings
 from ..database import get_session
 from ..models import Log
+from ..producer import publish_log
 from ..schemas import LogCreate, LogResponse
+from ..service import persist_log
 
 router = APIRouter(prefix="/logs", tags=["Logs"])
-
-LOGS_INGESTED = Counter("ingestion_logs_total", "Total number of logs ingested")
-LOGS_ANOMALOUS = Counter(
-    "ingestion_anomalous_logs_total", "Total number of logs flagged as anomalies"
-)
 
 
 @router.post("", response_model=LogResponse, status_code=status.HTTP_201_CREATED)
@@ -23,27 +20,16 @@ async def ingest_log(
     session: AsyncSession = Depends(get_session),
     ai: AIClient = Depends(get_ai_client),
 ) -> Log:
-    result = await ai.analyze(log)
+    return await persist_log(session, log, ai)
 
-    record = Log(
-        service=log.service,
-        level=log.level.value,
-        message=log.message,
-        timestamp=log.timestamp,
-        status="scored" if result else "unscored",
-        anomaly_score=result.anomaly_score if result else None,
-        is_anomaly=result.is_anomaly if result else None,
-        predicted_severity=result.predicted_severity.value if result else None,
-    )
-    session.add(record)
-    await session.commit()
-    await session.refresh(record)
 
-    LOGS_INGESTED.inc()
-    if result and result.is_anomaly:
-        LOGS_ANOMALOUS.inc()
-
-    return record
+@router.post("/stream", status_code=status.HTTP_202_ACCEPTED)
+async def stream_log(log: LogCreate) -> dict[str, str]:
+    """Publish a log to Kafka for asynchronous scoring by the consumer worker."""
+    if not settings.kafka_enabled:
+        raise HTTPException(status_code=503, detail="Streaming is disabled")
+    await publish_log(log)
+    return {"status": "queued"}
 
 
 @router.get("", response_model=list[LogResponse])
