@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
-from .analyzer import analyze
+from .analyzer import active_analyzer, analyze
 from .schemas import AnalyzeRequest, AnalyzeResponse
 
 app = FastAPI(title="Log Guardian AI Service", version="0.1.0")
@@ -25,7 +25,7 @@ ANOMALY_SCORE = Histogram(
 
 @app.get("/health", tags=["Health"])
 def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "analyzer": active_analyzer.name}
 
 
 @app.get("/metrics", tags=["Monitoring"])

@@ -2,7 +2,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from app.analyzer import analyze
+# These tests pin the deterministic heuristic behaviour, which is the
+# documented fallback regardless of whether a trained model is loaded.
+from app.analyzer import heuristic_analyze as analyze
 from app.schemas import AnalyzeRequest, LogLevel, Severity
 
 
