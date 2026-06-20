@@ -1,0 +1,26 @@
+route:
+  receiver: webhook
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 1h
+
+receivers:
+  - name: webhook
+    webhook_configs:
+      # Demo sink: the webhook-echo container logs every alert payload.
+      - url: http://webhook-echo:8080/
+        send_resolved: true
+
+  # Example Slack receiver — drop in a webhook URL and switch `route.receiver`.
+  # - name: slack
+  #   slack_configs:
+  #     - api_url: https://hooks.slack.com/services/XXX/YYY/ZZZ
+  #       channel: "#alerts"
+  #       send_resolved: true
+
+inhibit_rules:
+  # A firing critical alert silences a warning with the same alertname.
+  - source_matchers: ['severity = "critical"']
+    target_matchers: ['severity = "warning"']
+    equal: ["alertname"]

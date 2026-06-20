@@ -9,8 +9,36 @@ resources:
   - postgres.yaml
   - ai-service.yaml
   - ingestion-service.yaml
+  - log-consumer.yaml
   - frontend.yaml
+  - kafka.yaml
+  - monitoring.yaml
   - ingress.yaml
 
-commonLabels:
-  app.kubernetes.io/part-of: log-guardian
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: log-guardian
+    includeSelectors: false
+
+# monitoring-config/ mirrors the root monitoring/ configs (kustomize cannot read
+# files outside its own directory). Stable names keep volume references simple.
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - monitoring-config/prometheus.yml
+      - monitoring-config/alerts.yml
+  - name: alertmanager-config
+    files:
+      - monitoring-config/alertmanager.yml
+  - name: grafana-datasources
+    files:
+      - monitoring-config/datasource.yml
+  - name: grafana-dashboard-provider
+    files:
+      - monitoring-config/dashboards.yml
+  - name: grafana-dashboards
+    files:
+      - monitoring-config/log-guardian.json

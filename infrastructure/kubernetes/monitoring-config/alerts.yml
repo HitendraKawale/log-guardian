@@ -1,0 +1,42 @@
+groups:
+  - name: log-guardian
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "Prometheus cannot scrape {{ $labels.job }} ({{ $labels.instance }})."
+
+      - alert: HighAnomalyRate
+        # More than half of ingested logs flagged as anomalies over 5m.
+        expr: >
+          rate(ingestion_anomalous_logs_total[5m])
+            / clamp_min(rate(ingestion_logs_total[5m]), 0.001) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Anomaly rate above 50%"
+          description: "Over 50% of logs in the last 5 minutes were flagged anomalous."
+
+      - alert: NoLogsIngested
+        expr: rate(ingestion_logs_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No logs ingested"
+          description: "The ingestion service has received no logs for 10 minutes."
+
+      - alert: ModelDrift
+        # Recent score distribution has drifted from the training baseline.
+        expr: ai_score_drift > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model score drift detected"
+          description: "The recent mean anomaly score deviates from the training baseline; consider retraining."

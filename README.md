@@ -195,8 +195,9 @@ the same `persist_log` logic as the synchronous route. Enabled via
 
 ## Kubernetes
 
-Manifests for the core tier (Postgres, AI, ingestion + HPA, frontend, ingress)
-live in [`infrastructure/kubernetes`](infrastructure/kubernetes/README.md):
+Manifests for the full stack — Postgres, AI, ingestion (+ HPA), Kafka and the
+consumer, the frontend, an ingress, and the monitoring stack — live in
+[`infrastructure/kubernetes`](infrastructure/kubernetes/README.md):
 
 ```bash
 kubectl apply -k infrastructure/kubernetes
@@ -212,6 +213,6 @@ kubectl apply -k infrastructure/kubernetes
 - [x] Kafka streaming ingestion
 - [x] Feedback loop: human labels → retrain → versioned registry → drift alerts
 - [x] Distributed tracing + structured logs (OpenTelemetry + Jaeger)
-- [ ] Kafka + monitoring stack manifests for Kubernetes
+- [x] Full stack on Kubernetes (streaming + monitoring)
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.
