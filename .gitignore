@@ -27,6 +27,10 @@ log_guardian.db
 # only the current anomaly_model.joblib is committed).
 services/ai-service/app/model/anomaly_model_v*.joblib
 
+# Raw datasets pulled by ml/data/download.py (BGL.log alone is 709 MB).
+ml/datasets/*
+!ml/datasets/.gitkeep
+
 # Environment
 .env
 
