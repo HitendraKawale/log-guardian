@@ -2,3 +2,6 @@ pytest==8.3.4
 httpx==0.28.1
 pydantic==2.10.4
 ruff==0.8.4
+
+# Browser tests (tests/e2e). Needs `playwright install chromium` as well.
+pytest-playwright==0.6.2

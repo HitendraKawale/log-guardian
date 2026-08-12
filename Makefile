@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration test-e2e smoke up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -32,6 +32,12 @@ test-contract: ## Check the two services still agree on the wire contract
 
 test-integration: ## Run end-to-end tests against the live stack (needs make up)
 	cd tests && ../$(PY) -m pytest integration
+
+test-e2e: ## Drive the dashboard in a real browser (needs make up)
+	cd tests && ../$(PY) -m pytest e2e
+
+smoke: ## Probe a deployment from outside (BASE_URL=... to target a host)
+	$(PY) scripts/smoke.py $(SMOKE_URL)
 
 lint: ## Lint and check formatting with ruff
 	$(PY) -m ruff check services ml
