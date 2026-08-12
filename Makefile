@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -16,13 +16,16 @@ install: ## Create venv and install dev dependencies for both services
 	$(PIP) install -r services/ai-service/requirements-dev.txt
 	$(PIP) install -r services/ingestion-service/requirements-dev.txt
 
-test: test-ai test-ingestion ## Run all test suites
+test: test-ai test-ingestion test-ml ## Run all test suites
 
 test-ai: ## Run AI service tests
 	cd services/ai-service && ../../$(PY) -m pytest
 
 test-ingestion: ## Run ingestion service tests
 	cd services/ingestion-service && ../../$(PY) -m pytest
+
+test-ml: ## Run dataset/training tests
+	cd ml && ../$(PY) -m pytest
 
 lint: ## Lint and check formatting with ruff
 	$(PY) -m ruff check services ml

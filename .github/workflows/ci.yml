@@ -26,15 +26,21 @@ jobs:
       - run: kubectl kustomize infrastructure/kubernetes > /dev/null
 
   test:
-    name: ${{ matrix.service }} tests
+    name: ${{ matrix.name }} tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        service: [ai-service, ingestion-service]
+        include:
+          - name: ai-service
+            path: services/ai-service
+          - name: ingestion-service
+            path: services/ingestion-service
+          - name: ml
+            path: ml
     defaults:
       run:
-        working-directory: services/${{ matrix.service }}
+        working-directory: ${{ matrix.path }}
     steps:
       - uses: actions/checkout@v4
 
