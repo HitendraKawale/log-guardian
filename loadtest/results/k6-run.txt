@@ -1,0 +1,142 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: -
+        output: -
+
+     scenarios: (100.00%) 2 scenarios, 20 max VUs, 50s max duration (incl. graceful stop):
+              * stream: 10 looping VUs for 20s (exec: streamIngest, gracefulStop: 30s)
+              * sync: 10 looping VUs for 20s (exec: syncIngest, gracefulStop: 30s)
+
+
+running (01.0s), 20/20 VUs, 150 complete and 0 interrupted iterations
+stream   [   5% ] 10 VUs  01.0s/20s
+sync     [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 20/20 VUs, 359 complete and 0 interrupted iterations
+stream   [  10% ] 10 VUs  02.0s/20s
+sync     [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 20/20 VUs, 556 complete and 0 interrupted iterations
+stream   [  15% ] 10 VUs  03.0s/20s
+sync     [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 20/20 VUs, 767 complete and 0 interrupted iterations
+stream   [  20% ] 10 VUs  04.0s/20s
+sync     [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 20/20 VUs, 983 complete and 0 interrupted iterations
+stream   [  25% ] 10 VUs  05.0s/20s
+sync     [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 20/20 VUs, 1179 complete and 0 interrupted iterations
+stream   [  30% ] 10 VUs  06.0s/20s
+sync     [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 20/20 VUs, 1372 complete and 0 interrupted iterations
+stream   [  35% ] 10 VUs  07.0s/20s
+sync     [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 20/20 VUs, 1578 complete and 0 interrupted iterations
+stream   [  40% ] 10 VUs  08.0s/20s
+sync     [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 20/20 VUs, 1764 complete and 0 interrupted iterations
+stream   [  45% ] 10 VUs  09.0s/20s
+sync     [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 20/20 VUs, 1960 complete and 0 interrupted iterations
+stream   [  50% ] 10 VUs  10.0s/20s
+sync     [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 20/20 VUs, 2147 complete and 0 interrupted iterations
+stream   [  55% ] 10 VUs  11.0s/20s
+sync     [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 20/20 VUs, 2331 complete and 0 interrupted iterations
+stream   [  60% ] 10 VUs  12.0s/20s
+sync     [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 20/20 VUs, 2522 complete and 0 interrupted iterations
+stream   [  65% ] 10 VUs  13.0s/20s
+sync     [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 20/20 VUs, 2700 complete and 0 interrupted iterations
+stream   [  70% ] 10 VUs  14.0s/20s
+sync     [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 20/20 VUs, 2902 complete and 0 interrupted iterations
+stream   [  75% ] 10 VUs  15.0s/20s
+sync     [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 20/20 VUs, 3082 complete and 0 interrupted iterations
+stream   [  80% ] 10 VUs  16.0s/20s
+sync     [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 20/20 VUs, 3293 complete and 0 interrupted iterations
+stream   [  85% ] 10 VUs  17.0s/20s
+sync     [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 20/20 VUs, 3487 complete and 0 interrupted iterations
+stream   [  90% ] 10 VUs  18.0s/20s
+sync     [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 20/20 VUs, 3675 complete and 0 interrupted iterations
+stream   [  95% ] 10 VUs  19.0s/20s
+sync     [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 20/20 VUs, 3849 complete and 0 interrupted iterations
+stream   [ 100% ] 10 VUs  20.0s/20s
+sync     [ 100% ] 10 VUs  20.0s/20s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration{scenario:stream}
+    ✓ 'p(95)<200' p(95)=52.16ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 3869    190.946315/s
+    checks_succeeded...: 100.00% 3869 out of 3869
+    checks_failed......: 0.00%   0 out of 3869
+
+    ✓ stream 202
+    ✓ sync 201
+
+    CUSTOM
+    anomalies_flagged..............: 469    23.146503/s
+
+    HTTP
+    http_req_duration..............: avg=39.67ms  min=2.11ms  med=19.39ms max=393.07ms p(90)=98.2ms   p(95)=120.02ms
+      { expected_response:true }...: avg=39.67ms  min=2.11ms  med=19.39ms max=393.07ms p(90)=98.2ms   p(95)=120.02ms
+      { scenario:stream }..........: avg=19.85ms  min=2.11ms  med=14.98ms max=120.04ms p(90)=36.77ms  p(95)=52.16ms 
+    http_req_failed................: 0.00%  0 out of 3869
+    http_reqs......................: 3869   190.946315/s
+
+    EXECUTION
+    iteration_duration.............: avg=104.11ms min=52.99ms med=70.02ms max=502.73ms p(90)=197.96ms p(95)=220.74ms
+    iterations.....................: 3869   190.946315/s
+    vus............................: 20     min=20        max=20
+    vus_max........................: 20     min=20        max=20
+
+    NETWORK
+    data_received..................: 805 kB 40 kB/s
+    data_sent......................: 1.0 MB 50 kB/s
+
+
+
+
+running (20.3s), 00/20 VUs, 3869 complete and 0 interrupted iterations
+stream ✓ [ 100% ] 10 VUs  20s
+sync   ✓ [ 100% ] 10 VUs  20s

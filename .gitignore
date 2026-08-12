@@ -38,3 +38,6 @@ ml/datasets/*
 .DS_Store
 .idea/
 .vscode/
+
+# Browser test output (screenshots are committed deliberately; traces are not)
+tests/e2e/test-results/

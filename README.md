@@ -243,15 +243,58 @@ cd services/ingestion-service && alembic upgrade head
 
 ## Tests
 
+91 tests in two tiers. The first needs nothing:
+
 ```bash
-make test            # 61 tests across three suites
-make test-ai
-make test-ingestion
-make test-ml
+make test              # 67 tests: ai-service, ingestion, ml, contract
 ```
 
-CI runs the three suites, ruff, `kubectl kustomize`, and a model training smoke
-test on every push.
+The second needs the stack running, because it is specifically about the seams
+the first tier replaces with fakes:
+
+```bash
+make up
+make test-integration  # 16 tests against real containers
+make test-e2e          # 8 chromium tests against the dashboard
+make smoke             # probe a deployment from outside
+```
+
+What the integration tier buys, given the unit suites mock every boundary:
+
+- ingestion reaching the scorer over **real HTTP**, not a `FakeAIClient`
+- a log surviving **produce → broker → consume → Postgres**, which nothing else
+  covers: the unit test calls `process_record` directly and never involves Kafka
+- **one trace spanning both services** through the Kafka headers, checked against
+  Jaeger's API and rejecting traces older than the test
+- the **Alembic** schema on Postgres rather than SQLite `create_all`
+- Prometheus **actually scraping** both targets
+- the AI container **stopped outright**, proving a dropped connection degrades to
+  `status: "unscored"` and a 201 — a real failure, not the tidy `None` the unit
+  suite fakes
+
+A contract test compares the two services' JSON schemas, since they duplicate
+the wire format deliberately and nothing else stops them drifting.
+
+CI runs six jobs: four unit suites in a matrix, lint, `kubectl kustomize`, the
+integration and browser tests against a Compose stack, and a training smoke
+test. Dashboard screenshots are uploaded as a build artifact.
+
+### Load
+
+`make loadtest` runs k6 against the stack. Latest run, with method and hardware,
+is in [`loadtest/results/`](loadtest/results/README.md):
+
+| metric | value |
+| --- | --- |
+| throughput | 190.9 req/s |
+| failed | 0.00% (0 of 3,869) |
+| median | 19.4 ms |
+| p95 (all) | 120.0 ms |
+| p95 (stream only) | 52.2 ms |
+
+Everything on one M1 laptop, load generator included, so treat these as
+contention numbers. The streaming path being 2.3× faster at p95 is the point:
+it returns once Kafka accepts the message instead of blocking on the scorer.
 
 ## Kubernetes
 
@@ -287,8 +330,10 @@ Things that are wrong or missing, in roughly the order they'd bite:
 - **`infrastructure/kubernetes/monitoring-config/` duplicates `monitoring/`**
   because kustomize can't read outside its own directory. Both must be edited
   together and nothing enforces that.
-- **Throughput is unmeasured.** `make loadtest` runs a k6 script; no result with
-  a recorded method and hardware is committed, so there's no number to quote.
+- **Load numbers are from a single laptop.** Load generator, both services,
+  Postgres, Kafka and the monitoring stack all share eight cores, so the p95 of
+  120 ms says as much about contention as about the services. Nothing has been
+  measured on separated hosts.
 
 ## Next
 
