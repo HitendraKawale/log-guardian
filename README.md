@@ -5,7 +5,12 @@ model, stores the result, and exposes the whole thing over Prometheus, Grafana
 and Jaeger. Two FastAPI services, a Kafka path for volume, a static dashboard,
 and manifests to run it on Compose or Kubernetes.
 
-![Log Guardian dashboard](docs/images/dashboard.png)
+![Log Guardian dashboard](docs/images/demo.gif)
+
+*Ingesting a critical log: the AI service scores it 0.90, the dashboard flags it
+high severity, and a reviewer's "anomaly" label is written back as training data
+for the next retrain. Recorded from the Compose stack by
+`scripts/capture_demo.py`.*
 
 <!-- TODO(hitesh): a paragraph on why you started this - the itch it scratched,
      what you wanted to learn. That is the one thing nobody else can write. -->

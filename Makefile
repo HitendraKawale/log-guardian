@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration test-e2e smoke up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -38,6 +38,12 @@ test-e2e: ## Drive the dashboard in a real browser (needs make up)
 
 smoke: ## Probe a deployment from outside (BASE_URL=... to target a host)
 	$(PY) scripts/smoke.py $(SMOKE_URL)
+
+seed: ## Fill a running stack with realistic demo traffic
+	$(PY) scripts/seed_demo.py
+
+demo-assets: seed ## Re-record the README screenshot and GIF (needs make up + ffmpeg)
+	$(PY) scripts/capture_demo.py
 
 lint: ## Lint and check formatting with ruff
 	$(PY) -m ruff check services ml
