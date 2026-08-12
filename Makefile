@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -16,7 +16,7 @@ install: ## Create venv and install dev dependencies for both services
 	$(PIP) install -r services/ai-service/requirements-dev.txt
 	$(PIP) install -r services/ingestion-service/requirements-dev.txt
 
-test: test-ai test-ingestion test-ml ## Run all test suites
+test: test-ai test-ingestion test-ml test-contract ## Run every suite that needs no infra
 
 test-ai: ## Run AI service tests
 	cd services/ai-service && ../../$(PY) -m pytest
@@ -26,6 +26,12 @@ test-ingestion: ## Run ingestion service tests
 
 test-ml: ## Run dataset/training tests
 	cd ml && ../$(PY) -m pytest
+
+test-contract: ## Check the two services still agree on the wire contract
+	cd tests && ../$(PY) -m pytest contract
+
+test-integration: ## Run end-to-end tests against the live stack (needs make up)
+	cd tests && ../$(PY) -m pytest integration
 
 lint: ## Lint and check formatting with ruff
 	$(PY) -m ruff check services ml

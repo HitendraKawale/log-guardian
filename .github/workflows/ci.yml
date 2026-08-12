@@ -38,6 +38,8 @@ jobs:
             path: services/ingestion-service
           - name: ml
             path: ml
+          - name: contract
+            path: tests
     defaults:
       run:
         working-directory: ${{ matrix.path }}
@@ -54,6 +56,46 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -q
+
+  integration:
+    name: integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install test dependencies
+        run: pip install -r tests/requirements-dev.txt
+
+      - name: Start the stack
+        run: docker compose -f infrastructure/docker/docker-compose.yml up --build -d
+
+      - name: Wait for the services to answer
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -sf http://localhost:8000/readiness && curl -sf http://localhost:8001/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "stack did not come up in time"
+          exit 1
+
+      - name: Run end-to-end tests
+        working-directory: tests
+        run: python -m pytest integration -q
+
+      - name: Container logs (on failure)
+        if: failure()
+        run: docker compose -f infrastructure/docker/docker-compose.yml logs --tail=200
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f infrastructure/docker/docker-compose.yml down -v
 
   train-smoke:
     name: model training smoke test
