@@ -41,3 +41,6 @@ ml/datasets/*
 
 # Browser test output (screenshots are committed deliberately; traces are not)
 tests/e2e/test-results/
+
+# Personal study notes (not part of the project)
+notes/
