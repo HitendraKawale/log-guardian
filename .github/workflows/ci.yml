@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.8.4
-      - run: ruff check services ml
-      - run: ruff format --check services ml
+      - run: ruff check services ml evals
+      - run: ruff format --check services ml evals
 
   manifests:
     name: validate k8s manifests
@@ -40,6 +40,8 @@ jobs:
             path: ml
           - name: contract
             path: tests
+          - name: evals
+            path: evals
     defaults:
       run:
         working-directory: ${{ matrix.path }}
