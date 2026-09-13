@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-13T18:28:55.205601+00:00",
+  "question": "What caused the search timeouts?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "7490913eb179976232ddc28f8cbe8e60eb262f7a847fda46cf972fb27131f2cb",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "outcome": "supported",
+    "observations": [
+      {
+        "claim": "The gateway service logged errors indicating search requests timed out waiting for response headers after 2000ms.",
+        "evidence_ids": [
+          "dev-06:01",
+          "dev-06:02"
+        ]
+      },
+      {
+        "claim": "The collector service logged a warning that search log export was unavailable for the interval, with the last received data before the window, indicating missing telemetry during the incident period.",
+        "evidence_ids": [
+          "dev-06:03"
+        ]
+      },
+      {
+        "claim": "The gateway service reported that the local connection pool was active with 2 connections out of a max of 50 and zero queue wait time, suggesting no connection pool exhaustion or queuing delays at the gateway.",
+        "evidence_ids": [
+          "dev-06:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The search timeouts were caused by the collector service being unavailable or not exporting search logs during the incident window, leading to the gateway timing out waiting for responses.",
+      "evidence_ids": [
+        "dev-06:02",
+        "dev-06:03"
+      ]
+    },
+    "alternatives": [],
+    "missing_evidence": [
+      "Upstream service logs and traces to confirm if the collector was slow or unresponsive",
+      "Detailed timing data correlating gateway requests to collector responses to distinguish transport delay from handler delay"
+    ],
+    "suggested_checks": [
+      "Check collector service health and logs for errors or resource exhaustion during the incident window",
+      "Review network connectivity between gateway and collector services",
+      "Correlate request IDs and timestamps between gateway and collector to identify delays or failures in request handling"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "179cb32d8be184803a475a8c60957402ebac57419cb9e2786756261b7200ad96",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-06:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "search log export unavailable for this interval; last_received_before_window=true",
+              "timestamp": "2026-01-01T10:00:05Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s41 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s40 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:04",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "local connection pool active=2 max=50; queue_wait_ms=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2930409973487258
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "cee0bca146ab4f6d6deb6e97dfd839c1a756fa5728c68abbb68232b678854979",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:51ac544e552df275cef151088c6a25d3c02cd84bea9616d3ff74aee09223f0cf",
+            "kind": "summary",
+            "content": {
+              "total": 4,
+              "groups": [
+                {
+                  "service": "collector",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "gateway",
+                  "level": "ERROR",
+                  "count": 2
+                },
+                {
+                  "service": "gateway",
+                  "level": "INFO",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.15791700570844114
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "What caused the search timeouts?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.0682079882826656
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1581,
+    "output_tokens": 299,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00111080",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00603080",
+  "input_token_reservation": 10981,
+  "elapsed_ms": 4345.940375002101,
+  "provenance": {
+    "case_id": "dev-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "47248a62bfc8b04667542096320df07374d3e87f3796ef31455cc3c61df6aeae",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "0a97c3f00acdfefe48329f1d0d89a60b3533b59f",
+    "code_dirty": false,
+    "implementation_sha256": "bb6dd7e2bff52013c094fac6d92d1174f85c6428fa9f413c2e92b1a846311cdc"
+  }
+}

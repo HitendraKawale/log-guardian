@@ -6,6 +6,8 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "services/ingestion-service"))
 
@@ -13,8 +15,15 @@ from app.investigation_agent import validate_citations  # noqa: E402
 from app.investigation_schemas import EvidenceBatch, InvestigationReport  # noqa: E402
 
 
-def test_first_live_batch_preserves_provenance_failures_and_accounting():
-    folder = ROOT / "evals/results/2026-09-13-baseline-smoke"
+@pytest.mark.parametrize(
+    "name,revision,expected_cost",
+    [
+        ("2026-09-13-baseline-smoke", "e4edf8bdc33e5df6f666518ee146f74a46058e12", "0.00366960"),
+        ("2026-09-13-baseline-smoke-v2", "0a97c3f00acdfefe48329f1d0d89a60b3533b59f", "0.00401200"),
+    ],
+)
+def test_live_batches_preserve_provenance_failures_and_accounting(name, revision, expected_cost):
+    folder = ROOT / "evals/results" / name
     summary = json.loads((folder / "summary.json").read_text())
     assert summary["requests"] == len(summary["runs"]) == 4
     assert summary["authorization_exhausted"] is True
@@ -28,7 +37,7 @@ def test_first_live_batch_preserves_provenance_failures_and_accounting():
         assert run["model_requests"] == 1
         assert run["model_requested"] == run["model_returned"] == summary["model"]
         assert run["provenance"]["code_dirty"] is False
-        assert run["provenance"]["code_revision"] == "e4edf8bdc33e5df6f666518ee146f74a46058e12"
+        assert run["provenance"]["code_revision"] == revision
         assert run["provenance"]["origin"] == "authored"
         batches = [EvidenceBatch.model_validate(event["result"]) for event in run["trace"]]
         report = InvestigationReport.model_validate(run["report"])
@@ -52,6 +61,6 @@ def test_first_live_batch_preserves_provenance_failures_and_accounting():
         if entry["case_id"] == "dev-06":
             assert entry["expected_outcome"] == "inconclusive"
             abstentions += report.outcome == "inconclusive"
-    assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal("0.00366960")
+    assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal(expected_cost)
     assert total <= Decimal(summary["allowance_usd"])
     assert abstentions == summary["correct_abstentions"] == 0

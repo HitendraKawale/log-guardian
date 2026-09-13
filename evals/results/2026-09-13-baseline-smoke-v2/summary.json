@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "evaluation": "second development smoke, not a held-out benchmark",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "requests": 4,
+  "authorization_exhausted": true,
+  "allowance_usd": "0.10",
+  "estimated_total_cost_usd": "0.00401200",
+  "supported_case_core_diagnoses_matching_rubric": 2,
+  "correct_abstentions": 0,
+  "required_abstentions": 2,
+  "reviewer": "coding assistant; not independent or blind",
+  "runs": [
+    {
+      "artifact": "dev-01-A.json",
+      "sha256": "ed6038a4247e55f661366babdc9333aa69ceac6f6d67402aa720f3bc281fddb8",
+      "case_id": "dev-01",
+      "system": "A",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1044,
+        "output_tokens": 328,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00094240",
+      "elapsed_ms": 3593.4477080008946
+    },
+    {
+      "artifact": "dev-01-B.json",
+      "sha256": "f535605a1a0c0e4f20eaf010d8c1f7c922fd9f8a9b90f6d43124259903fb3cb7",
+      "case_id": "dev-01",
+      "system": "B",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1541,
+        "output_tokens": 337,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00115560",
+      "elapsed_ms": 3624.3652909761295
+    },
+    {
+      "artifact": "dev-06-A.json",
+      "sha256": "effd92fe4eb98b8148db4228e40236d80d857717447bf8be2f7e904e07ac6b8e",
+      "case_id": "dev-06",
+      "system": "A",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "inconclusive",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 924,
+        "output_tokens": 271,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00080320",
+      "elapsed_ms": 3619.2090409749653
+    },
+    {
+      "artifact": "dev-06-B.json",
+      "sha256": "42702246945e7bd6279b8f6af0d31e7fc564c3e7da9eb270e9c101909e2404bc",
+      "case_id": "dev-06",
+      "system": "B",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "inconclusive",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1581,
+        "output_tokens": 299,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00111080",
+      "elapsed_ms": 4345.940375002101
+    }
+  ]
+}

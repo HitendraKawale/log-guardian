@@ -84,11 +84,12 @@ class Finding(BaseModel):
 class InvestigationReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    outcome: Literal["supported", "inconclusive"]
+    # Structured Outputs follows this order; collect evidence before choosing a conclusion.
     observations: list[Finding] = Field(max_length=8)
-    likely_cause: Finding | None
-    alternatives: list[Finding] = Field(max_length=8)
     missing_evidence: list[ReportText] = Field(max_length=8)
+    alternatives: list[Finding] = Field(max_length=8)
+    likely_cause: Finding | None
+    outcome: Literal["supported", "inconclusive"]
     suggested_checks: list[ReportText] = Field(max_length=8)
 
     @model_validator(mode="after")
