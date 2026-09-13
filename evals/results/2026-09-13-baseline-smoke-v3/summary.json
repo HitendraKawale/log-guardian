@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "evaluation": "third development smoke: schema order only, not a held-out benchmark",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "requests": 4,
+  "authorization_exhausted": true,
+  "allowance_usd": "0.10",
+  "supported_case_core_diagnoses_matching_rubric": 2,
+  "reported_abstentions": 2,
+  "correct_abstentions": 1,
+  "required_abstentions": 2,
+  "reviewer": "coding assistant; not independent or blind",
+  "runs": [
+    {
+      "artifact": "dev-01-A.json",
+      "sha256": "75f9e19fe190d34f75eb4284c60409ce554debe164eada79f8f4013868a2beb5",
+      "case_id": "dev-01",
+      "system": "A",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1044,
+        "output_tokens": 329,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00094400",
+      "elapsed_ms": 3931.9130000076257,
+      "review": "Core deadline mechanism matches. Deadline comparison observation omits its deadline citation. Internal delay cause remains unknown; suggestion to consider increasing deadlines is not a verified fix or a read-only check."
+    },
+    {
+      "artifact": "dev-01-B.json",
+      "sha256": "aa04b219b467dd01996f1294799979470ebd89b968fe1609bad707a20b38aba9",
+      "case_id": "dev-01",
+      "system": "B",
+      "execution_status": "completed",
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1541,
+        "output_tokens": 319,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00112680",
+      "elapsed_ms": 4166.888332983945,
+      "review": "Core deadline mechanism matches. Health-probe responsiveness is scoped to that probe, not all requests; internal delay cause remains unknown."
+    },
+    {
+      "artifact": "dev-06-A.json",
+      "sha256": "d08619c026a3be30ad0701c211d576ed0bd11f469ba8018003a62a6886a6a659",
+      "case_id": "dev-06",
+      "system": "A",
+      "execution_status": "completed",
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "inconclusive",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 924,
+        "output_tokens": 267,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00079680",
+      "elapsed_ms": 3284.7790000087116,
+      "review": "Core abstention passes: null cause, no invented request dependency, search-side logs/traces and transport-versus-handler timing requested. last_received_before_window wording overstates what is known about receipt before the window; pool snapshot does not prove the whole interval.",
+      "abstention_review_pass": true
+    },
+    {
+      "artifact": "dev-06-B.json",
+      "sha256": "e0af2fa9e06ae19207ef2b5afaea1c8b9312725cc9cded499ede5234a22e29cf",
+      "case_id": "dev-06",
+      "system": "B",
+      "execution_status": "completed",
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "inconclusive",
+      "citation_membership_valid": true,
+      "usage": {
+        "input_tokens": 1581,
+        "output_tokens": 370,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00122440",
+      "elapsed_ms": 3125.7608750020154,
+      "review": "Core abstention fails despite inconclusive label: collector log export is again presented as a request dependency in alternatives, missing evidence and checks. Keep this semantic failure in the denominator.",
+      "abstention_review_pass": false
+    }
+  ],
+  "estimated_total_cost_usd": "0.0040920"
+}

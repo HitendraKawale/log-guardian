@@ -16,19 +16,41 @@ from app.investigation_schemas import EvidenceBatch, InvestigationReport  # noqa
 
 
 @pytest.mark.parametrize(
-    "name,revision,expected_cost",
+    "name,revision,expected_cost,expected_labels,expected_reviewed",
     [
-        ("2026-09-13-baseline-smoke", "e4edf8bdc33e5df6f666518ee146f74a46058e12", "0.00366960"),
-        ("2026-09-13-baseline-smoke-v2", "0a97c3f00acdfefe48329f1d0d89a60b3533b59f", "0.00401200"),
+        (
+            "2026-09-13-baseline-smoke",
+            "e4edf8bdc33e5df6f666518ee146f74a46058e12",
+            "0.00366960",
+            0,
+            0,
+        ),
+        (
+            "2026-09-13-baseline-smoke-v2",
+            "0a97c3f00acdfefe48329f1d0d89a60b3533b59f",
+            "0.00401200",
+            0,
+            0,
+        ),
+        (
+            "2026-09-13-baseline-smoke-v3",
+            "8edf09ed34d896ea54e76fcc9ccc6632c8c1b9f7",
+            "0.00409200",
+            2,
+            1,
+        ),
     ],
 )
-def test_live_batches_preserve_provenance_failures_and_accounting(name, revision, expected_cost):
+def test_live_batches_preserve_provenance_failures_and_accounting(
+    name, revision, expected_cost, expected_labels, expected_reviewed
+):
     folder = ROOT / "evals/results" / name
     summary = json.loads((folder / "summary.json").read_text())
     assert summary["requests"] == len(summary["runs"]) == 4
     assert summary["authorization_exhausted"] is True
     total = Decimal(0)
     abstentions = 0
+    reviewed = 0
     for entry in summary["runs"]:
         raw = (folder / entry["artifact"]).read_bytes()
         assert hashlib.sha256(raw).hexdigest() == entry["sha256"]
@@ -61,6 +83,22 @@ def test_live_batches_preserve_provenance_failures_and_accounting(name, revision
         if entry["case_id"] == "dev-06":
             assert entry["expected_outcome"] == "inconclusive"
             abstentions += report.outcome == "inconclusive"
+            if expected_reviewed:
+                # Preserve the offline review, not an automated claim of semantic correctness.
+                assert entry["abstention_review_pass"] is (entry["system"] == "A")
+                reviewed += entry["abstention_review_pass"]
+        if expected_reviewed:
+            previous = json.loads(
+                (
+                    ROOT / "evals/results/2026-09-13-baseline-smoke-v2" / entry["artifact"]
+                ).read_text()
+            )
+            for current_event, previous_event in zip(run["trace"], previous["trace"], strict=True):
+                assert {k: v for k, v in current_event.items() if k != "elapsed_ms"} == {
+                    k: v for k, v in previous_event.items() if k != "elapsed_ms"
+                }
+            assert usage["input_tokens"] == previous["usage"]["input_tokens"]
     assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal(expected_cost)
     assert total <= Decimal(summary["allowance_usd"])
-    assert abstentions == summary["correct_abstentions"] == 0
+    assert abstentions == summary.get("reported_abstentions", 0) == expected_labels
+    assert reviewed == summary["correct_abstentions"] == expected_reviewed
