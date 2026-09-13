@@ -149,6 +149,14 @@ async def test_replay_takes_a_snapshot_and_refuses_label_fields():
         EvidenceTools(InvestigationScope(**SCOPE), records=records)
 
 
+@pytest.mark.parametrize("query", ["What caused the search timeouts?", "timeouts"])
+async def test_runbook_section_ids_match_without_common_word_noise(tools, query):
+    result = await tools.search_runbooks(query=query, limit=1)
+    assert result.items[0].evidence_id == "runbook:timeouts"
+    empty = await tools.search_runbooks(query="what is the")
+    assert empty.items == [] and empty.error is None
+
+
 async def test_runbooks_are_ranked_versioned_and_do_not_accept_paths(tools):
     first = await tools.search_runbooks(query="connection pool exhaustion", limit=1)
     assert first.error is None

@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-13T12:23:26.526775+00:00",
+  "question": "Why did checkout begin returning 504 responses?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "57865698dfacda4301c46a1af5e4c1d89453a60715aca167b385d872ca257814",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "outcome": "supported",
+    "observations": [
+      {
+        "claim": "Checkout service began returning 504 responses due to inventory read timeouts after 5000ms.",
+        "evidence_ids": [
+          "dev-01:04"
+        ]
+      },
+      {
+        "claim": "Inventory service request r101 handler completed in 5340ms, exceeding the 5000ms deadline set by checkout service.",
+        "evidence_ids": [
+          "dev-01:05"
+        ]
+      },
+      {
+        "claim": "Inventory service accepted the request and performed a database query quickly (4ms), but overall handling took longer than checkout's deadline.",
+        "evidence_ids": [
+          "dev-01:02",
+          "dev-01:03",
+          "dev-01:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "Inventory service request handling took longer than the 5000ms deadline expected by checkout, causing checkout to timeout and return 504 errors.",
+      "evidence_ids": [
+        "dev-01:04",
+        "dev-01:05"
+      ]
+    },
+    "alternatives": [],
+    "missing_evidence": [
+      "Detailed inventory service logs explaining why the request handling took 5340ms",
+      "Checkout service logs before 10:00:01Z to see if timeouts started exactly at 10:00:06Z"
+    ],
+    "suggested_checks": [
+      "Check inventory service internal processing and resource usage around 10:00:06Z",
+      "Review network latency and connectivity between checkout and inventory services",
+      "Examine database performance and load during the incident timeframe"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "212d159d009d289b65b5e6531387e4b6b25bff0393b7899a02927543fcdf3079",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-01:06",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "health probe status=200; elapsed_ms=2",
+              "timestamp": "2026-01-01T10:00:07Z"
+            }
+          },
+          {
+            "evidence_id": "dev-01:05",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "WARNING",
+              "message": "request r101 handler completed in 5340ms; response_write=client_disconnected",
+              "timestamp": "2026-01-01T10:00:06.341000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-01:04",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request r101 inventory read timed out after 5000ms; status=504",
+              "timestamp": "2026-01-01T10:00:06Z"
+            }
+          },
+          {
+            "evidence_id": "dev-01:03",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "request r101 database query completed in 4ms",
+              "timestamp": "2026-01-01T10:00:01.005000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-01:02",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "request r101 accepted; cache=miss",
+              "timestamp": "2026-01-01T10:00:01.001000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-01:01",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "INFO",
+              "message": "request r101 started; dependency=inventory; deadline_ms=5000",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.34070800757035613
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 918,
+    "output_tokens": 276,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00080880",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00496680",
+  "input_token_reservation": 8321,
+  "elapsed_ms": 4339.128042018274,
+  "provenance": {
+    "case_id": "dev-01",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "92be25b4182588e09896790dbe03b2409244cc8c16ba773c7c748d1b21081f0d",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "e4edf8bdc33e5df6f666518ee146f74a46058e12",
+    "code_dirty": false,
+    "implementation_sha256": "e7cb6805488f887eda42ed375ea6c78ef2be15a3b555e26cd667b88d5fc509a4"
+  }
+}

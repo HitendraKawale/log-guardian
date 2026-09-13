@@ -141,6 +141,20 @@ async def test_invalid_reports_fail_without_losing_usage(change):
     assert result["report"] is None and result["usage"]["input_tokens"] == 100
 
 
+@pytest.mark.parametrize("system", ["A", "B"])
+async def test_sdk_receives_telemetry_and_causal_evidence_policy(system):
+    # This checks prompt transport, not whether a live model follows the policy.
+    result, requests = await execute(completion(), system=system)
+    policy = requests[0]["messages"][0]["content"]
+    assert "Missing telemetry is not evidence of an application failure" in policy
+    assert "Do not infer a request-path dependency from service names" in policy
+    assert "a successful health probe does not establish general service health" in policy
+    assert (
+        result["prompt_sha256"]
+        != "57865698dfacda4301c46a1af5e4c1d89453a60715aca167b385d872ca257814"
+    )
+
+
 async def test_empty_evidence_can_produce_explicit_inconclusive_report():
     body = {
         "outcome": "inconclusive",

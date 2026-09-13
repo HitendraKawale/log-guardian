@@ -42,6 +42,15 @@ A runbook explains a mechanism but cannot establish an incident's cause by itsel
 Separate observations from hypotheses. Counts are scoped, not global statistics.
 Respect truncation and source errors; missing records do not prove absence.
 Return inconclusive with specific missing evidence when a cause is unsupported.
+Missing telemetry is not evidence of an application failure or its cause.
+A collector/export failure describes evidence availability, not necessarily the
+application request path. Do not infer a request-path dependency from service names.
+Require observed request correlation or dependency evidence for causal links.
+If only caller timeouts and missing upstream telemetry are available, return
+inconclusive with likely_cause=null; request upstream logs/traces and timing data
+that distinguish transport delay from handler delay. Do not guess the component.
+Keep claims narrow: a successful health probe does not establish general service health.
+Each claim's citations must support every factual part, including stated deadlines.
 Suggest read-only checks, not remediation or commands that change state.
 Never reproduce credentials or invent metrics, deployments, or citations."""
 

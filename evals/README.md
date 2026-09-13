@@ -2,7 +2,7 @@
 
 Version `1.0.0` contains eight development cases, sixteen held-out cases, and 169 log observations. It supports investigation evaluation, not per-log anomaly classification.
 
-These are AI-assisted, explicitly authored engineering fixtures. They are not customer incidents, operator-labeled production data, BGL excerpts, or results from the live sandbox. Expected diagnoses were authored separately from observations, not inferred from the old anomaly scorer. No model has been evaluated against this corpus yet.
+These are AI-assisted, explicitly authored engineering fixtures. They are not customer incidents, operator-labeled production data, BGL excerpts, or results from the live sandbox. Expected diagnoses were authored separately from observations, not inferred from the old anomaly scorer. The [first live development smoke evaluation](results/2026-09-13-baseline-smoke/README.md) contains four A/B requests on two cases. Both systems failed the required abstention; no held-out evaluation has run.
 
 ## Run the checks
 
@@ -52,7 +52,15 @@ The runner limits execution to 120 seconds, evidence to 64 KiB, and requested ou
 
 Price estimates use the dated table in `app/investigation_agent.py`. The official model page checked on 2026-09-13 lists $0.40 input, $0.10 cached input, and $1.60 output per million tokens. Returned cached counts receive the discount. If the provider omits cache details, the estimate assumes no discount. Recheck prices and model availability before live evaluation.
 
-Artifacts include the model requested and returned, SDK version, prompt/schema hash, code revision and implementation digest, case and corpus hashes, tool arguments and redacted evidence snapshots, latency, usage, limits, and the dated price table. Dry runs contain no report. Scripted HTTP tests exercise the real SDK but are not live quality or cost measurements. No aggregate baseline score or live example has been published yet.
+Artifacts include the model requested and returned, SDK version, prompt/schema hash, code revision and implementation digest, case and corpus hashes, tool arguments and redacted evidence snapshots, latency, usage, limits, and the dated price table. Dry runs contain no report. Scripted HTTP tests exercise the real SDK but are not live quality or cost measurements. The [recorded development smoke results](results/2026-09-13-baseline-smoke/README.md) preserve all four original reports, including two semantic failures. They are not a complete scorecard or proof of production reliability.
+
+### Offline correction candidate
+
+After the first smoke evaluation, lexical retrieval now ignores common question words and includes stable section IDs in matching. The recorded question "What caused the search timeouts?" now retrieves `timeouts` first; stop-word-only queries return no matches. Retrieval remains lexical, with no stemming, embeddings, or case-specific routing.
+
+The shared prompt now distinguishes unavailable telemetry from application failures, requires evidence for request-path dependencies, and warns against health-probe generalizations. These are general instructions, not a rule that forces an outcome based on a case ID or log keyword. Tests verify retrieval and that the SDK receives the policy; they do not prove the model follows it.
+
+The original four reports and their hashes remain unchanged. The prompt hash and implementation digest identify this new candidate. Prompt and retrieval changed together, so a future comparison cannot attribute improvement to either change alone. No paid run has evaluated this candidate yet; step 6 remains open.
 
 Sources: [SDK 2.11.0 configuration](https://github.com/openai/openai-python/blob/v2.11.0/README.md), [SDK API](https://github.com/openai/openai-python/blob/v2.11.0/api.md), [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs), and [model snapshots and pricing](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
 
