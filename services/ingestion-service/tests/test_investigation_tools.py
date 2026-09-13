@@ -82,6 +82,7 @@ async def test_summary_counts_full_scope_not_first_page(tools):
         {"services": []},
         {"services": ["checkout", "checkout"]},
         {"start": "2026-01-01T10:00:00"},
+        {"start": str(int(START.timestamp()))},
         {"end": START - timedelta(seconds=1)},
         {"path": "../../evals/labels.jsonl"},
     ],

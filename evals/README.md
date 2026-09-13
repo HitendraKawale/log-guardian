@@ -23,6 +23,39 @@ Success exits 0. Invalid data or missing files exit 1 with an error on stderr. I
 
 CI runs the evaluation tests as their own matrix entry. The tests validate the checked-in corpus and mutate small independent examples to exercise rejection behavior. They do not call a model or consume API credits.
 
+## Run the A/B baselines
+
+The runner uses the ingestion service's tools and report schema. Install the shared environment with `make install`; unlike the validator, the runner requires the service dependencies, including pinned `openai==2.11.0`.
+
+Inspect a development case without a provider key or network request:
+
+```bash
+.venv/bin/python evals/run.py --system B --case dev-01 \
+  --model gpt-4.1-mini-2025-04-14 --max-cost-usd 0.10 --dry-run
+```
+
+A uses one log query. B always uses a log query, a full-scope summary, and runbook retrieval using the first 512 characters of the sanitized question. Each then makes exactly one SDK request. Neither is an adaptive agent. The model receives evidence as tool messages, not system instructions.
+
+Live execution requires separate owner approval, `OPENAI_API_KEY`, a clean committed worktree, `--allow-live`, and an explicit per-run allowance. `--model` can also come from `LLM_MODEL`; there is no model default. The only currently supported snapshot is `gpt-4.1-mini-2025-04-14`. Missing credentials never produce a fabricated report. The CLI uses the official API endpoint, not an environment-supplied proxy URL.
+
+After approval, replace `--dry-run` with `--allow-live`. Add `--output path/to/new-run.json` to preserve an artifact; its parent directory must exist. Existing paths are refused before any provider request. Without `--output`, the command emits JSON on stdout. Exit codes are 0 for a completed report or dry run, 1 for a recorded run failure, and 2 for invalid configuration or an unavailable output path. An interrupted process can leave an empty reserved output file; do not present it as a completed run. Save live artifacts outside the worktree until the evaluation batch finishes: untracked output files inside the repo would make the next invocation fail its clean-worktree check.
+
+The CLI selects only development case IDs from its fixed corpus location. It has no fixture-path option and does not open labels or held-out evidence. A run artifact records authored incident provenance separately from live, scripted, or dry-run model execution.
+
+### Reports, failures, and accounting
+
+Reports contain observations, a supported likely cause or an inconclusive outcome, alternatives, missing evidence, and suggested read-only checks. Every finding requires citations from successful evidence results. A likely cause cannot cite only a runbook or an empty summary. Citation validation establishes membership, not whether a claim follows from its evidence; semantic review remains required.
+
+Invalid reports, refusals, truncated model outputs, model mismatches, and provider errors remain failures. Raw rejected output and provider error bodies are not exported. Returned usage is retained when report validation fails. Missing usage or an ambiguous failed request produces null usage/cost, not zero. SDK retries are disabled. The baseline does not attempt report repair, keeping the comparison to one request.
+
+The runner limits execution to 120 seconds, evidence to 64 KiB, and requested output to 1,024 tokens. The tool-level limits still apply. Before a provider request, it reserves an estimate using serialized input bytes plus 4,096 protocol-overhead tokens and the output ceiling, without a cache discount. This deliberately conservative byte-based estimate is not a billing guarantee, account-wide ledger, or permission for public paid execution. Reported cost above the allowance is flagged after the response; that cannot undo a charge already incurred.
+
+Price estimates use the dated table in `app/investigation_agent.py`. The official model page checked on 2026-09-13 lists $0.40 input, $0.10 cached input, and $1.60 output per million tokens. Returned cached counts receive the discount. If the provider omits cache details, the estimate assumes no discount. Recheck prices and model availability before live evaluation.
+
+Artifacts include the model requested and returned, SDK version, prompt/schema hash, code revision and implementation digest, case and corpus hashes, tool arguments and redacted evidence snapshots, latency, usage, limits, and the dated price table. Dry runs contain no report. Scripted HTTP tests exercise the real SDK but are not live quality or cost measurements. No aggregate baseline score or live example has been published yet.
+
+Sources: [SDK 2.11.0 configuration](https://github.com/openai/openai-python/blob/v2.11.0/README.md), [SDK API](https://github.com/openai/openai-python/blob/v2.11.0/api.md), [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs), and [model snapshots and pricing](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
+
 ## Files and separation
 
 | File | Consumer | Contents |
