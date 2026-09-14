@@ -7,6 +7,9 @@
   const authHeaders = window.LG.authHeaders;
   const announce = window.LG.announce;
 
+  const RECORDED_URL = window.LG_RECORDED_URL || null;
+  let recordedRuns = new Map();
+
   let selected = null;
   let pollTimer = null;
   let eventCursor = 0;
@@ -35,10 +38,39 @@
     return node;
   }
 
+  if (RECORDED_URL) {
+    const banner = element(
+      "p",
+      "callout recorded-banner",
+      "Recorded demo: these are preserved live investigation artifacts. " +
+        "Nothing on this page executes a model or contacts a backend."
+    );
+    document.querySelector("#view-investigations").prepend(banner);
+    const form = $("inv-form");
+    for (const control of form.querySelectorAll("input, select, button")) {
+      control.disabled = true;
+    }
+    $("inv-form-msg").textContent = "Live execution is disabled in the recorded demo.";
+  }
+
+
   // --- history list ---------------------------------------------------------
   async function loadList() {
     const list = $("inv-list");
     let runs;
+    if (RECORDED_URL) {
+      try {
+        const res = await fetch(RECORDED_URL);
+        const manifest = await res.json();
+        recordedRuns = new Map(manifest.runs.map((run) => [run.id, run]));
+        runs = manifest.runs;
+      } catch {
+        list.replaceChildren(element("li", "empty", "Could not load recorded runs."));
+        return;
+      }
+      renderList(runs, list);
+      return;
+    }
     try {
       const res = await fetch(`${API}/investigations`, { headers: authHeaders() });
       if (res.status === 503) {
@@ -57,6 +89,10 @@
       list.replaceChildren(element("li", "empty", "Could not load investigations."));
       return;
     }
+    renderList(runs, list);
+  }
+
+  function renderList(runs, list) {
     if (!runs.length) {
       list.replaceChildren(element("li", "empty", "No investigations yet."));
       return;
@@ -91,6 +127,12 @@
     $("inv-detail-empty").hidden = true;
     $("inv-detail").hidden = false;
     $("inv-report-section").hidden = true;
+    if (RECORDED_URL) {
+      const run = recordedRuns.get(id);
+      for (const event of run.events) appendEvent(event);
+      renderRun(run);
+      return;
+    }
     await refreshDetail();
     pollTimer = setInterval(refreshDetail, 1000);
   }

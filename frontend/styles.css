@@ -240,3 +240,5 @@ table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
   main { padding: 12px; }
   .logs { display: block; overflow-x: auto; }
 }
+.inv-form input, .inv-form select { width: 100%; min-width: 0; box-sizing: border-box; }
+.inv-side, .inv-main { min-width: 0; }
