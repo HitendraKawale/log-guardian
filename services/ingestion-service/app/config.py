@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # execution entirely; there is no unauthenticated investigation mode.
     investigation_api_key: str = ""
 
+    # Demo-only Prometheus base URL for the fixed-template metric tool. Empty
+    # disables the tool (it reports source_unavailable).
+    prometheus_url: str = ""
+
     # Per-client-IP request cap per minute. 0 disables rate limiting.
     rate_limit_per_minute: int = 0
 

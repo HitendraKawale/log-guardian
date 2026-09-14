@@ -45,6 +45,37 @@ class LogQuery(InvestigationScope):
     limit: int = Field(50, strict=True, ge=1, le=50)
 
 
+class MetricQuery(BaseModel):
+    """Fixed-template metric read; names map to server-owned queries, never PromQL."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    service: Annotated[
+        str, Field(strict=True, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._-]+$")
+    ]
+    metric_name: Literal["request_rate", "error_rate", "latency_p95"]
+    start: AwareDatetime
+    end: AwareDatetime
+
+    @field_validator("start", "end", mode="before")
+    @classmethod
+    def require_timestamp(cls, value):
+        if not isinstance(value, str | datetime):
+            raise ValueError("Expected an offset-aware ISO timestamp")
+        return datetime.fromisoformat(value) if isinstance(value, str) else value
+
+    @field_validator("start", "end")
+    @classmethod
+    def utc(cls, value: datetime) -> datetime:
+        return value.astimezone(UTC)
+
+    @model_validator(mode="after")
+    def check_window(self) -> Self:
+        if not timedelta(0) < self.end - self.start <= timedelta(hours=1):
+            raise ValueError("Window must span more than zero and at most one hour")
+        return self
+
+
 class RunbookQuery(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -105,12 +136,12 @@ class InvestigationReport(BaseModel):
 
 class EvidenceItem(BaseModel):
     evidence_id: str
-    kind: Literal["log", "summary", "runbook"]
+    kind: Literal["log", "summary", "runbook", "metric"]
     content: dict[str, Any]
 
 
 class EvidenceBatch(BaseModel):
-    source: Literal["replay", "database", "runbooks"]
+    source: Literal["replay", "database", "runbooks", "metrics"]
     version: str | None = None
     start: datetime | None = None
     end: datetime | None = None

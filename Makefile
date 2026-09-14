@@ -69,6 +69,18 @@ train: ## Train the model on synthetic data and register it
 retrain: ## Retrain on synthetic + collected feedback (set INGESTION_URL)
 	$(PY) ml/training/retrain.py
 
+demo-up: ## Start the minimal demo stack (no Kafka/Grafana/Kubernetes)
+	docker compose -f infrastructure/docker/demo-compose.yml up -d --build
+
+demo-down: ## Stop the minimal demo stack
+	docker compose -f infrastructure/docker/demo-compose.yml down
+
+demo-scenario: ## Owner-operated fault/recovery scenario against the demo stack
+	$(PY) demo/run_scenario.py
+
+test-demo: ## Isolated in-process sandbox fault/recovery checks
+	cd demo && ../$(PY) -m pytest
+
 up: ## Build and start the full stack with Docker Compose
 	$(COMPOSE) up --build -d
 

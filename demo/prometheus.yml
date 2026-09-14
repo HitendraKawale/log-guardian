@@ -1,0 +1,9 @@
+# Demo-only Prometheus configuration. The two base monitoring configurations
+# (monitoring/ and infrastructure/kubernetes/monitoring-config/) are unchanged.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: demo-apps
+    static_configs:
+      - targets: ["checkout:9001", "inventory:9001"]

@@ -23,12 +23,22 @@ from .investigation_schemas import (
     EvidenceItem,
     InvestigationScope,
     LogQuery,
+    MetricQuery,
     ReplayLog,
     RunbookQuery,
 )
 from .models import Log
 
 MAX_RESULT_BYTES = 16_384
+# Server-owned metric templates; the model chooses a name, never query text.
+_METRIC_TEMPLATES = {
+    "request_rate": 'sum(rate(demo_requests_total{{service="{service}"}}[1m]))',
+    "error_rate": 'sum(rate(demo_requests_total{{service="{service}",status=~"5.."}}[1m]))',
+    "latency_p95": (
+        "histogram_quantile(0.95, "
+        'sum(rate(demo_request_seconds_bucket{{service="{service}"}}[1m])) by (le))'
+    ),
+}
 RUNBOOK_PATH = Path(__file__).resolve().parents[1] / "runbooks" / "operations.md"
 _RUNBOOK_STOP_WORDS = frozenset(
     "a an and are as at be been by did do does for from how in is it of on or "
@@ -85,6 +95,7 @@ class EvidenceTools:
         records=None,
         session: AsyncSession | None = None,
         runbook_path: Path = RUNBOOK_PATH,
+        prometheus_url: str | None = None,
     ):
         if (records is None) == (session is None):
             raise ValueError("Provide exactly one replay or database source")
@@ -99,6 +110,7 @@ class EvidenceTools:
             raise ValueError("Duplicate replay evidence IDs")
         self.source = "replay" if self.records is not None else "database"
         self.runbook_path = runbook_path
+        self.prometheus_url = prometheus_url
 
     def _request(self, schema, arguments, source):
         try:
@@ -211,6 +223,52 @@ class EvidenceTools:
         identity = hashlib.sha256(snapshot.encode()).hexdigest()
         item = EvidenceItem(evidence_id=f"summary:{identity}", kind="summary", content=content)
         return bounded_batch(self.source, [item], scope=query)
+
+    async def read_metric_series(self, **arguments) -> EvidenceBatch:
+        """Bounded metric read from the demo Prometheus; absent unless configured."""
+        query = self._request(MetricQuery, arguments, "metrics")
+        if isinstance(query, EvidenceBatch):
+            return query
+        if (
+            query.service not in self.scope.services
+            or query.start < self.scope.start
+            or query.end > self.scope.end
+        ):
+            return EvidenceBatch(source="metrics", error="scope_violation")
+        if self.prometheus_url is None:
+            return EvidenceBatch(source="metrics", error="source_unavailable")
+        import httpx
+
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    f"{self.prometheus_url}/api/v1/query_range",
+                    params={
+                        "query": _METRIC_TEMPLATES[query.metric_name].format(service=query.service),
+                        "start": query.start.timestamp(),
+                        "end": query.end.timestamp(),
+                        "step": "15s",
+                    },
+                )
+                response.raise_for_status()
+                payload = response.json()
+        except (httpx.HTTPError, ValueError):
+            return EvidenceBatch(source="metrics", error="source_unavailable")
+        if payload.get("status") != "success":
+            return EvidenceBatch(source="metrics", error="source_unavailable")
+        series = payload["data"].get("result", [])
+        points = series[0]["values"] if series else []
+        content = {
+            "service": query.service,
+            "metric": query.metric_name,
+            "step_seconds": 15,
+            "points": [[float(ts), value] for ts, value in points[:400]],
+        }
+        identity = hashlib.sha256(
+            (json.dumps(content, sort_keys=True) + query.model_dump_json()).encode()
+        ).hexdigest()
+        item = EvidenceItem(evidence_id=f"metric:{identity[:32]}", kind="metric", content=content)
+        return bounded_batch("metrics", [item])
 
     async def search_runbooks(self, **arguments) -> EvidenceBatch:
         query = self._request(RunbookQuery, arguments, "runbooks")

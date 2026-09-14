@@ -1,0 +1,243 @@
+{
+  "captured_at": "2026-09-14T03:34:44.399251+00:00",
+  "origin": "live-demo",
+  "scope": {
+    "services": [
+      "checkout",
+      "inventory"
+    ],
+    "start": "2026-09-14T03:34:37.415936+00:00",
+    "end": "2026-09-14T03:34:44.390496+00:00"
+  },
+  "question": "Why did checkout requests start failing?",
+  "logs": [
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-0 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:37.494074"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request ok-0 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:37.525164"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-0 completed in 53ms; status=200",
+      "timestamp": "2026-09-14T03:34:37.546396"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-1 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:37.776182"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request ok-1 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:37.805226"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-1 completed in 57ms; status=200",
+      "timestamp": "2026-09-14T03:34:37.831212"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-2 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:38.059254"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request ok-2 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:38.091613"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-2 completed in 59ms; status=200",
+      "timestamp": "2026-09-14T03:34:38.114583"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-3 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:38.342862"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request ok-3 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:38.373909"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-3 completed in 56ms; status=200",
+      "timestamp": "2026-09-14T03:34:38.395332"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-4 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:38.624156"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request ok-4 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:38.654092"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order ok-4 completed in 57ms; status=200",
+      "timestamp": "2026-09-14T03:34:38.677415"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order fault-0 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:38.907001"
+    },
+    {
+      "service": "checkout",
+      "level": "ERROR",
+      "message": "order fault-0 inventory read timed out after 1000ms; status=504",
+      "timestamp": "2026-09-14T03:34:40.020748"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order fault-0 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:40.313192"
+    },
+    {
+      "service": "checkout",
+      "level": "ERROR",
+      "message": "order fault-0 inventory read timed out after 1000ms; status=504",
+      "timestamp": "2026-09-14T03:34:41.367551"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order fault-0 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:41.628129"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request fault-0 completed in 3002ms; available=42",
+      "timestamp": "2026-09-14T03:34:41.951331"
+    },
+    {
+      "service": "checkout",
+      "level": "ERROR",
+      "message": "order fault-0 inventory read timed out after 1000ms; status=504",
+      "timestamp": "2026-09-14T03:34:42.687757"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-0 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:42.927882"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request recovered-0 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:42.960298"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-0 completed in 63ms; status=200",
+      "timestamp": "2026-09-14T03:34:42.988515"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-1 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:43.219824"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request recovered-1 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:43.266792"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-1 completed in 77ms; status=200",
+      "timestamp": "2026-09-14T03:34:43.294187"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request fault-0 completed in 3003ms; available=42",
+      "timestamp": "2026-09-14T03:34:43.352918"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-2 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:43.524250"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request recovered-2 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:43.555189"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-2 completed in 55ms; status=200",
+      "timestamp": "2026-09-14T03:34:43.576475"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-3 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:43.807282"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request recovered-3 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:43.851023"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-3 completed in 73ms; status=200",
+      "timestamp": "2026-09-14T03:34:43.876850"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-4 started; dependency=inventory; deadline_ms=1000",
+      "timestamp": "2026-09-14T03:34:44.108068"
+    },
+    {
+      "service": "inventory",
+      "level": "INFO",
+      "message": "stock request recovered-4 completed in 0ms; available=42",
+      "timestamp": "2026-09-14T03:34:44.137860"
+    },
+    {
+      "service": "checkout",
+      "level": "INFO",
+      "message": "order recovered-4 completed in 54ms; status=200",
+      "timestamp": "2026-09-14T03:34:44.163057"
+    }
+  ]
+}
