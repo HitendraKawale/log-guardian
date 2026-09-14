@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:49:54.816045+00:00",
+  "question": "Why are valid users receiving 401 responses from the catalog API?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The catalog service logs an error indicating token rejection due to audience mismatch, where the received audience is 'orders-api' but the expected audience is 'catalog-api'.",
+        "evidence_ids": [
+          "dev-07:02"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs from the identity service showing token issuance and validation details",
+      "Logs showing user authentication success or failure events",
+      "Trace or correlation logs linking user requests to token validation failures"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Valid users receive 401 responses from the catalog API because their tokens have an audience claim set to 'orders-api' instead of the expected 'catalog-api', causing the catalog service to reject the tokens.",
+      "evidence_ids": [
+        "dev-07:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the identity service configuration for token audience claims to ensure tokens issued for catalog API have the correct audience 'catalog-api'.",
+      "Verify client applications are requesting tokens with the correct audience for the catalog API.",
+      "Review token validation logic in the catalog service to confirm it correctly checks the audience claim."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "catalog"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "401",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2804590039886534
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "identity"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "401",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.12783403508365154
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "catalog"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "401 Unauthorized",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.23908296134322882
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "catalog"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "token",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "ea070b4857470e73c9617b311d2545ef008579fba20a3692e8cf416472dca7a9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-07:02",
+            "kind": "log",
+            "content": {
+              "service": "catalog",
+              "level": "ERROR",
+              "message": "token rejected; reason=audience_mismatch; received=orders-api expected=catalog-api",
+              "timestamp": "2026-01-01T10:00:01.100000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.44158397940918803
+    }
+  ],
+  "model_requests": 4,
+  "tool_executions": 4,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 919,
+        "output_tokens": 118,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055640",
+      "input_token_reservation": 9208
+    },
+    {
+      "usage": {
+        "input_tokens": 1254,
+        "output_tokens": 52,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00058480",
+      "input_token_reservation": 10287
+    },
+    {
+      "usage": {
+        "input_tokens": 1407,
+        "output_tokens": 51,
+        "cached_input_tokens": 1152
+      },
+      "estimated_cost_usd": "0.00029880",
+      "input_token_reservation": 10850
+    },
+    {
+      "usage": {
+        "input_tokens": 1619,
+        "output_tokens": 225,
+        "cached_input_tokens": 1280
+      },
+      "estimated_cost_usd": "0.00062360",
+      "input_token_reservation": 11653
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 5199,
+    "output_tokens": 446,
+    "cached_input_tokens": 2432
+  },
+  "estimated_cost_usd": "0.00206360",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11653,
+  "estimated_max_cost_usd": "0.00629960",
+  "elapsed_ms": 7073.408916010521,
+  "provenance": {
+    "case_id": "dev-07",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "46cf54cafec3958a1cf8b6ee99c5ef527f79a810c5345aa370970f73f08e9736",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "998ed1382e7a2668a0aede31ae03a86845560484",
+    "code_dirty": false,
+    "implementation_sha256": "12fa6bad02c451730aa494194236f937a3aeb9797c68474b819fd1b9cfdc4144"
+  }
+}

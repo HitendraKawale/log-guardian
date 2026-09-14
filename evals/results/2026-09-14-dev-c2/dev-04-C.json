@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:49:39.724507+00:00",
+  "question": "Why does the API gateway fail every inventory lookup?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The inventory service is up and ready, as indicated by the log 'service registered as inventory.internal; ready=true' at 2026-01-01T10:00:00.500000Z.",
+        "evidence_ids": [
+          "dev-04:04"
+        ]
+      },
+      {
+        "claim": "The inventory service health probe returned status 200 with zero active requests at 2026-01-01T10:00:03Z, indicating it is healthy and responsive.",
+        "evidence_ids": [
+          "dev-04:05"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs from the gateway service related to inventory lookup failures between 2026-01-01T10:00:00Z and 2026-01-01T10:10:00Z",
+      "Logs from the inventory service showing any errors or request handling details during the same period"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check gateway logs specifically for errors or timeouts when calling the inventory service.",
+      "Check inventory service logs for any request handling errors or unusual latency during the incident window.",
+      "Verify network connectivity and configuration between the gateway and inventory services.",
+      "Check for any recent deployment or configuration changes in the gateway or inventory services that could affect communication."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "inventory lookup",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.27904199669137597
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "e26449761484fae6e58f9a5e972cee0abfb228f3c8ae154c369feffbd9598acb",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-04:05",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "health probe status=200; active_requests=0",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:04",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "service registered as inventory.internal; ready=true",
+              "timestamp": "2026-01-01T10:00:00.500000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.35016698529943824
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 916,
+        "output_tokens": 115,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055040",
+      "input_token_reservation": 9197
+    },
+    {
+      "usage": {
+        "input_tokens": 1378,
+        "output_tokens": 265,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00097520",
+      "input_token_reservation": 10699
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2294,
+    "output_tokens": 380,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00152560",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 10699,
+  "estimated_max_cost_usd": "0.00591800",
+  "elapsed_ms": 4851.247791026253,
+  "provenance": {
+    "case_id": "dev-04",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "6a05eddad4aa991f3a558a23709e6b52e9f31c629bdfab3e9c48b1e481fb27f0",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "998ed1382e7a2668a0aede31ae03a86845560484",
+    "code_dirty": false,
+    "implementation_sha256": "12fa6bad02c451730aa494194236f937a3aeb9797c68474b819fd1b9cfdc4144"
+  }
+}
