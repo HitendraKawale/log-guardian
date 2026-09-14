@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:02.789267+00:00",
+  "question": "Why is the shipping worker processing fewer jobs while outbound traffic increases?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The shipping service logs show a warning that the carrier returned HTTP 429 (Too Many Requests) with a retry_after_seconds=30, indicating throttling by the carrier service.",
+        "evidence_ids": [
+          "test-02:01"
+        ]
+      },
+      {
+        "claim": "The shipping service logs indicate a high number of outbound attempts (180) with most being throttled (171), and only 20 jobs processed in the window, showing the shipping service is being rate limited by the carrier.",
+        "evidence_ids": [
+          "test-02:04"
+        ]
+      },
+      {
+        "claim": "The carrier service logs show a warning that the shipping client exceeded its request quota, with an accepted rate of 9 requests per minute, confirming the throttling seen in shipping logs.",
+        "evidence_ids": [
+          "test-02:05"
+        ]
+      },
+      {
+        "claim": "The shipping service logs show a job (sh7) exceeded its 10000ms deadline after immediate retries, indicating delays in processing jobs possibly due to throttling and retry delays.",
+        "evidence_ids": [
+          "test-02:02",
+          "test-02:03",
+          "test-02:06"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed timing and volume metrics of outbound traffic and job processing rates over time",
+      "Correlation logs or traces showing the exact interaction timing between shipping and carrier services"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The shipping worker is processing fewer jobs because it is being throttled by the carrier service, which is enforcing a request quota and returning HTTP 429 responses, causing retries and delays in job processing despite increased outbound traffic attempts.",
+      "evidence_ids": [
+        "test-02:01",
+        "test-02:04",
+        "test-02:05",
+        "test-02:06"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check carrier service quota and rate limiting policies for shipping client",
+      "Monitor retry and backoff behavior in shipping service when receiving 429 responses",
+      "Analyze detailed request and response timing between shipping and carrier services to confirm throttling impact"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "shipping"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "9b43dd15ea5c89e2b0070ecb4c7edfe9580e56cc08eed171c0a499909b216943",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-02:06",
+            "kind": "log",
+            "content": {
+              "service": "shipping",
+              "level": "ERROR",
+              "message": "job sh7 exceeded 10000ms deadline after immediate retries",
+              "timestamp": "2026-01-01T10:00:11Z"
+            }
+          },
+          {
+            "evidence_id": "test-02:04",
+            "kind": "log",
+            "content": {
+              "service": "shipping",
+              "level": "WARNING",
+              "message": "window jobs=20 outbound_attempts=180 throttled=171",
+              "timestamp": "2026-01-01T10:00:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-02:03",
+            "kind": "log",
+            "content": {
+              "service": "shipping",
+              "level": "INFO",
+              "message": "job sh7 retry attempt=2 delay_ms=0",
+              "timestamp": "2026-01-01T10:00:01.002000Z"
+            }
+          },
+          {
+            "evidence_id": "test-02:02",
+            "kind": "log",
+            "content": {
+              "service": "shipping",
+              "level": "INFO",
+              "message": "job sh7 retry attempt=1 delay_ms=0",
+              "timestamp": "2026-01-01T10:00:01.001000Z"
+            }
+          },
+          {
+            "evidence_id": "test-02:01",
+            "kind": "log",
+            "content": {
+              "service": "shipping",
+              "level": "WARNING",
+              "message": "carrier returned 429; retry_after_seconds=30",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.49770798068493605
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "carrier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "7d81904d3db283993282631b44749fcdb33881f7ea7de837b7aeb91333a781b9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-02:05",
+            "kind": "log",
+            "content": {
+              "service": "carrier",
+              "level": "WARNING",
+              "message": "shipping-client exceeded request quota; accepted_per_minute=9",
+              "timestamp": "2026-01-01T10:00:10.100000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.12149999383836985
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 919,
+        "output_tokens": 110,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00054360",
+      "input_token_reservation": 9225
+    },
+    {
+      "usage": {
+        "input_tokens": 1655,
+        "output_tokens": 399,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00130040",
+      "input_token_reservation": 11558
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2574,
+    "output_tokens": 509,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00184400",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11558,
+  "estimated_max_cost_usd": "0.00626160",
+  "elapsed_ms": 5164.450459007639,
+  "provenance": {
+    "case_id": "test-02",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "acd4afac075ecc72d9a2234a385a406bfd8da0913e735241ffea2ebe81a9aa3a",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

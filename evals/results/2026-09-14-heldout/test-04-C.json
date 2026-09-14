@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:31.840830+00:00",
+  "question": "What explains long commit times in the ledger?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The ledger service experienced a commit response that exceeded the 5000ms deadline, resulting in the transaction outcome being unknown to the client.",
+        "evidence_ids": [
+          "test-04:03"
+        ]
+      },
+      {
+        "claim": "The ledger service transaction statements finished quickly in 11ms, but the commit was delayed awaiting completion.",
+        "evidence_ids": [
+          "test-04:01"
+        ]
+      },
+      {
+        "claim": "The database service logged a warning about a WAL (Write-Ahead Log) sync duration of 6100ms and a storage queue depth of 94, indicating a bottleneck in the storage subsystem.",
+        "evidence_ids": [
+          "test-04:02"
+        ]
+      },
+      {
+        "claim": "The database service recorded a transaction commit as durable after 6120ms, confirming the long commit time observed in the ledger service.",
+        "evidence_ids": [
+          "test-04:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed timing correlation between ledger commit requests and database WAL sync operations",
+      "Additional logs or metrics on database storage performance and queue management during the incident"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The long commit times in the ledger are explained by the slow WAL sync duration in the database, which took over 6 seconds, causing the ledger commit response to exceed its deadline.",
+      "evidence_ids": [
+        "test-04:02",
+        "test-04:03",
+        "test-04:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check database storage subsystem health and performance metrics during the incident timeframe",
+      "Investigate causes of high storage queue depth in the database",
+      "Correlate ledger commit request timestamps with database WAL sync logs for further confirmation"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "database",
+          "ledger"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "a6ea338872177737891e2f1ba290a68cf5ad01fd78dcd663c62cba211d99fd75",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-04:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "read-only probe elapsed_ms=2",
+              "timestamp": "2026-01-01T10:00:07.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:04",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "transaction le9 commit durable after 6120ms",
+              "timestamp": "2026-01-01T10:00:07.120000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "WARNING",
+              "message": "WAL sync duration_ms=6100; storage_queue_depth=94",
+              "timestamp": "2026-01-01T10:00:07.100000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:03",
+            "kind": "log",
+            "content": {
+              "service": "ledger",
+              "level": "ERROR",
+              "message": "commit response exceeded 5000ms deadline; transaction outcome unknown to client",
+              "timestamp": "2026-01-01T10:00:06Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:01",
+            "kind": "log",
+            "content": {
+              "service": "ledger",
+              "level": "INFO",
+              "message": "transaction le9 statements finished in 11ms; awaiting commit",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.7661249837838113
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "database",
+          "ledger"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "74348b389a669c1d609ebff50ce88c7273112c7731c8a15e4506c3d73bbf36bc",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:40874b6b9017accc80f9a07fd4604cd4e4b0150f5e43ac047ccec2ef007df737",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "database",
+                  "level": "INFO",
+                  "count": 2
+                },
+                {
+                  "service": "database",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "ledger",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "ledger",
+                  "level": "INFO",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.42100000428035855
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 915,
+        "output_tokens": 120,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055800",
+      "input_token_reservation": 9188
+    },
+    {
+      "usage": {
+        "input_tokens": 1730,
+        "output_tokens": 330,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00122000",
+      "input_token_reservation": 11758
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2645,
+    "output_tokens": 450,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00177800",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11758,
+  "estimated_max_cost_usd": "0.00634160",
+  "elapsed_ms": 4578.730207984336,
+  "provenance": {
+    "case_id": "test-04",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f9e9acf96a2994cfea8a6943de2ebf8c694b59122c8f6670aa39f6f6594d5991",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

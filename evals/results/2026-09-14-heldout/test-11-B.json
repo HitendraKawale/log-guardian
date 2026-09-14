@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:04.577886+00:00",
+  "question": "Does this memory error establish a service outage?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "An ECC single-bit memory error was detected and corrected successfully in the node service at 2026-01-01T10:00:01Z.",
+        "evidence_ids": [
+          "test-11:01"
+        ]
+      },
+      {
+        "claim": "The node service completed a memory scrub with zero uncorrectable errors at 2026-01-01T10:00:02Z.",
+        "evidence_ids": [
+          "test-11:02"
+        ]
+      },
+      {
+        "claim": "The api service showed no errors and had stable worker processes with zero restarts during the period 2026-01-01T10:00:00Z to 2026-01-01T10:10:00Z.",
+        "evidence_ids": [
+          "test-11:03",
+          "test-11:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Service request failure rates or business impact metrics during the period",
+      "Upstream or downstream dependency error logs or traces",
+      "Detailed memory error logs beyond the single-bit corrected error"
+    ],
+    "alternatives": [
+      {
+        "claim": "The corrected single-bit memory error is a benign hardware event that does not establish a service outage by itself.",
+        "evidence_ids": [
+          "test-11:01",
+          "test-11:02",
+          "runbook:benign-errors"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The memory error was corrected successfully and did not cause a service outage in the node or api services during the observed period.",
+      "evidence_ids": [
+        "test-11:01",
+        "test-11:02",
+        "test-11:03",
+        "test-11:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check service request failure rates and latency metrics for the node and api services during the period to confirm no impact.",
+      "Review upstream and downstream dependency logs for correlated errors or outages.",
+      "Monitor for repeated or uncorrectable memory errors that could indicate hardware degradation."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "node",
+          "api"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "04d35d1e095a3f960a77f6554c29ae707fc29d27541ac51f3af10e58f57010f7",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-11:04",
+            "kind": "log",
+            "content": {
+              "service": "api",
+              "level": "INFO",
+              "message": "worker processes unchanged; restart_count=0",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:03",
+            "kind": "log",
+            "content": {
+              "service": "api",
+              "level": "INFO",
+              "message": "window requests=800 errors=0 p95_ms=21",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:02",
+            "kind": "log",
+            "content": {
+              "service": "node",
+              "level": "INFO",
+              "message": "memory scrub completed; uncorrectable_errors=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:01",
+            "kind": "log",
+            "content": {
+              "service": "node",
+              "level": "WARNING",
+              "message": "ECC single-bit memory error detected; correction successful",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2680409816093743
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "node",
+          "api"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "41f00674d0cc14209e3f02a4267c22e176510dfbea5121e0c9d13e6349957be4",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:bcf59f23becfe648ca932fb0ce869461db40abff16c2b94f519c99d07a7c2329",
+            "kind": "summary",
+            "content": {
+              "total": 4,
+              "groups": [
+                {
+                  "service": "api",
+                  "level": "INFO",
+                  "count": 2
+                },
+                {
+                  "service": "node",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "node",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.15166698722168803
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Does this memory error establish a service outage?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:benign-errors",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish expected rejections from outages",
+              "body": "Error severity and a word such as failure are triage hints, not a diagnosis. Compare business declines, unsupported routes, corrected hardware events, and transport failures with successful requests in the same bounded scope.\n\nRead actual counts and the period they describe. A sample containing only failures does not establish a system-wide failure rate. Successful requests can contradict a claim of total unavailability without proving that every customer or route is unaffected.\n\nDescribe the supported explanation narrowly. A corrected error does not guarantee that hardware will remain healthy. Independent failures in two dependencies do not automatically have a common root cause."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          }
+        ],
+        "truncated": true,
+        "error": null
+      },
+      "elapsed_ms": 1.203541993163526
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1905,
+    "output_tokens": 368,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00135080",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00672480",
+  "input_token_reservation": 12716,
+  "elapsed_ms": 3758.0432500108145,
+  "provenance": {
+    "case_id": "test-11",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "4722ff5abf568740effb7fe702a3e77cf3ec45c01d3470f585f5d7d51de4d5c5",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

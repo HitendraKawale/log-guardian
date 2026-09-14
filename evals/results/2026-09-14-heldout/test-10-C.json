@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:54.824066+00:00",
+  "question": "Why does the export client reject the object-store connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "failed",
+  "error": "duplicate_call",
+  "report": null,
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "exporter"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "reject",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.35320804454386234
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "object-store"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "reject",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.15962496399879456
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "exporter"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.4688750486820936
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "object-store"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3042909665964544
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "exporter"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "connection",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3352909698151052
+    }
+  ],
+  "model_requests": 4,
+  "tool_executions": 5,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 919,
+        "output_tokens": 120,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055960",
+      "input_token_reservation": 9210
+    },
+    {
+      "usage": {
+        "input_tokens": 1256,
+        "output_tokens": 120,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00069440",
+      "input_token_reservation": 10300
+    },
+    {
+      "usage": {
+        "input_tokens": 1593,
+        "output_tokens": 52,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00072040",
+      "input_token_reservation": 11388
+    },
+    {
+      "usage": {
+        "input_tokens": 1746,
+        "output_tokens": 52,
+        "cached_input_tokens": 1536
+      },
+      "estimated_cost_usd": "0.00032080",
+      "input_token_reservation": 11946
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 5514,
+    "output_tokens": 344,
+    "cached_input_tokens": 1536
+  },
+  "estimated_cost_usd": "0.00229520",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11946,
+  "estimated_max_cost_usd": "0.00641680",
+  "elapsed_ms": 6489.351624972187,
+  "provenance": {
+    "case_id": "test-10",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "fee4925c6285fc62a5077bf3f19d169c461896ff1a2c0aaf0cabf54e18197463",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

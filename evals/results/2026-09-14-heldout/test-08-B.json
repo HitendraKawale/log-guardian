@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:22.042583+00:00",
+  "question": "Why did report downloads start failing TLS validation?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The reports service logged an error indicating TLS verification failed due to an expired certificate from archive.internal.",
+        "evidence_ids": [
+          "test-08:01"
+        ]
+      },
+      {
+        "claim": "The archive service was serving a certificate that expired on 2025-12-31T23:59:59Z, which is before the incident time.",
+        "evidence_ids": [
+          "test-08:02"
+        ]
+      },
+      {
+        "claim": "The reports service clock was synchronized and accurate at the time of the incident, so the TLS failure was not due to client clock skew.",
+        "evidence_ids": [
+          "test-08:03"
+        ]
+      },
+      {
+        "claim": "The archive service's TCP listener was ready, but TLS handshakes aborted before HTTP communication could occur.",
+        "evidence_ids": [
+          "test-08:04"
+        ]
+      },
+      {
+        "claim": "The reports service received no HTTP status from the archive service, consistent with TLS handshake failure.",
+        "evidence_ids": [
+          "test-08:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Report downloads started failing TLS validation because the archive service's TLS certificate had expired before the incident time, causing the reports service to reject the TLS handshake.",
+      "evidence_ids": [
+        "test-08:01",
+        "test-08:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify the certificate renewal process for the archive service to prevent future expiration.",
+      "Check for any automated alerts or monitoring related to certificate expiry.",
+      "Confirm that the reports service correctly validates TLS certificates and logs detailed errors on failure."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "reports",
+          "archive"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "4b6c0de8059be1e5034fce1854e5b36c542ca01a8bc3bffc7823a5675c60f21a",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-08:05",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "WARNING",
+              "message": "no HTTP status received from archive",
+              "timestamp": "2026-01-01T10:00:11.300000Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:04",
+            "kind": "log",
+            "content": {
+              "service": "archive",
+              "level": "INFO",
+              "message": "TCP listener ready; incoming TLS handshakes abort before HTTP",
+              "timestamp": "2026-01-01T10:00:11.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:01",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "ERROR",
+              "message": "TLS verification failed for archive.internal: certificate has expired",
+              "timestamp": "2026-01-01T10:00:11Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:03",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "INFO",
+              "message": "client_clock_utc=2026-01-01T10:00:10Z; clock_sync_offset_ms=1",
+              "timestamp": "2026-01-01T10:00:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:02",
+            "kind": "log",
+            "content": {
+              "service": "archive",
+              "level": "INFO",
+              "message": "serving certificate not_after=2025-12-31T23:59:59Z",
+              "timestamp": "2026-01-01T10:00:08Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2996249822899699
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "reports",
+          "archive"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "0c1c68d3171d039827f3fa4a0e968aac6249ef1c7bfc498b5acd15f1edc34223",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:b13a558b7504e045aab547a2f21b3ef31a5b4cb7ec49d39bcf0db867c98b6404",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "archive",
+                  "level": "INFO",
+                  "count": 2
+                },
+                {
+                  "service": "reports",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "reports",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "reports",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.1538750366307795
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why did report downloads start failing TLS validation?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.2727919965982437
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 2080,
+    "output_tokens": 303,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00131680",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00699440",
+  "input_token_reservation": 13390,
+  "elapsed_ms": 3042.1344169881195,
+  "provenance": {
+    "case_id": "test-08",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "51324f4ddbdd381340bf676cb3d9a9be602a26cf2586a6e18e15fae33e855f1d",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

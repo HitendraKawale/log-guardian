@@ -1,0 +1,607 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T02:56:11.912048+00:00",
+  "question": "Why do stock lookups fail even though inventory finishes quickly?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Gateway service health requests complete successfully with low latency (1 ms) during the incident window.",
+        "evidence_ids": [
+          "test-16:07",
+          "test-16:08",
+          "test-16:09",
+          "test-16:10",
+          "test-16:11",
+          "test-16:12",
+          "test-16:13",
+          "test-16:14"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs or traces of stock lookup requests and their failures",
+      "Inventory service logs showing stock lookup request handling and errors",
+      "Timing data correlating stock lookup requests with inventory service responses"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check logs and traces for stock lookup requests in the gateway and inventory services during the incident window",
+      "Check for errors or timeouts in stock lookup request handling in inventory service",
+      "Check for network or communication issues between gateway and inventory services during the incident window"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "58dcaf2144b04073ccd25c86270160d6726d84ecf5320ab6923570dcb4413d0e",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-16:56",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h51 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:04:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:55",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h50 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:04:15Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:54",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h49 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:04:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:53",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h48 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:04:05Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:52",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h47 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:04:00Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:51",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h46 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:55Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:50",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h45 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:50Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:49",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h44 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:45Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:48",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h43 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:40Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:47",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h42 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:35Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:46",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h41 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:30Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:45",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h40 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:44",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h39 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:43",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h38 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:15Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:42",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h37 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:41",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h36 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:05Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:40",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h35 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:03:00Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:39",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h34 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:55Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:38",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h33 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:50Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:37",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h32 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:45Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:36",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h31 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:40Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:35",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h30 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:35Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:34",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h29 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:30Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:33",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h28 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:32",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h27 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:31",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h26 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:15Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:30",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h25 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:29",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h24 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:05Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:28",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h23 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:02:00Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:27",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h22 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:55Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:26",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h21 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:50Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:25",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h20 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:45Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:24",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h19 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:40Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:23",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h18 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:35Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:22",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h17 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:30Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:21",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h16 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:20",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h15 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:19",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h14 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:15Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:18",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h13 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:17",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h12 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:05Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:16",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h11 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:01:00Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:15",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h10 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:55Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:14",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h9 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:50Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:13",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h8 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:45Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:12",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h7 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:40Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:11",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h6 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:35Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:10",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h5 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:30Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:09",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h4 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:08",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h3 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-16:07",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "health request h2 completed status=200 elapsed_ms=1",
+              "timestamp": "2026-01-01T10:00:15Z"
+            }
+          }
+        ],
+        "truncated": true,
+        "error": null
+      },
+      "elapsed_ms": 2.412125002592802
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 3497,
+    "output_tokens": 190,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00170280",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00903760",
+  "input_token_reservation": 18498,
+  "elapsed_ms": 2126.4152500079945,
+  "provenance": {
+    "case_id": "test-16",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "e2c42a3e47bbc100ea8a8318b1b2834d8e675156b514a47825a32bac7723ab74",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

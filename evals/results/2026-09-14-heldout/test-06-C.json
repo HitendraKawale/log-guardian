@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:01.578502+00:00",
+  "question": "Why does the fulfillment service stop accepting work after a small number of requests?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The fulfillment service logs indicate that it has a connection pool size of 4, with 4 completed requests and 4 total checkouts but 0 total returns, suggesting connections are not being returned to the pool.",
+        "evidence_ids": [
+          "test-06:01"
+        ]
+      },
+      {
+        "claim": "The fulfillment service logs show a warning that a request response was sent but the borrowed connection remains owned by that request, indicating connections are not released properly.",
+        "evidence_ids": [
+          "test-06:02"
+        ]
+      },
+      {
+        "claim": "The fulfillment service logs show a warning about pool waiters=6 and checked_out=4 with no in-flight requests, indicating that requests are waiting for connections but none are available.",
+        "evidence_ids": [
+          "test-06:03"
+        ]
+      },
+      {
+        "claim": "The fulfillment service logs show an error that a request failed acquiring a connection after 1500ms, indicating connection acquisition timeout due to pool exhaustion.",
+        "evidence_ids": [
+          "test-06:05"
+        ]
+      },
+      {
+        "claim": "The database logs show that fulfillment sessions are idle and not in transaction, indicating the database is not overloaded or blocking connections.",
+        "evidence_ids": [
+          "test-06:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "fulfillment service internal metrics on connection pool management",
+      "detailed request traces correlating request lifecycle with connection usage"
+    ],
+    "alternatives": [
+      {
+        "claim": "The issue could be caused by a bug in the fulfillment service that fails to release database connections back to the pool after request completion, leading to pool exhaustion.",
+        "evidence_ids": [
+          "test-06:01",
+          "test-06:02",
+          "test-06:03",
+          "test-06:05"
+        ]
+      },
+      {
+        "claim": "The issue could be caused by a misconfiguration of the connection pool size being too small for the request load, causing requests to wait and eventually fail acquiring connections.",
+        "evidence_ids": [
+          "test-06:01",
+          "test-06:03",
+          "test-06:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The fulfillment service stops accepting work after a small number of requests because it exhausts its database connection pool by not returning connections after use, causing connection acquisition timeouts and request failures.",
+      "evidence_ids": [
+        "test-06:01",
+        "test-06:02",
+        "test-06:03",
+        "test-06:05"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check fulfillment service code for proper connection release after request completion",
+      "Monitor connection pool metrics to confirm connections are returned to the pool",
+      "Review connection pool configuration for appropriate size relative to request load",
+      "Collect detailed request traces to correlate connection usage and request lifecycle"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "fulfillment"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "a23eba4e76bf24ade0feb50e3c8cbd9cc81535760ba0af61426722dc60e86596",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-06:05",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "ERROR",
+              "message": "request f13 failed acquiring connection after 1500ms",
+              "timestamp": "2026-01-01T10:00:02.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:03",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "WARNING",
+              "message": "pool waiters=6 checked_out=4; in_flight_requests=0",
+              "timestamp": "2026-01-01T10:00:01.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:02",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "WARNING",
+              "message": "request f12 response sent but borrowed connection remains owned_by=f12",
+              "timestamp": "2026-01-01T10:00:01.100000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:01",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "INFO",
+              "message": "pool_size=4; completed_requests=4; total_checkouts=4 total_returns=0",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.9771659970283508
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "cff1c016785d6877fa344bf4f7ef57b7e5ae9eb9d18df456ec7ab11454232fbf",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-06:04",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "fulfillment sessions idle=4 idle_in_transaction=0",
+              "timestamp": "2026-01-01T10:00:01.300000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.27704203967005014
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 922,
+        "output_tokens": 111,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00054640",
+      "input_token_reservation": 9233
+    },
+    {
+      "usage": {
+        "input_tokens": 1609,
+        "output_tokens": 520,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00147560",
+      "input_token_reservation": 11432
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2531,
+    "output_tokens": 631,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00202200",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11432,
+  "estimated_max_cost_usd": "0.00621120",
+  "elapsed_ms": 5947.269166004844,
+  "provenance": {
+    "case_id": "test-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "c23f95e1995b66f754bf5b2d3244ec30cb5a56d447dad4809b378b538db24288",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

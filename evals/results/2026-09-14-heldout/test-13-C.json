@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:35.086013+00:00",
+  "question": "Did the cache restart cause the checkout failures?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "failed",
+  "error": "invalid_report",
+  "report": null,
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "cache"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "restart",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "c0a22a8e3239e73311486ab87ca6d509b65746ddf4ee1a32c04cf32c5bc9d3e3",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-13:05",
+            "kind": "log",
+            "content": {
+              "service": "cache",
+              "level": "INFO",
+              "message": "probe after restart returned PONG",
+              "timestamp": "2026-01-01T10:06:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-13:02",
+            "kind": "log",
+            "content": {
+              "service": "cache",
+              "level": "WARNING",
+              "message": "process restarted; local_event_time=10:05:00; reason unavailable",
+              "timestamp": "2026-01-01T10:06:10Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.6339170504361391
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "failure",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.1599579700268805
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "44ec2d4a7809f7e3f35bfea0692d812793328c88e7b83d12bcff651d80af1c73",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-13:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "cache clock offset estimate uncertain by 120s; timestamps are collector receipt times",
+              "timestamp": "2026-01-01T10:06:15Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2833750331774354
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 3,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 917,
+        "output_tokens": 165,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00063080",
+      "input_token_reservation": 9205
+    },
+    {
+      "usage": {
+        "input_tokens": 1607,
+        "output_tokens": 252,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00073880",
+      "input_token_reservation": 11467
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2524,
+    "output_tokens": 417,
+    "cached_input_tokens": 1024
+  },
+  "estimated_cost_usd": "0.00136960",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11467,
+  "estimated_max_cost_usd": "0.00622520",
+  "elapsed_ms": 4830.195415997878,
+  "provenance": {
+    "case_id": "test-13",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "82b514afa622dc44009f362352d05d26c885b17e5f13919666d8b0979e85a980",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}
