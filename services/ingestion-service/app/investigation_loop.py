@@ -45,7 +45,12 @@ TOOLS = [
         },
     }
     for name, description in (
-        ("query_logs", "Read scoped logs; optionally filter a literal substring, at most 50 rows."),
+        (
+            "query_logs",
+            "Read scoped logs, at most 50 rows. Start with no text filter to see all"
+            " evidence; text matches the message field only, as a literal case-sensitive"
+            " substring, and never matches level or service names.",
+        ),
         ("summarize_logs", "Count all scoped logs by service and level, not only a query page."),
         ("search_runbooks", "Search curated operational guidance; not incident evidence."),
     )
