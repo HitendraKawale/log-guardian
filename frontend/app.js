@@ -21,6 +21,16 @@ function authHeaders(extra = {}) {
   return key ? { ...extra, "X-API-Key": key } : extra;
 }
 
+// Shared namespace for the other view scripts.
+window.LG = {
+  apiBase: API_BASE,
+  authHeaders,
+  announce(message) {
+    const region = $("announcer");
+    if (region) region.textContent = message;
+  },
+};
+
 // --- rendering helpers ------------------------------------------------------
 function setStatus(online) {
   $("status-dot").className = "dot " + (online ? "online" : "offline");
@@ -102,15 +112,23 @@ function renderLogs(logs) {
 }
 
 async function submitFeedback(id, isAnomaly) {
+  const msg = $("form-msg");
   try {
-    await fetch(`${API_BASE}/logs/${id}/feedback`, {
+    const res = await fetch(`${API_BASE}/logs/${id}/feedback`, {
       method: "POST",
       headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ is_anomaly: isAnomaly }),
     });
+    if (!res.ok) {
+      msg.textContent = `Feedback for #${id} was not saved (HTTP ${res.status}).`;
+      window.LG.announce(msg.textContent);
+      return;
+    }
+    msg.textContent = "";
     refresh();
   } catch (err) {
-    /* ignore; next refresh will reflect state */
+    msg.textContent = `Feedback for #${id} was not saved (network error).`;
+    window.LG.announce(msg.textContent);
   }
 }
 

@@ -41,6 +41,8 @@ def shots_dir() -> None:
 @pytest.fixture
 def dashboard(page: Page) -> Page:
     page.goto(DASHBOARD)
+    # The logs dashboard now lives in a secondary tab behind the investigations view.
+    page.click('.tab[data-view="logs"]')
     # The page polls every 3s; wait for the first successful round trip rather
     # than sleeping and hoping.
     expect(page.locator("#status-text")).to_have_text("connected", timeout=15_000)
@@ -99,11 +101,12 @@ def test_feedback_button_records_a_label(dashboard: Page):
 
     row = dashboard.locator("#logs-body tr", has_text=marker)
     expect(row).to_be_visible(timeout=15_000)
-    row.locator(".fb-btn").first.click()
+    row.locator(".fb-anom").click()
 
-    # Re-rendered from the API, so the label came back from the database.
-    expect(dashboard.locator("#logs-body tr", has_text=marker)).not_to_contain_text(
-        "?", timeout=15_000
+    # The specific label must round-trip through the API and database, not
+    # merely change the cell away from its unlabeled state.
+    expect(dashboard.locator("#logs-body tr", has_text=marker)).to_contain_text(
+        "labeled: anomaly", timeout=15_000
     )
 
 
