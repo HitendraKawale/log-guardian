@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # header. Empty (the default) leaves the API open for local development.
     api_key: str = ""
 
+    # Investigations API and worker. Empty (the default) disables investigation
+    # execution entirely; there is no unauthenticated investigation mode.
+    investigation_api_key: str = ""
+
     # Per-client-IP request cap per minute. 0 disables rate limiting.
     rate_limit_per_minute: int = 0
 
