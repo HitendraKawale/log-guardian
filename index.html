@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Guardian</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="shield">&#9683;</span>
+      <div>
+        <h1>Log Guardian</h1>
+        <p class="tagline">Evidence-cited log investigations</p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <button class="tab active" data-view="investigations">Investigations</button>
+      <button class="tab" data-view="logs">Logs</button>
+      <button class="tab" data-view="evaluations">Evaluations</button>
+    </nav>
+    <div class="topbar-right">
+      <span id="model-badge" class="model-badge" title="active model"></span>
+      <label class="key-label">API key
+        <input id="api-key" class="key-input" type="password" autocomplete="off" />
+      </label>
+      <div class="status">
+        <span id="status-dot" class="dot"></span>
+        <span id="status-text">connecting&hellip;</span>
+      </div>
+    </div>
+  </header>
+
+  <p id="announcer" class="visually-hidden" role="status" aria-live="polite"></p>
+
+  <main id="view-investigations" class="view">
+    <div class="split">
+      <section class="panel inv-side">
+        <h2>New investigation</h2>
+        <form id="inv-form" class="inv-form">
+          <label>Question
+            <input name="question" required maxlength="2048"
+                   placeholder="Why did checkout begin returning 504 responses?" />
+          </label>
+          <label>Services (comma separated, max 4)
+            <input name="services" required placeholder="checkout, inventory" />
+          </label>
+          <div class="inv-times">
+            <label>From <input name="start" type="datetime-local" step="1" required /></label>
+            <label>To <input name="end" type="datetime-local" step="1" required /></label>
+          </div>
+          <label>System
+            <select name="system">
+              <option value="B" selected>B — fixed retrieval</option>
+              <option value="A">A — logs only</option>
+              <option value="C">C — adaptive</option>
+            </select>
+          </label>
+          <button type="submit">Start investigation</button>
+        </form>
+        <p id="inv-form-msg" class="form-msg" role="alert"></p>
+
+        <div class="panel-head">
+          <h2>History</h2>
+          <button id="inv-reload" class="ghost" type="button">Reload</button>
+        </div>
+        <ul id="inv-list" class="inv-list">
+          <li class="empty">No investigations yet.</li>
+        </ul>
+      </section>
+
+      <section class="panel inv-main">
+        <div id="inv-detail-empty" class="empty-state">
+          <h2>No investigation selected</h2>
+          <p>Start one, or pick a run from the history list. Investigations are
+             disabled until the server has an investigation API key configured.</p>
+        </div>
+        <article id="inv-detail" hidden>
+          <div class="panel-head">
+            <h2 id="inv-question"></h2>
+            <div>
+              <span id="inv-status" class="badge"></span>
+              <button id="inv-cancel" class="ghost danger" type="button" hidden>Cancel</button>
+            </div>
+          </div>
+          <dl class="inv-meta" id="inv-meta"></dl>
+          <div id="inv-error" class="callout danger" hidden></div>
+          <section id="inv-progress">
+            <h3>Tool activity</h3>
+            <ol id="inv-events" class="events"></ol>
+          </section>
+          <section id="inv-report-section" hidden>
+            <h3 id="inv-outcome"></h3>
+            <div id="inv-report" class="report"></div>
+          </section>
+        </article>
+      </section>
+    </div>
+    <aside id="citation-drawer" class="drawer" hidden aria-label="Evidence detail">
+      <div class="panel-head">
+        <h3 id="citation-title">Evidence</h3>
+        <button id="citation-close" class="ghost" type="button">Close</button>
+      </div>
+      <pre id="citation-body" class="citation-body"></pre>
+    </aside>
+  </main>
+
+  <main id="view-logs" class="view" hidden>
+    <section class="stats" id="stats">
+      <div class="card"><span class="label">Logs</span><span class="value" id="stat-total">0</span></div>
+      <div class="card"><span class="label">Anomalies</span><span class="value danger" id="stat-anomalies">0</span></div>
+      <div class="card"><span class="label">Anomaly rate</span><span class="value" id="stat-rate">0%</span></div>
+      <div class="card severity-card">
+        <span class="label">By severity</span>
+        <div class="sevbars" id="sevbars"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Send a test log</h2>
+      <form id="log-form" class="log-form">
+        <input name="service" placeholder="service (e.g. payment-api)" value="payment-api" required />
+        <select name="level">
+          <option>DEBUG</option><option>INFO</option><option selected>WARNING</option>
+          <option>ERROR</option><option>CRITICAL</option>
+        </select>
+        <input name="message" placeholder="message" value="Database connection refused, request failed" required />
+        <button type="submit">Ingest</button>
+      </form>
+      <p id="form-msg" class="form-msg" role="alert"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Recent logs</h2>
+        <div class="filters">
+          <input id="f-service" placeholder="filter service&hellip;" />
+          <select id="f-level">
+            <option value="">All levels</option>
+            <option>DEBUG</option><option>INFO</option><option>WARNING</option>
+            <option>ERROR</option><option>CRITICAL</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="f-anomalous" /> anomalies only</label>
+          <button id="toggle-refresh" class="ghost" type="button">&#10073;&#10073; Pause</button>
+        </div>
+      </div>
+      <table class="logs">
+        <thead>
+          <tr>
+            <th>Time</th><th>Service</th><th>Level</th><th>Message</th>
+            <th>Score</th><th>Severity</th><th>Feedback</th>
+          </tr>
+        </thead>
+        <tbody id="logs-body">
+          <tr><td colspan="7" class="empty">No logs yet.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <main id="view-evaluations" class="view" hidden>
+    <section class="panel">
+      <h2>Recorded evaluation results</h2>
+      <p class="callout">These are <strong>recorded</strong> reports from published
+        evaluation artifacts, not live model runs. Development and held-out cases are
+        authored fixtures; review notes are from the project's own (non-independent)
+        review. Full raw artifacts live in the repository under
+        <code>evals/results/</code>.</p>
+      <div id="eval-batches"></div>
+    </section>
+  </main>
+
+  <script>window.LG_RECORDED_URL = "recorded-runs.json";</script>
+  <script src="app.js"></script>
+  <script src="investigations.js"></script>
+  <script src="evaluations.js"></script>
+</body>
+</html>
