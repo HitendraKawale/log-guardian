@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -15,8 +15,9 @@ install: ## Create venv and install dev dependencies for both services
 	$(PIP) install --upgrade pip
 	$(PIP) install -r services/ai-service/requirements-dev.txt
 	$(PIP) install -r services/ingestion-service/requirements-dev.txt
+	$(PIP) install -r evals/requirements-dev.txt
 
-test: test-ai test-ingestion test-ml test-contract ## Run every suite that needs no infra
+test: test-ai test-ingestion test-ml test-contract test-evals ## Run every suite that needs no infra
 
 test-ai: ## Run AI service tests
 	cd services/ai-service && ../../$(PY) -m pytest
@@ -29,6 +30,12 @@ test-ml: ## Run dataset/training tests
 
 test-contract: ## Check the two services still agree on the wire contract
 	cd tests && ../$(PY) -m pytest contract
+
+test-evals: ## Validate the incident corpus and its validation behavior
+	cd evals && ../$(PY) -m pytest
+
+validate-corpus: ## Check incident evidence and evaluator labels without model calls
+	$(PY) evals/validate.py
 
 test-integration: ## Run end-to-end tests against the live stack (needs make up)
 	cd tests && ../$(PY) -m pytest integration
@@ -46,12 +53,12 @@ demo-assets: seed ## Re-record the README screenshot and GIF (needs make up + ff
 	$(PY) scripts/capture_demo.py
 
 lint: ## Lint and check formatting with ruff
-	$(PY) -m ruff check services ml
-	$(PY) -m ruff format --check services ml
+	$(PY) -m ruff check services ml evals
+	$(PY) -m ruff format --check services ml evals
 
 format: ## Auto-fix lint issues and format with ruff
-	$(PY) -m ruff check --fix services ml
-	$(PY) -m ruff format services ml
+	$(PY) -m ruff check --fix services ml evals
+	$(PY) -m ruff format services ml evals
 
 loadtest: ## Run the k6 load test (override BASE_URL to target a host)
 	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js
