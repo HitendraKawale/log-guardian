@@ -69,7 +69,12 @@ def main():
     )
     parser.add_argument("--system", choices=["A", "B", "C"], required=True)
     parser.add_argument(
-        "--case", required=True, help="development case ID; no paths or held-out cases"
+        "--case", required=True, help="case ID from the selected split; never a path"
+    )
+    parser.add_argument(
+        "--held-out",
+        action="store_true",
+        help="use the held-out split; only for a frozen candidate with explicit authorization",
     )
     parser.add_argument(
         "--model", default=os.environ.get("LLM_MODEL"), help="explicit model snapshot, or LLM_MODEL"
@@ -104,12 +109,12 @@ def main():
         config = BaselineConfig(model=args.model, max_cost_usd=args.max_cost_usd)
     except ValueError:
         parser.error("specify the supported model snapshot and a finite positive --max-cost-usd")
-    corpus = ROOT / "evals/cases/dev.jsonl"
+    corpus = ROOT / ("evals/cases/test.jsonl" if args.held_out else "evals/cases/dev.jsonl")
     try:
         cases = load_cases(corpus)
         case = next((case for case in cases if case["case_id"] == args.case), None)
         if case is None:
-            parser.error("unknown development case ID")
+            parser.error("unknown case ID in the selected development or held-out split")
         metadata = provenance(case, corpus)
         if not args.dry_run and metadata["code_dirty"]:
             parser.error(
