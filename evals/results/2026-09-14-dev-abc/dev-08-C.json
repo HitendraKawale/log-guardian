@@ -1,0 +1,354 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T01:16:02.881853+00:00",
+  "question": "Why does the notification worker time out before connecting to its upstream?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "d48a6378403995a07b6c5a30375cb54600924b2abc384cc9701ec097b299655f",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The notifier service has a HTTP client pool with a maximum of 8 connections shared by long_poll and publish operations.",
+        "evidence_ids": [
+          "dev-08:01"
+        ]
+      },
+      {
+        "claim": "At the time of the incident, there were eight long_poll requests active for 60 seconds and zero idle connections available in the pool.",
+        "evidence_ids": [
+          "dev-08:02"
+        ]
+      },
+      {
+        "claim": "A publish operation failed with a PoolTimeout after 1000ms without attempting an upstream connection, indicating the timeout occurred waiting for a connection from the pool.",
+        "evidence_ids": [
+          "dev-08:03"
+        ]
+      },
+      {
+        "claim": "A long_poll connection was released and a subsequent publish operation succeeded quickly, showing that connection availability affects operation success.",
+        "evidence_ids": [
+          "dev-08:05"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Upstream service logs or telemetry to confirm if the upstream was reachable or responsive during the timeout period"
+    ],
+    "alternatives": [
+      {
+        "claim": "The timeout could be caused by the HTTP client pool being exhausted due to all connections being held by long_poll requests, preventing new connections for publish operations.",
+        "evidence_ids": [
+          "dev-08:01",
+          "dev-08:02",
+          "dev-08:03"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The notification worker times out before connecting to its upstream because the HTTP client connection pool is exhausted, with all connections occupied by long_poll requests, leaving no idle connections for new upstream connections.",
+      "evidence_ids": [
+        "dev-08:01",
+        "dev-08:02",
+        "dev-08:03"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check upstream service logs and telemetry to verify upstream availability and responsiveness during the timeout period",
+      "Monitor HTTP client pool usage and connection hold times to identify connection exhaustion patterns",
+      "Review long_poll request handling to reduce connection hold time or increase pool size if appropriate"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "timeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.32412499422207475
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "connect",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "8a68935ef460761d99a1cd6abb08860b3e10f05a169d305655a766a0b8a53a46",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:05",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "released one long_poll connection; publish n63 succeeded in 12ms",
+              "timestamp": "2026-01-01T10:00:04.012000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:03",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "ERROR",
+              "message": "publish n62 failed with PoolTimeout after 1000ms; upstream_connection_attempted=false",
+              "timestamp": "2026-01-01T10:00:03.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:02",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "WARNING",
+              "message": "eight long_poll requests active for 60s; idle_connections=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:01",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "HTTP client pool max_connections=8 shared_by=long_poll,publish",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.2881669972557575
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "PoolTimeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "2c4e875059ac581f22375b0e2968fc6cfc355d73040deaf0c33f0735157b2040",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:03",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "ERROR",
+              "message": "publish n62 failed with PoolTimeout after 1000ms; upstream_connection_attempted=false",
+              "timestamp": "2026-01-01T10:00:03.100000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.4227499885018915
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "idle_connections=0",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "b4eee427ed9378cb87459ee566d0851ec10e492509e9baf5f867a48553dc0c22",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:02",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "WARNING",
+              "message": "eight long_poll requests active for 60s; idle_connections=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.7725000032223761
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "max_connections=8",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "3a3a6442950ee6cc70a12923f5645bd29a1ac9f4ab20cdb58e9d4ee51ba02f92",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:01",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "HTTP client pool max_connections=8 shared_by=long_poll,publish",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.45291701098904014
+    }
+  ],
+  "model_requests": 6,
+  "tool_executions": 5,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 894,
+        "output_tokens": 52,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00044080",
+      "input_token_reservation": 9092
+    },
+    {
+      "usage": {
+        "input_tokens": 1047,
+        "output_tokens": 52,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00050200",
+      "input_token_reservation": 9647
+    },
+    {
+      "usage": {
+        "input_tokens": 1443,
+        "output_tokens": 53,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00035480",
+      "input_token_reservation": 11141
+    },
+    {
+      "usage": {
+        "input_tokens": 1659,
+        "output_tokens": 55,
+        "cached_input_tokens": 1408
+      },
+      "estimated_cost_usd": "0.00032920",
+      "input_token_reservation": 11955
+    },
+    {
+      "usage": {
+        "input_tokens": 1868,
+        "output_tokens": 55,
+        "cached_input_tokens": 1536
+      },
+      "estimated_cost_usd": "0.00037440",
+      "input_token_reservation": 12745
+    },
+    {
+      "usage": {
+        "input_tokens": 2083,
+        "output_tokens": 377,
+        "cached_input_tokens": 1792
+      },
+      "estimated_cost_usd": "0.00089880",
+      "input_token_reservation": 13534
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 8994,
+    "output_tokens": 644,
+    "cached_input_tokens": 5760
+  },
+  "estimated_cost_usd": "0.00290000",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 13534,
+  "estimated_max_cost_usd": "0.00705200",
+  "elapsed_ms": 9602.233999990858,
+  "provenance": {
+    "case_id": "dev-08",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f2609ce56e05ced96bf2f0c33e7a6177bebf33f40c904259f12d2d1d2676f5c7",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

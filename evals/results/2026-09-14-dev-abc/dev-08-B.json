@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T01:15:57.554161+00:00",
+  "question": "Why does the notification worker time out before connecting to its upstream?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The notifier service logs an error indicating a publish operation failed with PoolTimeout after 1000ms and no upstream connection was attempted.",
+        "evidence_ids": [
+          "dev-08:03"
+        ]
+      },
+      {
+        "claim": "The notifier service has a maximum HTTP client pool size of 8 connections shared by long_poll and publish operations.",
+        "evidence_ids": [
+          "dev-08:01"
+        ]
+      },
+      {
+        "claim": "There are eight long_poll requests active for 60 seconds with zero idle connections in the notifier service, indicating all connections are in use.",
+        "evidence_ids": [
+          "dev-08:02"
+        ]
+      },
+      {
+        "claim": "The events service reports a healthy publish endpoint with status 200 and zero worker queue depth, indicating it is not overloaded or unhealthy.",
+        "evidence_ids": [
+          "dev-08:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed timing and correlation of individual notifier requests to upstream connection attempts",
+      "Upstream service logs or traces showing connection acceptance or rejection",
+      "System resource metrics such as file descriptor limits or socket availability on the notifier host"
+    ],
+    "alternatives": [
+      {
+        "claim": "The notification worker times out before connecting to its upstream because the HTTP client connection pool is exhausted by long-lived long_poll requests, leaving no available connections for new publish requests.",
+        "evidence_ids": [
+          "dev-08:01",
+          "dev-08:02",
+          "dev-08:03"
+        ]
+      },
+      {
+        "claim": "The notification worker times out due to an upstream service issue causing connection attempts to fail or be delayed, despite the events service reporting healthy status.",
+        "evidence_ids": [
+          "dev-08:03",
+          "dev-08:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The notification worker times out before connecting to its upstream because the HTTP client connection pool is fully occupied by long-lived long_poll requests, causing new publish requests to fail with a pool timeout without attempting an upstream connection.",
+      "evidence_ids": [
+        "dev-08:01",
+        "dev-08:02",
+        "dev-08:03"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the number of active connections and pool usage in the notifier service to confirm pool exhaustion.",
+      "Inspect system resource limits such as file descriptors and socket availability on the notifier host.",
+      "Review upstream service logs for connection acceptance or rejection during the timeout period.",
+      "Consider monitoring or limiting long_poll request duration or increasing the HTTP client pool size if justified by capacity."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier",
+          "events"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "50fc50c944413cc98043cf708c76c9a7372ec4917ec4235f7686b4508100342e",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:05",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "released one long_poll connection; publish n63 succeeded in 12ms",
+              "timestamp": "2026-01-01T10:00:04.012000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:04",
+            "kind": "log",
+            "content": {
+              "service": "events",
+              "level": "INFO",
+              "message": "publish endpoint health status=200; worker_queue_depth=0",
+              "timestamp": "2026-01-01T10:00:03.200000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:03",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "ERROR",
+              "message": "publish n62 failed with PoolTimeout after 1000ms; upstream_connection_attempted=false",
+              "timestamp": "2026-01-01T10:00:03.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:02",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "WARNING",
+              "message": "eight long_poll requests active for 60s; idle_connections=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:01",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "HTTP client pool max_connections=8 shared_by=long_poll,publish",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3227079869247973
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "notifier",
+          "events"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "f306fafec48818b93dcb97b1a05cfa167cef9563249177eba03103f9b51ea78f",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:87f6b0fa25f69010bd58bab5a72001559cdcb25c4321f0853153059309b4b134",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "events",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "notifier",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "notifier",
+                  "level": "INFO",
+                  "count": 2
+                },
+                {
+                  "service": "notifier",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16720799612812698
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why does the notification worker time out before connecting to its upstream?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          },
+          {
+            "evidence_id": "runbook:insufficient-evidence",
+            "kind": "runbook",
+            "content": {
+              "title": "Stop when a causal claim is unsupported",
+              "body": "Identify missing upstream records, denied collection access, truncated results, uncertain clocks, or absent request correlation. Empty evidence and a failed evidence source are different states. Try a narrower relevant query when results are truncated; do not treat an omitted record as proof that an event did not occur.\n\nIf available observations cannot distinguish plausible explanations, return an inconclusive outcome. Name the observations that are established and the specific additional evidence needed. Do not invent traces, metrics, deployments, or citation IDs. Suggest read-only checks rather than remediation that assumes an unproven cause."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.5617920143995434
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 2053,
+    "output_tokens": 466,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00156680",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00694960",
+  "input_token_reservation": 13278,
+  "elapsed_ms": 4800.979499996174,
+  "provenance": {
+    "case_id": "dev-08",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f2609ce56e05ced96bf2f0c33e7a6177bebf33f40c904259f12d2d1d2676f5c7",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

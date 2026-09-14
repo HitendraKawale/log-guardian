@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:59.781962+00:00",
+  "question": "Why does the API gateway fail every inventory lookup?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The API gateway configuration has a typo in the inventory host name, configured as 'inventroy.internal' instead of 'inventory.internal'.",
+        "evidence_ids": [
+          "dev-04:01"
+        ]
+      },
+      {
+        "claim": "The gateway logs show an error 'lookup inventroy.internal returned NXDOMAIN', indicating DNS resolution failure for the misconfigured host name.",
+        "evidence_ids": [
+          "dev-04:02"
+        ]
+      },
+      {
+        "claim": "The gateway logs show a warning 'no upstream TCP connection attempted; response_status=502', consistent with failure to resolve the upstream inventory service host.",
+        "evidence_ids": [
+          "dev-04:03"
+        ]
+      },
+      {
+        "claim": "The inventory service is registered correctly as 'inventory.internal' and is healthy, responding to health probes with status 200.",
+        "evidence_ids": [
+          "dev-04:04",
+          "dev-04:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The API gateway fails every inventory lookup due to a DNS resolution failure caused by a typo in the configured inventory host name 'inventroy.internal' instead of the correct 'inventory.internal'.",
+      "evidence_ids": [
+        "dev-04:01",
+        "dev-04:02",
+        "dev-04:03",
+        "dev-04:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify and correct the inventory host name configuration in the API gateway to 'inventory.internal'.",
+      "Check DNS resolution from the gateway host for 'inventory.internal' after correction.",
+      "Confirm that the gateway can establish TCP connections to the inventory service after fixing the host name."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "0c70ca3911c36a5a4be6a2b638be937dd0b1e9dc14a8e3838e9c4de7f2fa03bf",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-04:05",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "health probe status=200; active_requests=0",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:03",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "WARNING",
+              "message": "no upstream TCP connection attempted; response_status=502",
+              "timestamp": "2026-01-01T10:00:02.001000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "lookup inventroy.internal returned NXDOMAIN",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "configuration loaded; inventory_host=inventroy.internal",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:04",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "service registered as inventory.internal; ready=true",
+              "timestamp": "2026-01-01T10:00:00.500000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.33116701524704695
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "e36f7b83722dddadb438f89ba98950a15fcfc362b2ca855e1ca3b47f273cfc22",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:af360229b2d3f002ddfa6c4e2eeeb2634ab381e3140c6a12bef1871b2c497a6f",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "gateway",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "gateway",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "gateway",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "inventory",
+                  "level": "INFO",
+                  "count": 2
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.1761250023264438
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why does the API gateway fail every inventory lookup?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:benign-errors",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish expected rejections from outages",
+              "body": "Error severity and a word such as failure are triage hints, not a diagnosis. Compare business declines, unsupported routes, corrected hardware events, and transport failures with successful requests in the same bounded scope.\n\nRead actual counts and the period they describe. A sample containing only failures does not establish a system-wide failure rate. Successful requests can contradict a claim of total unavailability without proving that every customer or route is unaffected.\n\nDescribe the supported explanation narrowly. A corrected error does not guarantee that hardware will remain healthy. Independent failures in two dependencies do not automatically have a common root cause."
+            }
+          },
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.2009159836452454
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1819,
+    "output_tokens": 313,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00122840",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00645840",
+  "input_token_reservation": 12050,
+  "elapsed_ms": 3120.783874997869,
+  "provenance": {
+    "case_id": "dev-04",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "6a05eddad4aa991f3a558a23709e6b52e9f31c629bdfab3e9c48b1e481fb27f0",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

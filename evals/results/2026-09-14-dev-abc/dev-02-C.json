@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:34.749468+00:00",
+  "question": "Why are order submissions unable to obtain a database connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "d48a6378403995a07b6c5a30375cb54600924b2abc384cc9701ec097b299655f",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The database service is accepting connections and has not reached its maximum connection limit, with total_sessions=31 and max_connections=100 at 2026-01-01T10:00:06Z.",
+        "evidence_ids": [
+          "dev-02:05"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "logs from orders service indicating failure to obtain database connection"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check orders service logs for errors or warnings related to database connection failures.",
+      "Check database connection pool configuration and usage in the orders service.",
+      "Check network connectivity and firewall rules between orders service and database service.",
+      "Check for any resource exhaustion or limits on the orders service side that might prevent obtaining a database connection."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "orders"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "database connection",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.28570799622684717
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "connection",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "05828766b83e078f69495d5dc60b5ce1f9d08470d804855f5f4dc1993aac0db9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-02:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "accepting connections; total_sessions=31 max_connections=100",
+              "timestamp": "2026-01-01T10:00:06.100000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.29762499616481364
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 891,
+        "output_tokens": 127,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055960",
+      "input_token_reservation": 9081
+    },
+    {
+      "usage": {
+        "input_tokens": 1303,
+        "output_tokens": 164,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00078360",
+      "input_token_reservation": 10441
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2194,
+    "output_tokens": 291,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00134320",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 10441,
+  "estimated_max_cost_usd": "0.00581480",
+  "elapsed_ms": 3854.9892920127604,
+  "provenance": {
+    "case_id": "dev-02",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "2c79939d67a5861d6cc603625d8aa1dc9a9b5da2d4b2ef166f533f8062087395",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

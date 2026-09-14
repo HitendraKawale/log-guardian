@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:15:52.977383+00:00",
+  "question": "Why does the notification worker time out before connecting to its upstream?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "failed",
+  "error": "invalid_report",
+  "report": null,
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "notifier",
+          "events"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "50fc50c944413cc98043cf708c76c9a7372ec4917ec4235f7686b4508100342e",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-08:05",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "released one long_poll connection; publish n63 succeeded in 12ms",
+              "timestamp": "2026-01-01T10:00:04.012000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:04",
+            "kind": "log",
+            "content": {
+              "service": "events",
+              "level": "INFO",
+              "message": "publish endpoint health status=200; worker_queue_depth=0",
+              "timestamp": "2026-01-01T10:00:03.200000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:03",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "ERROR",
+              "message": "publish n62 failed with PoolTimeout after 1000ms; upstream_connection_attempted=false",
+              "timestamp": "2026-01-01T10:00:03.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:02",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "WARNING",
+              "message": "eight long_poll requests active for 60s; idle_connections=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-08:01",
+            "kind": "log",
+            "content": {
+              "service": "notifier",
+              "level": "INFO",
+              "message": "HTTP client pool max_connections=8 shared_by=long_poll,publish",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3260409866925329
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1004,
+    "output_tokens": 399,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00104000",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00520960",
+  "input_token_reservation": 8928,
+  "elapsed_ms": 4067.6587909983937,
+  "provenance": {
+    "case_id": "dev-08",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f2609ce56e05ced96bf2f0c33e7a6177bebf33f40c904259f12d2d1d2676f5c7",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

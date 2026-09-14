@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:15:22.507287+00:00",
+  "question": "What caused the search timeouts?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The gateway service logged errors indicating search requests timed out waiting for response headers after 2000ms.",
+        "evidence_ids": [
+          "dev-06:01",
+          "dev-06:02"
+        ]
+      },
+      {
+        "claim": "The collector service logged a warning that search log export was unavailable for the interval, with last data received before the window, indicating no recent search logs were processed during the incident window.",
+        "evidence_ids": [
+          "dev-06:03"
+        ]
+      },
+      {
+        "claim": "The gateway service had an active local connection pool with 2 active connections and a max of 50, with no queue wait time, indicating no connection pool exhaustion at the time of the incident.",
+        "evidence_ids": [
+          "dev-06:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Upstream service logs or traces that the gateway depends on for search requests",
+      "Detailed timing data distinguishing transport delay from handler delay"
+    ],
+    "alternatives": [
+      {
+        "claim": "The search timeouts could be caused by upstream service delays or failures that the gateway depends on, as the gateway timed out waiting for response headers and the collector had no recent search logs.",
+        "evidence_ids": [
+          "dev-06:01",
+          "dev-06:02",
+          "dev-06:03"
+        ]
+      }
+    ],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check upstream service logs and traces that the gateway depends on for search requests to identify delays or failures.",
+      "Collect detailed timing data to distinguish between transport delays and handler delays in the search request path."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "179cb32d8be184803a475a8c60957402ebac57419cb9e2786756261b7200ad96",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-06:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "search log export unavailable for this interval; last_received_before_window=true",
+              "timestamp": "2026-01-01T10:00:05Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s41 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s40 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:04",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "local connection pool active=2 max=50; queue_wait_ms=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.27245801175013185
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 924,
+    "output_tokens": 300,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00084960",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00510000",
+  "input_token_reservation": 8654,
+  "elapsed_ms": 3723.5838339838665,
+  "provenance": {
+    "case_id": "dev-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "47248a62bfc8b04667542096320df07374d3e87f3796ef31455cc3c61df6aeae",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}
