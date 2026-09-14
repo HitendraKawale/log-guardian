@@ -82,6 +82,7 @@ async def test_summary_counts_full_scope_not_first_page(tools):
         {"services": []},
         {"services": ["checkout", "checkout"]},
         {"start": "2026-01-01T10:00:00"},
+        {"start": str(int(START.timestamp()))},
         {"end": START - timedelta(seconds=1)},
         {"path": "../../evals/labels.jsonl"},
     ],
@@ -146,6 +147,14 @@ async def test_replay_takes_a_snapshot_and_refuses_label_fields():
     records[0]["true_label"] = True
     with pytest.raises(ValueError):
         EvidenceTools(InvestigationScope(**SCOPE), records=records)
+
+
+@pytest.mark.parametrize("query", ["What caused the search timeouts?", "timeouts"])
+async def test_runbook_section_ids_match_without_common_word_noise(tools, query):
+    result = await tools.search_runbooks(query=query, limit=1)
+    assert result.items[0].evidence_id == "runbook:timeouts"
+    empty = await tools.search_runbooks(query="what is the")
+    assert empty.items == [] and empty.error is None
 
 
 async def test_runbooks_are_ranked_versioned_and_do_not_accept_paths(tools):

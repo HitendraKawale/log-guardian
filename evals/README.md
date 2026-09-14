@@ -2,7 +2,7 @@
 
 Version `1.0.0` contains eight development cases, sixteen held-out cases, and 169 log observations. It supports investigation evaluation, not per-log anomaly classification.
 
-These are AI-assisted, explicitly authored engineering fixtures. They are not customer incidents, operator-labeled production data, BGL excerpts, or results from the live sandbox. Expected diagnoses were authored separately from observations, not inferred from the old anomaly scorer. No model has been evaluated against this corpus yet.
+These are AI-assisted, explicitly authored engineering fixtures. They are not customer incidents, operator-labeled production data, BGL excerpts, or results from the live sandbox. Expected diagnoses were authored separately from observations, not inferred from the old anomaly scorer. The [first live development smoke evaluation](results/2026-09-13-baseline-smoke/README.md) contains four A/B requests on two cases. Both systems failed the required abstention; no held-out evaluation has run.
 
 ## Run the checks
 
@@ -22,6 +22,51 @@ make lint
 Success exits 0. Invalid data or missing files exit 1 with an error on stderr. Invalid CLI arguments exit 2. `--json` returns counts, dataset version, and SHA-256 hashes of all three input files without a prose prefix. Repeated runs on unchanged bytes return identical hashes.
 
 CI runs the evaluation tests as their own matrix entry. The tests validate the checked-in corpus and mutate small independent examples to exercise rejection behavior. They do not call a model or consume API credits.
+
+## Run the A/B baselines
+
+The runner uses the ingestion service's tools and report schema. Install the shared environment with `make install`; unlike the validator, the runner requires the service dependencies, including pinned `openai==2.11.0`.
+
+Inspect a development case without a provider key or network request:
+
+```bash
+.venv/bin/python evals/run.py --system B --case dev-01 \
+  --model gpt-4.1-mini-2025-04-14 --max-cost-usd 0.10 --dry-run
+```
+
+A uses one log query. B always uses a log query, a full-scope summary, and runbook retrieval using the first 512 characters of the sanitized question. Each then makes exactly one SDK request. Neither is an adaptive agent. The model receives evidence as tool messages, not system instructions.
+
+Live execution requires separate owner approval, `OPENAI_API_KEY`, a clean committed worktree, `--allow-live`, and an explicit per-run allowance. `--model` can also come from `LLM_MODEL`; there is no model default. The only currently supported snapshot is `gpt-4.1-mini-2025-04-14`. Missing credentials never produce a fabricated report. The CLI uses the official API endpoint, not an environment-supplied proxy URL.
+
+After approval, replace `--dry-run` with `--allow-live`. Add `--output path/to/new-run.json` to preserve an artifact; its parent directory must exist. Existing paths are refused before any provider request. Without `--output`, the command emits JSON on stdout. Exit codes are 0 for a completed report or dry run, 1 for a recorded run failure, and 2 for invalid configuration or an unavailable output path. An interrupted process can leave an empty reserved output file; do not present it as a completed run. Save live artifacts outside the worktree until the evaluation batch finishes: untracked output files inside the repo would make the next invocation fail its clean-worktree check.
+
+The CLI selects only development case IDs from its fixed corpus location. It has no fixture-path option and does not open labels or held-out evidence. A run artifact records authored incident provenance separately from live, scripted, or dry-run model execution.
+
+### Reports, failures, and accounting
+
+Reports contain observations, a supported likely cause or an inconclusive outcome, alternatives, missing evidence, and suggested read-only checks. Every finding requires citations from successful evidence results. A likely cause cannot cite only a runbook or an empty summary. Citation validation establishes membership, not whether a claim follows from its evidence; semantic review remains required.
+
+Invalid reports, refusals, truncated model outputs, model mismatches, and provider errors remain failures. Raw rejected output and provider error bodies are not exported. Returned usage is retained when report validation fails. Missing usage or an ambiguous failed request produces null usage/cost, not zero. SDK retries are disabled. The baseline does not attempt report repair, keeping the comparison to one request.
+
+The runner limits execution to 120 seconds, evidence to 64 KiB, and requested output to 1,024 tokens. The tool-level limits still apply. Before a provider request, it reserves an estimate using serialized input bytes plus 4,096 protocol-overhead tokens and the output ceiling, without a cache discount. This deliberately conservative byte-based estimate is not a billing guarantee, account-wide ledger, or permission for public paid execution. Reported cost above the allowance is flagged after the response; that cannot undo a charge already incurred.
+
+Price estimates use the dated table in `app/investigation_agent.py`. The official model page checked on 2026-09-13 lists $0.40 input, $0.10 cached input, and $1.60 output per million tokens. Returned cached counts receive the discount. If the provider omits cache details, the estimate assumes no discount. Recheck prices and model availability before live evaluation.
+
+Artifacts include the model requested and returned, SDK version, prompt/schema hash, code revision and implementation digest, case and corpus hashes, tool arguments and redacted evidence snapshots, latency, usage, limits, and the dated price table. Dry runs contain no report. Scripted HTTP tests exercise the real SDK but are not live quality or cost measurements. The [recorded development smoke results](results/2026-09-13-baseline-smoke/README.md) preserve all four original reports, including two semantic failures. They are not a complete scorecard or proof of production reliability.
+
+### Offline correction candidate
+
+After the first smoke evaluation, lexical retrieval now ignores common question words and includes stable section IDs in matching. The recorded question "What caused the search timeouts?" now retrieves `timeouts` first; stop-word-only queries return no matches. Retrieval remains lexical, with no stemming, embeddings, or case-specific routing.
+
+The shared prompt now distinguishes unavailable telemetry from application failures, requires evidence for request-path dependencies, and warns against health-probe generalizations. These are general instructions, not a rule that forces an outcome based on a case ID or log keyword. Tests verify retrieval and that the SDK receives the policy; they do not prove the model follows it.
+
+The original four reports and their hashes remain unchanged. The prompt hash and implementation digest identify this new candidate. Prompt and retrieval changed together, so a future comparison cannot attribute improvement to either change alone. The [second live smoke batch](results/2026-09-13-baseline-smoke-v2/README.md) evaluated this candidate. Both systems again failed to abstain on dev-06 despite improved targeted retrieval. Step 6 remained open after that batch. Both batches are preserved, with eight requests costing an estimated $0.00768160 in total. Both original request allowances are exhausted.
+
+The [offline diagnosis](../docs/baseline-abstention-diagnosis.md) found that the schema emitted outcome before observations and missing evidence. An order-only candidate was evaluated in the [third live batch](results/2026-09-13-baseline-smoke-v3/README.md). A/dev-06 now abstains without inventing a collector request dependency. B emits an inconclusive label but repeats the unsupported dependency in alternatives and checks. Two labels are inconclusive; only one passes core abstention review. Step 6's supported and inconclusive examples are saved with their limitations. This is not proof of general reliability.
+
+All three four-request allowances are exhausted: twelve requests, estimated $0.01177360 total. Further paid evaluation needs new approval.
+
+Sources: [SDK 2.11.0 configuration](https://github.com/openai/openai-python/blob/v2.11.0/README.md), [SDK API](https://github.com/openai/openai-python/blob/v2.11.0/api.md), [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs), and [model snapshots and pricing](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
 
 ## Files and separation
 

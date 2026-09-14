@@ -30,6 +30,10 @@ from .models import Log
 
 MAX_RESULT_BYTES = 16_384
 RUNBOOK_PATH = Path(__file__).resolve().parents[1] / "runbooks" / "operations.md"
+_RUNBOOK_STOP_WORDS = frozenset(
+    "a an and are as at be been by did do does for from how in is it of on or "
+    "that the these this to was were what when where which why with".split()
+)
 _BEARER = re.compile(r"\bBearer\s+[^\s,\"'<>]+", re.IGNORECASE)
 _CREDENTIAL = re.compile(
     r"""(["']?\b(?:password|api[_-]?key|token|secret|authorization)\b["']?\s*[:=]\s*)"""
@@ -220,7 +224,7 @@ class EvidenceTools:
         sections = re.split(r"^## ([a-z0-9-]+): (.+)$", document, flags=re.MULTILINE)
         if len(sections) == 1:
             return EvidenceBatch(source="runbooks", error="source_unavailable")
-        words = set(re.findall(r"\w+", query.query.lower()))
+        words = set(re.findall(r"\w+", query.query.lower())) - _RUNBOOK_STOP_WORDS
         ranked = []
         seen = set()
         for index in range(1, len(sections), 3):
@@ -228,7 +232,9 @@ class EvidenceTools:
             if section_id in seen:
                 return EvidenceBatch(source="runbooks", error="source_unavailable")
             seen.add(section_id)
-            score = len(words & set(re.findall(r"\w+", (title + " " + body).lower())))
+            score = len(
+                words & set(re.findall(r"\w+", (section_id + " " + title + " " + body).lower()))
+            )
             if score:
                 item = EvidenceItem(
                     evidence_id=f"runbook:{section_id}",

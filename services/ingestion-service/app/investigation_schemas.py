@@ -22,7 +22,7 @@ class InvestigationScope(BaseModel):
     def require_timestamp(cls, value):
         if not isinstance(value, str | datetime):
             raise ValueError("Expected an offset-aware ISO timestamp")
-        return value
+        return datetime.fromisoformat(value) if isinstance(value, str) else value
 
     @field_validator("start", "end")
     @classmethod
@@ -67,6 +67,40 @@ class ReplayLog(BaseModel):
     @classmethod
     def utc(cls, value: datetime) -> datetime:
         return value.astimezone(UTC)
+
+
+ReportText = Annotated[str, Field(strict=True, min_length=1, max_length=1200, pattern=r"\S")]
+
+
+class Finding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    claim: ReportText
+    evidence_ids: list[Annotated[str, Field(strict=True, min_length=1, max_length=128)]] = Field(
+        min_length=1, max_length=8
+    )
+
+
+class InvestigationReport(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    # Structured Outputs follows this order; collect evidence before choosing a conclusion.
+    observations: list[Finding] = Field(max_length=8)
+    missing_evidence: list[ReportText] = Field(max_length=8)
+    alternatives: list[Finding] = Field(max_length=8)
+    likely_cause: Finding | None
+    outcome: Literal["supported", "inconclusive"]
+    suggested_checks: list[ReportText] = Field(max_length=8)
+
+    @model_validator(mode="after")
+    def coherent_outcome(self) -> Self:
+        if self.outcome == "supported" and (self.likely_cause is None or not self.observations):
+            raise ValueError("Supported reports require observations and a cited cause")
+        if self.outcome == "inconclusive" and (
+            self.likely_cause is not None or not self.missing_evidence
+        ):
+            raise ValueError("Inconclusive reports require missing evidence and no asserted cause")
+        return self
 
 
 class EvidenceItem(BaseModel):
