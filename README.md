@@ -1,19 +1,53 @@
 # Log Guardian
 
-A log ingestion platform that scores each entry for anomalies with a trained
-model, stores the result, and exposes the whole thing over Prometheus, Grafana
-and Jaeger. Two FastAPI services, a Kafka path for volume, a static dashboard,
-and manifests to run it on Compose or Kubernetes.
+An AI incident investigator over a real log platform. An agent collects
+evidence with bounded read-only tools (logs, summaries, runbooks, fixed metric
+templates), then produces a structured report where **every claim cites
+evidence** and missing evidence yields an honest *inconclusive* instead of a
+guessed root cause.
 
-![Log Guardian dashboard](docs/images/demo.gif)
+**[90-second recorded demo](docs/media/demo-90s.webm)** · **[evaluation method
+and full scorecard](docs/evaluation.md)** · static recorded demo:
+`python scripts/export_static_demo.py` then open `site/index.html` (no
+provider key needed; explicitly marked recorded).
 
-*Ingesting a critical log: the AI service scores it 0.90, the dashboard flags it
-high severity, and a reviewer's "anomaly" label is written back as training data
-for the next retrain. Recorded from the Compose stack by
-`scripts/capture_demo.py`.*
+Headline results, measured (see the scorecard for everything, including
+failures): on the held-out split, fixed retrieval **B scored 13/16** core
+review passes at $0.024 total, the adaptive agent **C scored 11/16** at
+$0.029 — the adaptive hypothesis was **not supported** on this corpus. All 92
+live runs (152 requests, est. $0.128 total) are preserved byte-for-byte with
+provenance under `evals/results/`.
 
-<!-- TODO(hitesh): a paragraph on why you started this - the itch it scratched,
-     what you wanted to learn. That is the one thing nobody else can write. -->
+## What is shipped, what is an experiment, what is deferred
+
+- **Shipped**: ingestion platform (below), evidence tools, A/B/C runners,
+  investigations API + worker + UI, fault-injection demo sandbox, evaluation
+  corpus and archives, static recorded demo.
+- **Experiments (honestly negative where they are)**: the adaptive loop did
+  not beat fixed retrieval; the synthetic-trained anomaly scorer reproduced
+  F1 0.588 / ROC-AUC 0.407 on BGL and is a display signal only
+  ([ml/README.md](ml/README.md)); the schema-order abstention fix coincided
+  with improvement on one case and is not a proven cause.
+- **Deferred**: public hosted execution (needs spend-control review), held-out
+  re-evaluation after any further tuning (split is consumed), independent
+  review, live-origin evaluation set beyond one captured bundle.
+
+## Investigation quick start
+
+```bash
+make demo-up                 # minimal stack: no Kafka/Grafana/Kubernetes
+python demo/run_scenario.py  # owner-only fault: real 504s, then recovery
+make demo-down
+```
+
+Investigations are disabled until `INVESTIGATION_API_KEY` is set (every
+endpoint returns 503). The worker (`python -m app.investigator`) fails closed
+without `OPENAI_API_KEY` — no fabricated reports. Live model calls cost real
+money; nothing in this repository spends without explicit owner opt-in flags.
+
+---
+
+The underlying log platform:
 
 ```
                  ┌──────────────────┐        ┌──────────────────┐

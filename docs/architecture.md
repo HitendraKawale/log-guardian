@@ -90,3 +90,30 @@ REST route, so both paths are behaviourally identical. Kafka is gated behind
 - **Kubernetes** (`infrastructure/kubernetes`) deploys the core tier — Postgres,
   AI service, ingestion (with a HorizontalPodAutoscaler) and frontend behind an
   ingress. The ingestion image applies Alembic migrations on startup.
+
+## Investigation subsystem (added with the agentic work)
+
+```
+POST /investigations ──▶ investigations table (queued) ◀── claim (atomic UPDATE)
+        │ 503 without key                                      │
+        ▼                                                      ▼
+GET /investigations/{id}/events?after= ◀── ordered events ── python -m app.investigator
+                                                               │ bounded tools + one SDK
+                                                               ▼
+                                            report / failure persisted with usage+cost
+```
+
+- The HTTP process never calls the model; submission only queues a row.
+  A separate worker (same image, `python -m app.investigator`) claims runs
+  atomically, records ordered events, enforces deadlines, and preserves
+  terminal states. Stale claims from crashed workers fail closed.
+- Evidence tools are read-only and bounded: 50 log rows / 16 KiB per result,
+  64 KiB per run, literal substring search, lexical runbook retrieval, and
+  fixed-template metrics (never model-supplied PromQL). Tool results are
+  redacted snapshots; evaluator labels never reach runtime.
+- Reports are validated structurally (schema, citation membership, "supported
+  needs cited incident evidence") before acceptance; semantic review is a
+  separate, human-owned step. See docs/evaluation.md.
+- The demo sandbox (infrastructure/docker/demo-compose.yml) runs one small app
+  as checkout+inventory with real HTTP deadlines; fault controls are bound to
+  127.0.0.1 on a separate port and are not agent tools.

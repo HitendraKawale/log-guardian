@@ -44,3 +44,6 @@ tests/e2e/test-results/
 
 # Personal study notes (not part of the project)
 notes/
+
+# Built static demo (rebuild with scripts/export_static_demo.py)
+site/
