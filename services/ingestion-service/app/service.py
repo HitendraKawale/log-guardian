@@ -4,6 +4,8 @@ Keeping the "score it, store it, count it" step in one place means the
 synchronous API and the streaming worker behave identically.
 """
 
+from datetime import UTC
+
 from prometheus_client import Counter
 
 from .ai_client import AIClient
@@ -25,11 +27,13 @@ async def persist_log(session, log: LogCreate, ai: AIClient) -> Log:
     """Score a log via the AI service (best-effort) and persist it."""
     result = await ai.analyze(log)
 
+    # SQLite drops offsets on storage. Legacy naive inputs are interpreted as UTC.
+    timestamp = log.timestamp.replace(tzinfo=log.timestamp.tzinfo or UTC).astimezone(UTC)
     record = Log(
         service=log.service,
         level=log.level.value,
         message=log.message,
-        timestamp=log.timestamp,
+        timestamp=timestamp,
         status="scored" if result else "unscored",
         anomaly_score=result.anomaly_score if result else None,
         is_anomaly=result.is_anomaly if result else None,
