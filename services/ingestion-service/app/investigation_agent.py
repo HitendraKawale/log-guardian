@@ -121,6 +121,14 @@ def validate_citations(report: InvestigationReport, batches: list[EvidenceBatch]
         raise ValueError("Cause requires observed incident evidence")
 
 
+async def run_investigation(system, question, tools, client, config, *, dry_run=False):
+    if system == "C":
+        from .investigation_loop import run_agent
+
+        return await run_agent(question, tools, client, config, dry_run=dry_run)
+    return await run_baseline(system, question, tools, client, config, dry_run=dry_run)
+
+
 async def run_baseline(
     system: Literal["A", "B"],
     question: str,

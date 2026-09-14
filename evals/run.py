@@ -1,4 +1,4 @@
-"""Run one development baseline. Live execution requires explicit opt-in and a budget."""
+"""Run one development investigation. Live execution requires opt-in and a budget."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services/ingestion-service"))
 
-from app.investigation_agent import BaselineConfig, canonical, run_baseline  # noqa: E402
+from app.investigation_agent import BaselineConfig, canonical, run_investigation  # noqa: E402
 from app.investigation_schemas import InvestigationScope  # noqa: E402
 from app.investigation_tools import EvidenceTools  # noqa: E402
 from openai import AsyncOpenAI  # noqa: E402
@@ -30,6 +30,7 @@ def provenance(case, corpus):
         "evals/validate.py",
         "services/ingestion-service/requirements.txt",
         "services/ingestion-service/app/investigation_agent.py",
+        "services/ingestion-service/app/investigation_loop.py",
         "services/ingestion-service/app/investigation_schemas.py",
         "services/ingestion-service/app/investigation_tools.py",
     ):
@@ -49,11 +50,13 @@ def provenance(case, corpus):
 async def execute(args, case, config, key):
     tools = EvidenceTools(InvestigationScope(**case["scope"]), records=case["logs"])
     if args.dry_run:
-        return await run_baseline(args.system, case["question"], tools, None, config, dry_run=True)
+        return await run_investigation(
+            args.system, case["question"], tools, None, config, dry_run=True
+        )
     async with AsyncOpenAI(
         api_key=key, base_url="https://api.openai.com/v1", max_retries=0
     ) as client:
-        return await run_baseline(args.system, case["question"], tools, client, config)
+        return await run_investigation(args.system, case["question"], tools, client, config)
 
 
 def main():
@@ -64,7 +67,7 @@ def main():
             "--model gpt-4.1-mini-2025-04-14 --max-cost-usd 0.10 --dry-run"
         ),
     )
-    parser.add_argument("--system", choices=["A", "B"], required=True)
+    parser.add_argument("--system", choices=["A", "B", "C"], required=True)
     parser.add_argument(
         "--case", required=True, help="development case ID; no paths or held-out cases"
     )
