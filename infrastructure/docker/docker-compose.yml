@@ -24,6 +24,27 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  # Same ingestion image, separate process. Claims queued investigations and
+  # records ordered events. Requires INVESTIGATION_API_KEY and OPENAI_API_KEY
+  # at runtime; without them it exits or fails runs closed instead of faking.
+  investigation-worker:
+    build:
+      context: ../../services/ingestion-service
+      dockerfile: Dockerfile
+    container_name: lg-investigation-worker
+    command: ["python", "-m", "app.investigator"]
+    healthcheck:
+      disable: true
+    environment:
+      DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian
+      INVESTIGATION_API_KEY: ${INVESTIGATION_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    depends_on:
+      ingestion-service:
+        condition: service_healthy
+    profiles: ["investigations"]
+
   log-consumer:
     build:
       context: ../../services/ingestion-service
