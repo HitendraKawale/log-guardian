@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:15.244157+00:00",
+  "question": "Why can the relay not open new upstream sockets?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The relay cannot open new upstream sockets because socket creation failed with error 'Too many open files' (errno=24).",
+        "evidence_ids": [
+          "test-07:02"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The likely cause is that the relay process has reached the limit of open file descriptors, preventing it from creating new sockets.",
+      "evidence_ids": [
+        "test-07:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the relay process's file descriptor limits (ulimit) and current usage.",
+      "Inspect system-wide open file descriptor limits and usage.",
+      "Review relay socket usage patterns to identify potential leaks or excessive socket usage."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "relay"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "socket",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "edc6cab85c5d8100695948a68a41b4f847cf37d2a666a86a88756d156b2499a5",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-07:02",
+            "kind": "log",
+            "content": {
+              "service": "relay",
+              "level": "ERROR",
+              "message": "socket creation failed: errno=24 Too many open files",
+              "timestamp": "2026-01-01T10:00:01.001000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.47212495701387525
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 1,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 917,
+        "output_tokens": 51,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00044840",
+      "input_token_reservation": 9189
+    },
+    {
+      "usage": {
+        "input_tokens": 1125,
+        "output_tokens": 151,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00069160",
+      "input_token_reservation": 9960
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2042,
+    "output_tokens": 202,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00114000",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 9960,
+  "estimated_max_cost_usd": "0.00562240",
+  "elapsed_ms": 2832.1157500031404,
+  "provenance": {
+    "case_id": "test-07",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "43f73c1165b47a07621256451d27ebcb07f616a2e433fd962204aed91dad6456",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

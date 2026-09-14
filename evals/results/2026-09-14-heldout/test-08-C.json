@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:25.531706+00:00",
+  "question": "Why did report downloads start failing TLS validation?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The reports service logged an error indicating TLS verification failed for archive.internal due to an expired certificate.",
+        "evidence_ids": [
+          "test-08:01"
+        ]
+      },
+      {
+        "claim": "The archive service logged that it is serving a certificate with an expiration date of 2025-12-31T23:59:59Z, which is before the incident time.",
+        "evidence_ids": [
+          "test-08:02"
+        ]
+      },
+      {
+        "claim": "The reports service logged a warning that no HTTP status was received from the archive service, indicating a failure in communication likely related to TLS issues.",
+        "evidence_ids": [
+          "test-08:05"
+        ]
+      },
+      {
+        "claim": "The archive service logged that its TCP listener is ready but incoming TLS handshakes abort before HTTP, consistent with TLS handshake failures.",
+        "evidence_ids": [
+          "test-08:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs or telemetry showing when the certificate was last updated or replaced",
+      "Logs or telemetry from before 10:00:00Z to see if the certificate was valid before that time"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Report downloads started failing TLS validation because the archive service's TLS certificate expired before the incident time, causing TLS verification failures in the reports service.",
+      "evidence_ids": [
+        "test-08:01",
+        "test-08:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the certificate renewal process for the archive service",
+      "Verify the system clocks on both reports and archive services to ensure correct time synchronization"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "archive",
+          "reports"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "TLS validation",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.34991599386557937
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "archive",
+          "reports"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "download",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16500003403052688
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "archive",
+          "reports"
+        ],
+        "start": "2026-01-01T09:50:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "TLS",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": null,
+        "start": null,
+        "end": null,
+        "items": [],
+        "truncated": false,
+        "error": "scope_violation"
+      },
+      "elapsed_ms": 0.248999975156039
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "archive",
+          "reports"
+        ],
+        "start": "2026-01-01T09:50:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "validation",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": null,
+        "start": null,
+        "end": null,
+        "items": [],
+        "truncated": false,
+        "error": "scope_violation"
+      },
+      "elapsed_ms": 0.2250840188935399
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "archive",
+          "reports"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4b6c0de8059be1e5034fce1854e5b36c542ca01a8bc3bffc7823a5675c60f21a",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-08:05",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "WARNING",
+              "message": "no HTTP status received from archive",
+              "timestamp": "2026-01-01T10:00:11.300000Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:04",
+            "kind": "log",
+            "content": {
+              "service": "archive",
+              "level": "INFO",
+              "message": "TCP listener ready; incoming TLS handshakes abort before HTTP",
+              "timestamp": "2026-01-01T10:00:11.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:01",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "ERROR",
+              "message": "TLS verification failed for archive.internal: certificate has expired",
+              "timestamp": "2026-01-01T10:00:11Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:03",
+            "kind": "log",
+            "content": {
+              "service": "reports",
+              "level": "INFO",
+              "message": "client_clock_utc=2026-01-01T10:00:10Z; clock_sync_offset_ms=1",
+              "timestamp": "2026-01-01T10:00:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-08:02",
+            "kind": "log",
+            "content": {
+              "service": "archive",
+              "level": "INFO",
+              "message": "serving certificate not_after=2025-12-31T23:59:59Z",
+              "timestamp": "2026-01-01T10:00:08Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.9773750207386911
+    }
+  ],
+  "model_requests": 5,
+  "tool_executions": 5,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 915,
+        "output_tokens": 123,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00056280",
+      "input_token_reservation": 9196
+    },
+    {
+      "usage": {
+        "input_tokens": 1255,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00058680",
+      "input_token_reservation": 10316
+    },
+    {
+      "usage": {
+        "input_tokens": 1348,
+        "output_tokens": 53,
+        "cached_input_tokens": 1152
+      },
+      "estimated_cost_usd": "0.00027840",
+      "input_token_reservation": 10789
+    },
+    {
+      "usage": {
+        "input_tokens": 1441,
+        "output_tokens": 49,
+        "cached_input_tokens": 1280
+      },
+      "estimated_cost_usd": "0.00027080",
+      "input_token_reservation": 11269
+    },
+    {
+      "usage": {
+        "input_tokens": 1890,
+        "output_tokens": 306,
+        "cached_input_tokens": 1408
+      },
+      "estimated_cost_usd": "0.00082320",
+      "input_token_reservation": 12923
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 6849,
+    "output_tokens": 584,
+    "cached_input_tokens": 3840
+  },
+  "estimated_cost_usd": "0.00252200",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 12923,
+  "estimated_max_cost_usd": "0.00680760",
+  "elapsed_ms": 7823.051583021879,
+  "provenance": {
+    "case_id": "test-08",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "51324f4ddbdd381340bf676cb3d9a9be602a26cf2586a6e18e15fae33e855f1d",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

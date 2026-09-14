@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:39.092574+00:00",
+  "question": "Why did billing lose database access after its rollout?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Billing service started up with credential revision 17 at 10:00:01Z.",
+        "evidence_ids": [
+          "dev-03:01"
+        ]
+      },
+      {
+        "claim": "Database logged that billing login credential revision changed from 17 to 18 at 10:00:02Z.",
+        "evidence_ids": [
+          "dev-03:02"
+        ]
+      },
+      {
+        "claim": "Database reported password authentication failure for role billing from source billing at 10:00:03Z.",
+        "evidence_ids": [
+          "dev-03:03"
+        ]
+      },
+      {
+        "claim": "Billing service connection failed with SQLSTATE 28P01 (authentication failure) at 10:00:03.01Z, no queries executed.",
+        "evidence_ids": [
+          "dev-03:04"
+        ]
+      },
+      {
+        "claim": "Reporting service successfully queried the database using credential revision 18 at 10:00:04Z.",
+        "evidence_ids": [
+          "dev-03:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Billing lost database access because its credential revision was outdated (17) after the database credential changed to revision 18, causing authentication failure.",
+      "evidence_ids": [
+        "dev-03:01",
+        "dev-03:02",
+        "dev-03:03",
+        "dev-03:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify billing service configuration to ensure it uses the updated credential revision 18 for database access.",
+      "Check deployment or rollout procedures to confirm billing service credentials are updated in sync with database credential changes."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing",
+          "database",
+          "reporting"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "d9ce41163ab7f5b4b613c629c91589fefe5b9d6fc7bd70fa0d19f3eb49bdc224",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-03:05",
+            "kind": "log",
+            "content": {
+              "service": "reporting",
+              "level": "INFO",
+              "message": "database query succeeded using credential_revision=18",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:04",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "connect failed with SQLSTATE 28P01; no queries executed",
+              "timestamp": "2026-01-01T10:00:03.010000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:03",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "ERROR",
+              "message": "password authentication failed for role billing; source=billing",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "billing login credential revision changed from 17 to 18",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:01",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "INFO",
+              "message": "startup completed; credential_revision=17",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.30837501981295645
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 980,
+    "output_tokens": 301,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00087360",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00518360",
+  "input_token_reservation": 8863,
+  "elapsed_ms": 4934.354541997891,
+  "provenance": {
+    "case_id": "dev-03",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "66a37277749f21960946a32c6dfc6f141e385b000f55cf46d0509dfb1e357070",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

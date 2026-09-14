@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:49:33.068928+00:00",
+  "question": "Why did billing lose database access after its rollout?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Billing service startup completed with credential revision 17 at 2026-01-01T10:00:01Z.",
+        "evidence_ids": [
+          "dev-03:01"
+        ]
+      },
+      {
+        "claim": "Database service logged that billing login credential revision changed from 17 to 18 at 2026-01-01T10:00:02Z.",
+        "evidence_ids": [
+          "dev-03:02"
+        ]
+      },
+      {
+        "claim": "Database service reported password authentication failure for role billing from source billing at 2026-01-01T10:00:03Z.",
+        "evidence_ids": [
+          "dev-03:03"
+        ]
+      },
+      {
+        "claim": "Billing service connection failed with SQLSTATE 28P01 (authentication failure) and no queries executed at 2026-01-01T10:00:03.010000Z.",
+        "evidence_ids": [
+          "dev-03:04"
+        ]
+      },
+      {
+        "claim": "Reporting service successfully executed a database query using credential revision 18 at 2026-01-01T10:00:04Z.",
+        "evidence_ids": [
+          "dev-03:05"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs or traces showing the exact credential used by billing after the credential revision change",
+      "Configuration or deployment details of the billing service rollout",
+      "Database user permission changes or password update records for billing role"
+    ],
+    "alternatives": [
+      {
+        "claim": "The billing service lost database access due to a password authentication failure caused by a credential revision mismatch or incorrect password after the rollout.",
+        "evidence_ids": [
+          "dev-03:02",
+          "dev-03:03",
+          "dev-03:04"
+        ]
+      },
+      {
+        "claim": "The reporting service retained database access using credential revision 18, indicating the database and credentials themselves were functional for other services.",
+        "evidence_ids": [
+          "dev-03:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "Billing lost database access after its rollout because the billing service attempted to use outdated or incorrect credentials (revision 17) while the database expected credential revision 18, resulting in password authentication failure.",
+      "evidence_ids": [
+        "dev-03:01",
+        "dev-03:02",
+        "dev-03:03",
+        "dev-03:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify the billing service configuration to ensure it uses the updated credential revision 18 after rollout.",
+      "Check the deployment process for the billing service to confirm credential updates were applied correctly.",
+      "Review database user password and permission changes for the billing role around the rollout time."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing",
+          "database",
+          "reporting"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "d9ce41163ab7f5b4b613c629c91589fefe5b9d6fc7bd70fa0d19f3eb49bdc224",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-03:05",
+            "kind": "log",
+            "content": {
+              "service": "reporting",
+              "level": "INFO",
+              "message": "database query succeeded using credential_revision=18",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:04",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "connect failed with SQLSTATE 28P01; no queries executed",
+              "timestamp": "2026-01-01T10:00:03.010000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:03",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "ERROR",
+              "message": "password authentication failed for role billing; source=billing",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "billing login credential revision changed from 17 to 18",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:01",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "INFO",
+              "message": "startup completed; credential_revision=17",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3922089817933738
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "billing",
+          "database",
+          "reporting"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "b542164ffc1449d26733687830d7a7ec311122fe641b226e50c0b026b656ad2f",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:2f212afd9dadfa7e156a26aba938f0cbe88f631d5c814324aa8f9d4cf30c4ab6",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "billing",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "billing",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "database",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "database",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "reporting",
+                  "level": "INFO",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.21466700127348304
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 919,
+        "output_tokens": 122,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00056280",
+      "input_token_reservation": 9212
+    },
+    {
+      "usage": {
+        "input_tokens": 1745,
+        "output_tokens": 496,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00149160",
+      "input_token_reservation": 11848
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2664,
+    "output_tokens": 618,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00205440",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11848,
+  "estimated_max_cost_usd": "0.00637760",
+  "elapsed_ms": 6189.659415977076,
+  "provenance": {
+    "case_id": "dev-03",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "66a37277749f21960946a32c6dfc6f141e385b000f55cf46d0509dfb1e357070",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "998ed1382e7a2668a0aede31ae03a86845560484",
+    "code_dirty": false,
+    "implementation_sha256": "12fa6bad02c451730aa494194236f937a3aeb9797c68474b819fd1b9cfdc4144"
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T01:15:31.004708+00:00",
+  "question": "What caused the search timeouts?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "d48a6378403995a07b6c5a30375cb54600924b2abc384cc9701ec097b299655f",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Gateway service logs show search requests s40 and s41 timed out waiting for response headers after 2000ms.",
+        "evidence_ids": [
+          "dev-06:01",
+          "dev-06:02"
+        ]
+      },
+      {
+        "claim": "Collector service logs indicate search log export was unavailable for the interval, with last_received_before_window=true, suggesting no recent data was received before the time window.",
+        "evidence_ids": [
+          "dev-06:03"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Upstream service logs or traces to determine why gateway did not receive timely responses",
+      "Detailed timing data to distinguish transport delay from handler delay"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check upstream services that the gateway depends on for search responses for errors or delays",
+      "Review network and transport layer logs between gateway and upstream services",
+      "Collect detailed timing data and traces for search requests to identify where delays occur"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "timeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3114159917458892
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "timeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.15962502220645547
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "search",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "21153e9df80b183900be4c5bc340a2cb442b9904a2e61a3d5f2179cae668d61c",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-06:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s41 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s40 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.9212500008288771
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "search",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "f9cbbca2bd7f3d825d2d40ea50d5bc927a9076c014ea797e5ed8913212694853",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-06:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "search log export unavailable for this interval; last_received_before_window=true",
+              "timestamp": "2026-01-01T10:00:05Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.38487499114125967
+    }
+  ],
+  "model_requests": 3,
+  "tool_executions": 4,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 887,
+        "output_tokens": 126,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00055640",
+      "input_token_reservation": 9050
+    },
+    {
+      "usage": {
+        "input_tokens": 1230,
+        "output_tokens": 126,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00069360",
+      "input_token_reservation": 10168
+    },
+    {
+      "usage": {
+        "input_tokens": 1781,
+        "output_tokens": 195,
+        "cached_input_tokens": 1280
+      },
+      "estimated_cost_usd": "0.00064040",
+      "input_token_reservation": 11996
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 3898,
+    "output_tokens": 447,
+    "cached_input_tokens": 1280
+  },
+  "estimated_cost_usd": "0.00189040",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11996,
+  "estimated_max_cost_usd": "0.00643680",
+  "elapsed_ms": 5006.433958013076,
+  "provenance": {
+    "case_id": "dev-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "47248a62bfc8b04667542096320df07374d3e87f3796ef31455cc3c61df6aeae",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

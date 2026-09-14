@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:28.734865+00:00",
+  "question": "Why are order submissions unable to obtain a database connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The orders service logs show a pool acquire timeout after 3000ms, indicating it could not obtain a database connection for request o72.",
+        "evidence_ids": [
+          "dev-02:04"
+        ]
+      },
+      {
+        "claim": "The orders service connection pool is fully checked out with 20 connections in use and 14 waiting requests, indicating pool exhaustion.",
+        "evidence_ids": [
+          "dev-02:02"
+        ]
+      },
+      {
+        "claim": "The database service reports 31 total sessions with a max connection limit of 100, so the database itself is not at its connection limit.",
+        "evidence_ids": [
+          "dev-02:05"
+        ]
+      },
+      {
+        "claim": "The database service shows 20 sessions for the orders role are idle in transaction with no active sessions and the oldest transaction lasting 900 seconds, indicating connections are held open but idle.",
+        "evidence_ids": [
+          "dev-02:03"
+        ]
+      },
+      {
+        "claim": "The orders service successfully performed a database probe with a 3ms connect time, indicating basic connectivity to the database is functional.",
+        "evidence_ids": [
+          "dev-02:01"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed timing and request correlation logs to distinguish whether connections are held by long-running transactions or leaked by the orders service",
+      "Configuration details of the orders service connection pool size and timeout settings",
+      "Database server resource usage metrics and limits beyond connection counts"
+    ],
+    "alternatives": [
+      {
+        "claim": "The orders service connection pool is exhausted due to connections held idle in transactions, causing new requests to time out waiting for a connection.",
+        "evidence_ids": [
+          "dev-02:02",
+          "dev-02:03",
+          "dev-02:04"
+        ]
+      },
+      {
+        "claim": "The orders service connection pool exhaustion is caused by a leak or failure to release connections properly, not by database connection limits.",
+        "evidence_ids": [
+          "dev-02:02",
+          "dev-02:03",
+          "dev-02:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The orders service is unable to obtain a database connection because its connection pool is exhausted, primarily due to many connections held idle in transactions, causing new requests to time out waiting for a connection.",
+      "evidence_ids": [
+        "dev-02:02",
+        "dev-02:03",
+        "dev-02:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check orders service connection pool configuration and usage metrics to confirm pool size and timeout settings.",
+      "Inspect orders service code or logs for connection leaks or failure to release connections after use.",
+      "Review database session states and transaction durations to identify long-running idle transactions.",
+      "Monitor database server resource usage and connection limits beyond just max_connections.",
+      "Correlate request IDs and timing to distinguish between slow upstream handling and client-side pool exhaustion."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "orders",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "38e9d184d3453f709bd038d8d02ddf03adced486e4e0509e967a906717fc7222",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-02:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "accepting connections; total_sessions=31 max_connections=100",
+              "timestamp": "2026-01-01T10:00:06.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:04",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "ERROR",
+              "message": "pool acquire timed out after 3000ms; request o72 not submitted",
+              "timestamp": "2026-01-01T10:00:06Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:03",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "WARNING",
+              "message": "orders role sessions: idle_in_transaction=20 active=0 oldest_transaction_seconds=900",
+              "timestamp": "2026-01-01T10:00:02.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:02",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "WARNING",
+              "message": "pool checked_out=20 size=20 waiters=14",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:01",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "INFO",
+              "message": "database probe succeeded; connect_ms=3",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.30691700521856546
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "orders",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "485321f6c190ec5ecf572345aac007fc9b0612fbe2a3e3f49d7879745bcc1039",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:3fd02b03b8f48816ba260d82af0e1171417900d9518137ffccf9dbf2b41a463e",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "database",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "database",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "orders",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "orders",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "orders",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16937500913627446
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why are order submissions unable to obtain a database connection?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 2.193666994571686
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 2082,
+    "output_tokens": 528,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00167760",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00702760",
+  "input_token_reservation": 13473,
+  "elapsed_ms": 5498.276792000979,
+  "provenance": {
+    "case_id": "dev-02",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "2c79939d67a5861d6cc603625d8aa1dc9a9b5da2d4b2ef166f533f8062087395",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

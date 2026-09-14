@@ -102,3 +102,73 @@ def test_live_batches_preserve_provenance_failures_and_accounting(
     assert total <= Decimal(summary["allowance_usd"])
     assert abstentions == summary.get("reported_abstentions", 0) == expected_labels
     assert reviewed == summary["correct_abstentions"] == expected_reviewed
+
+
+def test_abc_development_batch_preserves_failures_and_accounting():
+    folder = ROOT / "evals/results/2026-09-14-dev-abc"
+    summary = json.loads((folder / "summary.json").read_text())
+    assert len(summary["runs"]) == 24 and summary["requests"] == 46
+    assert summary["authorization_exhausted"] is True
+    total = Decimal(0)
+    for entry in summary["runs"]:
+        raw = (folder / entry["artifact"]).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == entry["sha256"]
+        run = json.loads(raw)
+        assert run["provenance"]["code_revision"] == "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef"
+        assert run["provenance"]["code_dirty"] is False
+        assert run["status"] == entry["execution_status"]
+        if run["status"] == "completed":
+            batches = [EvidenceBatch.model_validate(e["result"]) for e in run["trace"]]
+            validate_citations(InvestigationReport.model_validate(run["report"]), batches)
+        else:
+            assert entry["core_review_pass"] is False and run["report"] is None
+        assert run["usage"] is not None
+        cost = Decimal(run["estimated_cost_usd"])
+        assert cost <= Decimal("0.025")
+        total += cost
+    assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal("0.03470640")
+    # Preserve the offline review verdicts, including C's failures.
+    assert summary["by_system"]["A"]["core_pass"] == 7
+    assert summary["by_system"]["B"]["core_pass"] == 7
+    assert summary["by_system"]["C"]["core_pass"] == 4
+
+
+def test_c_rerun_batch_preserves_review_and_accounting():
+    folder = ROOT / "evals/results/2026-09-14-dev-c2"
+    summary = json.loads((folder / "summary.json").read_text())
+    assert len(summary["runs"]) == 8 and summary["requests"] == 20
+    assert summary["core_review_passes"] == 5
+    total = Decimal(0)
+    for entry in summary["runs"]:
+        raw = (folder / entry["artifact"]).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == entry["sha256"]
+        run = json.loads(raw)
+        assert run["provenance"]["code_revision"] == "998ed1382e7a2668a0aede31ae03a86845560484"
+        assert run["provenance"]["code_dirty"] is False and run["status"] == "completed"
+        batches = [EvidenceBatch.model_validate(e["result"]) for e in run["trace"]]
+        validate_citations(InvestigationReport.model_validate(run["report"]), batches)
+        total += Decimal(run["estimated_cost_usd"])
+    assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal("0.01367280")
+
+
+def test_heldout_batch_preserves_review_and_accounting():
+    folder = ROOT / "evals/results/2026-09-14-heldout"
+    summary = json.loads((folder / "summary.json").read_text())
+    assert len(summary["runs"]) == 48 and summary["requests"] == 74
+    total = Decimal(0)
+    for entry in summary["runs"]:
+        raw = (folder / entry["artifact"]).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == entry["sha256"]
+        run = json.loads(raw)
+        assert run["provenance"]["code_revision"] == "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb"
+        assert run["provenance"]["code_dirty"] is False and run["usage"] is not None
+        if run["status"] == "completed":
+            batches = [EvidenceBatch.model_validate(e["result"]) for e in run["trace"]]
+            validate_citations(InvestigationReport.model_validate(run["report"]), batches)
+        else:
+            assert entry["core_review_pass"] is False
+        total += Decimal(run["estimated_cost_usd"])
+    assert total == Decimal(summary["estimated_total_cost_usd"]) == Decimal("0.06788320")
+    assert summary["by_system"]["A"]["core_pass"] == 12
+    assert summary["by_system"]["B"]["core_pass"] == 13
+    assert summary["by_system"]["C"]["core_pass"] == 11

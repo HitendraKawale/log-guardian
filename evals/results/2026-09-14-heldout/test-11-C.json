@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:08.783052+00:00",
+  "question": "Does this memory error establish a service outage?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "An ECC single-bit memory error was detected and corrected successfully by the node service.",
+        "evidence_ids": [
+          "test-11:01"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs indicating service unavailability or failure during the time window",
+      "Error logs from the api service related to memory or service outage",
+      "Telemetry or health check data showing service status during the time window"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check for any service unavailability or failure logs in the node and api services during the time window",
+      "Review health check or telemetry data for the node and api services to confirm service status",
+      "Investigate if there were any related errors or warnings in the api service logs"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "api",
+          "node"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "memory error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "b67051457352a08884891f72f18bc52816656d03e5baecd5e7b0d973bb71b29c",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-11:01",
+            "kind": "log",
+            "content": {
+              "service": "node",
+              "level": "WARNING",
+              "message": "ECC single-bit memory error detected; correction successful",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.5300000193528831
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 1,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 915,
+        "output_tokens": 54,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00045240",
+      "input_token_reservation": 9185
+    },
+    {
+      "usage": {
+        "input_tokens": 1118,
+        "output_tokens": 159,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00070160",
+      "input_token_reservation": 9970
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2033,
+    "output_tokens": 213,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00115400",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 9970,
+  "estimated_max_cost_usd": "0.00562640",
+  "elapsed_ms": 2926.0617080144584,
+  "provenance": {
+    "case_id": "test-11",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "4722ff5abf568740effb7fe702a3e77cf3ec45c01d3470f585f5d7d51de4d5c5",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

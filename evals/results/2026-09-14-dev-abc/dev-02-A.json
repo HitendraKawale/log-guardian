@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:23.987073+00:00",
+  "question": "Why are order submissions unable to obtain a database connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The orders service is experiencing connection pool exhaustion, with all 20 connections checked out and 14 requests waiting for a connection.",
+        "evidence_ids": [
+          "dev-02:02"
+        ]
+      },
+      {
+        "claim": "The orders service logs an error indicating a pool acquire timeout after 3000ms, causing order request o72 to not be submitted.",
+        "evidence_ids": [
+          "dev-02:04"
+        ]
+      },
+      {
+        "claim": "The database service shows 31 total sessions with a maximum of 100 connections allowed, indicating the database is not at its max connection limit.",
+        "evidence_ids": [
+          "dev-02:05"
+        ]
+      },
+      {
+        "claim": "The database has 20 idle_in_transaction sessions for the orders role, with the oldest transaction lasting 900 seconds, indicating possible connection leakage or long-running transactions.",
+        "evidence_ids": [
+          "dev-02:03"
+        ]
+      },
+      {
+        "claim": "The orders service successfully probes the database connection with a low connect time, indicating basic connectivity is functional.",
+        "evidence_ids": [
+          "dev-02:01"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed database connection pool metrics for the orders service",
+      "Order submission request traces showing timing and connection acquisition details"
+    ],
+    "alternatives": [
+      {
+        "claim": "The orders service connection pool size may be too small to handle the current load, causing timeouts.",
+        "evidence_ids": [
+          "dev-02:02",
+          "dev-02:04"
+        ]
+      },
+      {
+        "claim": "Long-running idle transactions in the database are holding connections open, preventing their reuse and causing pool exhaustion in the orders service.",
+        "evidence_ids": [
+          "dev-02:03"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "Long-running idle transactions in the database for the orders role are causing connection pool exhaustion in the orders service, leading to connection acquisition timeouts and failed order submissions.",
+      "evidence_ids": [
+        "dev-02:02",
+        "dev-02:03",
+        "dev-02:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the orders service database connection pool configuration and increase pool size if necessary.",
+      "Investigate and resolve long-running idle transactions in the database for the orders role.",
+      "Review order submission request traces to confirm connection acquisition delays and timeouts."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "orders",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "38e9d184d3453f709bd038d8d02ddf03adced486e4e0509e967a906717fc7222",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-02:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "accepting connections; total_sessions=31 max_connections=100",
+              "timestamp": "2026-01-01T10:00:06.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:04",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "ERROR",
+              "message": "pool acquire timed out after 3000ms; request o72 not submitted",
+              "timestamp": "2026-01-01T10:00:06Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:03",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "WARNING",
+              "message": "orders role sessions: idle_in_transaction=20 active=0 oldest_transaction_seconds=900",
+              "timestamp": "2026-01-01T10:00:02.100000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:02",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "WARNING",
+              "message": "pool checked_out=20 size=20 waiters=14",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-02:01",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "INFO",
+              "message": "database probe succeeded; connect_ms=3",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3150000120513141
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 987,
+    "output_tokens": 427,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00107800",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00518440",
+  "input_token_reservation": 8865,
+  "elapsed_ms": 4267.079916986404,
+  "provenance": {
+    "case_id": "dev-02",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "2c79939d67a5861d6cc603625d8aa1dc9a9b5da2d4b2ef166f533f8062087395",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:52:48.325344+00:00",
+  "question": "Why do pricing requests and its health checks stall at the same time?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Pricing service experiences high event loop lag and CPU usage during synchronous catalog refresh, causing delays in health handler execution.",
+        "evidence_ids": [
+          "test-01:01",
+          "test-01:02",
+          "test-01:04"
+        ]
+      },
+      {
+        "claim": "Checkout service logs an error indicating a pricing request deadline exceeded after 3000ms, suggesting it is waiting on pricing service response.",
+        "evidence_ids": [
+          "test-01:03"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs showing direct correlation or dependency between pricing health checks and checkout requests",
+      "Detailed timing data distinguishing transport delay from handler delay"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Pricing service stalls due to synchronous catalog refresh blocking the event loop, causing both pricing requests and health checks to stall simultaneously, which leads to checkout service request timeouts.",
+      "evidence_ids": [
+        "test-01:01",
+        "test-01:02",
+        "test-01:03",
+        "test-01:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check asynchronous handling of catalog refresh in pricing service to prevent event loop blocking.",
+      "Monitor event loop lag and CPU usage metrics during catalog refresh periods.",
+      "Trace request paths and timing between checkout and pricing services to confirm dependency and delay propagation."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "pricing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "b83eea98ae66ae1c36d0ec547d37380728942e2f03d62d54e7554ed2f7771598",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-01:05",
+            "kind": "log",
+            "content": {
+              "service": "pricing",
+              "level": "INFO",
+              "message": "refresh ended; next event_loop_lag_ms=3",
+              "timestamp": "2026-01-01T10:00:05.210000Z"
+            }
+          },
+          {
+            "evidence_id": "test-01:04",
+            "kind": "log",
+            "content": {
+              "service": "pricing",
+              "level": "WARNING",
+              "message": "health handler scheduled_delay_ms=4205; execution_ms=1",
+              "timestamp": "2026-01-01T10:00:05.206000Z"
+            }
+          },
+          {
+            "evidence_id": "test-01:02",
+            "kind": "log",
+            "content": {
+              "service": "pricing",
+              "level": "WARNING",
+              "message": "event_loop_lag_ms=4200; refresh_cpu_ms=4180",
+              "timestamp": "2026-01-01T10:00:05.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-01:01",
+            "kind": "log",
+            "content": {
+              "service": "pricing",
+              "level": "INFO",
+              "message": "request q18 started synchronous catalog refresh on event-loop thread",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.7707909680902958
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "a7d72f948785f20e405f4204de757df4fba7f3f23181385cb91585add081d6ff",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-01:03",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "pricing q19 deadline exceeded after 3000ms",
+              "timestamp": "2026-01-01T10:00:04.200000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.22362498566508293
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 2,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 920,
+        "output_tokens": 110,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00054400",
+      "input_token_reservation": 9212
+    },
+    {
+      "usage": {
+        "input_tokens": 1594,
+        "output_tokens": 255,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00104560",
+      "input_token_reservation": 11348
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2514,
+    "output_tokens": 365,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00158960",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11348,
+  "estimated_max_cost_usd": "0.00617760",
+  "elapsed_ms": 4164.754458004609,
+  "provenance": {
+    "case_id": "test-01",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f209cf66b49ae934aa3ea418afd76fd3144358b2bf40ff5c16da4981a2855f2c",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

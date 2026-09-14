@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:44.886446+00:00",
+  "question": "Why are several small application pools failing to open database sessions?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The database service log shows an error indicating that the remaining connection slots are reserved and the total connections have reached the maximum allowed connections (100).",
+        "evidence_ids": [
+          "test-05:02"
+        ]
+      },
+      {
+        "claim": "The orders and billing services report errors that the server rejected connection attempts with SQLSTATE 53300, which is related to connection limits.",
+        "evidence_ids": [
+          "test-05:04",
+          "test-05:05"
+        ]
+      },
+      {
+        "claim": "The orders service log shows it is attempting to open another connection while the local pool has checked out 3 connections out of a size of 20.",
+        "evidence_ids": [
+          "test-05:01"
+        ]
+      },
+      {
+        "claim": "The analytics service log shows a batch started with 90 parallel database sessions, indicating high database session usage.",
+        "evidence_ids": [
+          "test-05:03"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs or metrics showing database connection pool configuration and limits",
+      "Detailed timing and correlation between application pool connection attempts and database connection availability"
+    ],
+    "alternatives": [
+      {
+        "claim": "The failure to open database sessions could be due to the database reaching its maximum allowed connections, causing new connection attempts to be rejected.",
+        "evidence_ids": [
+          "test-05:02",
+          "test-05:04",
+          "test-05:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The likely cause of the failure for several small application pools to open database sessions is that the database has reached its maximum connection limit, causing the server to reject new connection attempts with SQLSTATE 53300 errors.",
+      "evidence_ids": [
+        "test-05:02",
+        "test-05:04",
+        "test-05:05"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the database server's max_connections setting and current connection usage",
+      "Review application pool connection pool sizes and usage patterns",
+      "Monitor database connection usage over time to identify spikes or leaks"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "analytics",
+          "billing",
+          "database",
+          "orders"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "fail",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.18083298346027732
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "analytics",
+          "billing",
+          "database",
+          "orders"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2483330317772925
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "analytics",
+          "billing",
+          "database",
+          "orders"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "e3d8af1db1a7a0a891fc0b83e09d7113d104b2a08d38cbb11304b38c5ec269e9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-05:05",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "server rejected connect with SQLSTATE 53300; local_pool_active=2",
+              "timestamp": "2026-01-01T10:00:01.003000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:04",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "ERROR",
+              "message": "server rejected connect with SQLSTATE 53300",
+              "timestamp": "2026-01-01T10:00:01.001000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "ERROR",
+              "message": "remaining connection slots are reserved; total_connections=100 max_connections=100",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:01",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "INFO",
+              "message": "local pool checked_out=3 size=20; opening another connection",
+              "timestamp": "2026-01-01T10:00:00.800000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:03",
+            "kind": "log",
+            "content": {
+              "service": "analytics",
+              "level": "WARNING",
+              "message": "batch started with 90 parallel database sessions",
+              "timestamp": "2026-01-01T10:00:00.500000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.2011670041829348
+    }
+  ],
+  "model_requests": 4,
+  "tool_executions": 3,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 922,
+        "output_tokens": 57,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00046000",
+      "input_token_reservation": 9242
+    },
+    {
+      "usage": {
+        "input_tokens": 1080,
+        "output_tokens": 57,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00052320",
+      "input_token_reservation": 9831
+    },
+    {
+      "usage": {
+        "input_tokens": 1238,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00058000",
+      "input_token_reservation": 10421
+    },
+    {
+      "usage": {
+        "input_tokens": 1686,
+        "output_tokens": 379,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00097360",
+      "input_token_reservation": 12138
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 4926,
+    "output_tokens": 546,
+    "cached_input_tokens": 1024
+  },
+  "estimated_cost_usd": "0.00253680",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 12138,
+  "estimated_max_cost_usd": "0.00649360",
+  "elapsed_ms": 6470.225292025134,
+  "provenance": {
+    "case_id": "test-05",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "95d1243fad064f97fc56e58bf4c62bc24d04d02279b73d08d93fc7fd154a6e0b",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

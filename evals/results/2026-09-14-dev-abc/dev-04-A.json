@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:56.715297+00:00",
+  "question": "Why does the API gateway fail every inventory lookup?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The API gateway configuration uses the hostname 'inventroy.internal' for the inventory service.",
+        "evidence_ids": [
+          "dev-04:01"
+        ]
+      },
+      {
+        "claim": "The API gateway fails DNS lookup for 'inventroy.internal', returning NXDOMAIN error.",
+        "evidence_ids": [
+          "dev-04:02"
+        ]
+      },
+      {
+        "claim": "The API gateway does not attempt an upstream TCP connection and returns HTTP 502 errors.",
+        "evidence_ids": [
+          "dev-04:03"
+        ]
+      },
+      {
+        "claim": "The inventory service is registered and healthy under the hostname 'inventory.internal'.",
+        "evidence_ids": [
+          "dev-04:04",
+          "dev-04:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The API gateway fails every inventory lookup because it is configured with a misspelled hostname 'inventroy.internal' instead of the correct 'inventory.internal', causing DNS resolution failures and subsequent request failures.",
+      "evidence_ids": [
+        "dev-04:01",
+        "dev-04:02",
+        "dev-04:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify and correct the inventory service hostname in the API gateway configuration from 'inventroy.internal' to 'inventory.internal'.",
+      "Check DNS records to ensure 'inventory.internal' resolves correctly.",
+      "Confirm that the API gateway can successfully resolve and connect to the inventory service after configuration correction."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "0c70ca3911c36a5a4be6a2b638be937dd0b1e9dc14a8e3838e9c4de7f2fa03bf",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-04:05",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "health probe status=200; active_requests=0",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:03",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "WARNING",
+              "message": "no upstream TCP connection attempted; response_status=502",
+              "timestamp": "2026-01-01T10:00:02.001000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "lookup inventroy.internal returned NXDOMAIN",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "configuration loaded; inventory_host=inventroy.internal",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          },
+          {
+            "evidence_id": "dev-04:04",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "INFO",
+              "message": "service registered as inventory.internal; ready=true",
+              "timestamp": "2026-01-01T10:00:00.500000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3065410128328949
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 975,
+    "output_tokens": 272,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00082520",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00516880",
+  "input_token_reservation": 8826,
+  "elapsed_ms": 2562.6618749811314,
+  "provenance": {
+    "case_id": "dev-04",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "6a05eddad4aa991f3a558a23709e6b52e9f31c629bdfab3e9c48b1e481fb27f0",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

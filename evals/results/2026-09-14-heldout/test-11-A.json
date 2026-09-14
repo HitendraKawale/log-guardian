@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:01.789970+00:00",
+  "question": "Does this memory error establish a service outage?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "An ECC single-bit memory error was detected and corrected successfully, indicating no uncorrectable memory errors occurred.",
+        "evidence_ids": [
+          "test-11:01",
+          "test-11:02"
+        ]
+      },
+      {
+        "claim": "The API service reported zero errors and stable worker processes during the time window.",
+        "evidence_ids": [
+          "test-11:03",
+          "test-11:04"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The memory error was corrected successfully and did not cause a service outage.",
+      "evidence_ids": [
+        "test-11:01",
+        "test-11:02",
+        "test-11:03",
+        "test-11:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify continued error-free operation in subsequent time windows.",
+      "Check for any related alerts or incidents in the monitoring system during the time window."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "node",
+          "api"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "04d35d1e095a3f960a77f6554c29ae707fc29d27541ac51f3af10e58f57010f7",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-11:04",
+            "kind": "log",
+            "content": {
+              "service": "api",
+              "level": "INFO",
+              "message": "worker processes unchanged; restart_count=0",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:03",
+            "kind": "log",
+            "content": {
+              "service": "api",
+              "level": "INFO",
+              "message": "window requests=800 errors=0 p95_ms=21",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:02",
+            "kind": "log",
+            "content": {
+              "service": "node",
+              "level": "INFO",
+              "message": "memory scrub completed; uncorrectable_errors=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-11:01",
+            "kind": "log",
+            "content": {
+              "service": "node",
+              "level": "WARNING",
+              "message": "ECC single-bit memory error detected; correction successful",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2553340164013207
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 913,
+    "output_tokens": 175,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00064520",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00505880",
+  "input_token_reservation": 8551,
+  "elapsed_ms": 2330.503833014518,
+  "provenance": {
+    "case_id": "test-11",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "4722ff5abf568740effb7fe702a3e77cf3ec45c01d3470f585f5d7d51de4d5c5",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

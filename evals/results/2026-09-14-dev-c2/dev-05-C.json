@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:49:45.049145+00:00",
+  "question": "Do these payment ERROR messages indicate a payment service outage?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [],
+    "missing_evidence": [
+      "payment service logs with ERROR messages"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check payment service logs for ERROR messages outside the given time range",
+      "Check other telemetry such as metrics or traces for payment service errors or outages",
+      "Check checkout service logs for related errors or timeouts"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "payments"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "ERROR",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2988749765790999
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 1,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 917,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00045160",
+      "input_token_reservation": 9210
+    },
+    {
+      "usage": {
+        "input_tokens": 1071,
+        "output_tokens": 84,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00056280",
+      "input_token_reservation": 9776
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 1988,
+    "output_tokens": 137,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00101440",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 9776,
+  "estimated_max_cost_usd": "0.00554880",
+  "elapsed_ms": 2712.0179170160554,
+  "provenance": {
+    "case_id": "dev-05",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "7c0c05b145e650f95cc5c958e6a4253e4c4d40a42aca2c31dc633330a26beaff",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "998ed1382e7a2668a0aede31ae03a86845560484",
+    "code_dirty": false,
+    "implementation_sha256": "12fa6bad02c451730aa494194236f937a3aeb9797c68474b819fd1b9cfdc4144"
+  }
+}

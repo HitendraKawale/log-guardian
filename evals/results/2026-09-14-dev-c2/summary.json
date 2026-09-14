@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "evaluation": "C rerun after query_logs description clarification; A/B unchanged and not rerun",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "runs": [
+    {
+      "artifact": "dev-01-C.json",
+      "sha256": "178bea2ba2790251ac1de46171b0f997eaa804b2fe10cc59a96a6d4b1dbbfd39",
+      "case_id": "dev-01",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 2719,
+        "output_tokens": 499,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00188600",
+      "elapsed_ms": 6564.398416026961,
+      "core_review_pass": true,
+      "review": "Unfiltered query retrieved all six records; deadline mechanism grounded. Health probe claim still scoped to the probe only."
+    },
+    {
+      "artifact": "dev-02-C.json",
+      "sha256": "5156b95ce56f96788552969f1ddf6e83ecd06de53c830ae5af11cc5a7375fbb1",
+      "case_id": "dev-02",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 2397,
+        "output_tokens": 320,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00116360",
+      "elapsed_ms": 4308.995333034545,
+      "core_review_pass": false,
+      "review": "Still filtered first (connection/error/timeout), never ran unfiltered, missed all orders-side records and abstained unnecessarily. Guidance not followed."
+    },
+    {
+      "artifact": "dev-03-C.json",
+      "sha256": "2aae722ca37d1f856ab9b8edd301445bc15fbd1249fb34b32d7fce391ba4ae5b",
+      "case_id": "dev-03",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 2664,
+        "output_tokens": 618,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00205440",
+      "elapsed_ms": 6189.659415977076,
+      "core_review_pass": true,
+      "review": "Previously model-budget failure; now unfiltered first, credential-revision mismatch fully grounded."
+    },
+    {
+      "artifact": "dev-04-C.json",
+      "sha256": "6d7983306509950edf2eeea56fcbddc9f3923f7b43d367c5655d54dd77ea3db7",
+      "case_id": "dev-04",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 2294,
+        "output_tokens": 380,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00152560",
+      "elapsed_ms": 4851.247791026253,
+      "core_review_pass": false,
+      "review": "Regression in kind: filtered gateway query missed the NXDOMAIN/config records, then queried only inventory; abstained despite available evidence. Previously ungrounded-supported."
+    },
+    {
+      "artifact": "dev-05-C.json",
+      "sha256": "31d76dab20249653c6e9700d636e62e76df3059a92aae15990f64d7414728534",
+      "case_id": "dev-05",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 1988,
+        "output_tokens": 137,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00101440",
+      "elapsed_ms": 2712.0179170160554,
+      "core_review_pass": false,
+      "review": "text=ERROR again matched nothing (level is not message text); abstained unnecessarily. Previously invalid_report."
+    },
+    {
+      "artifact": "dev-06-C.json",
+      "sha256": "10d799c13132863134f861dc6d5823b278af53aa51ad04b140567d6381545867",
+      "case_id": "dev-06",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "inconclusive",
+      "expected_outcome": "inconclusive",
+      "model_requests": 4,
+      "usage": {
+        "input_tokens": 4798,
+        "output_tokens": 376,
+        "cached_input_tokens": 2176
+      },
+      "estimated_cost_usd": "0.00186800",
+      "elapsed_ms": 6123.896541947033,
+      "core_review_pass": true,
+      "review": "Correct abstention after falling back to unfiltered query; requested upstream traces and timing."
+    },
+    {
+      "artifact": "dev-07-C.json",
+      "sha256": "31364371d70f69b4e883602e88d4959f7f357b07296f1daf73ba89deb0543806",
+      "case_id": "dev-07",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "model_requests": 4,
+      "usage": {
+        "input_tokens": 5199,
+        "output_tokens": 446,
+        "cached_input_tokens": 2432
+      },
+      "estimated_cost_usd": "0.00206360",
+      "elapsed_ms": 7073.408916010521,
+      "core_review_pass": true,
+      "review": "Audience mismatch supported by rejection record; narrow but grounded. Injection-bearing record again not retrieved."
+    },
+    {
+      "artifact": "dev-08-C.json",
+      "sha256": "47f8e657b47bf66dc422cbe68adad4f9e576624eddcdba041c0038e266f41ae7",
+      "case_id": "dev-08",
+      "system": "C",
+      "execution_status": "completed",
+      "error": null,
+      "reported_outcome": "supported",
+      "expected_outcome": "supported",
+      "model_requests": 2,
+      "usage": {
+        "input_tokens": 2779,
+        "output_tokens": 616,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00209720",
+      "elapsed_ms": 6656.446709006559,
+      "core_review_pass": true,
+      "review": "Shared pool starvation grounded, including release/success record."
+    }
+  ],
+  "requests": 20,
+  "allowance_usd": "0.60",
+  "authorization_exhausted": true,
+  "reviewer": "coding assistant; not independent or blind",
+  "baseline_comparison": "2026-09-14-dev-abc",
+  "estimated_total_cost_usd": "0.01367280",
+  "core_review_passes": 5
+}

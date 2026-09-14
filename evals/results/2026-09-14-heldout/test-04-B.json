@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:27.384003+00:00",
+  "question": "What explains long commit times in the ledger?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The ledger service logged a commit response exceeding the 5000ms deadline, making the transaction outcome unknown to the client.",
+        "evidence_ids": [
+          "test-04:03"
+        ]
+      },
+      {
+        "claim": "The ledger service finished transaction statements quickly (11ms) but then awaited commit, indicating the delay is in the commit phase.",
+        "evidence_ids": [
+          "test-04:01"
+        ]
+      },
+      {
+        "claim": "The database service logged a transaction commit as durable after 6120ms, confirming a long commit duration.",
+        "evidence_ids": [
+          "test-04:04"
+        ]
+      },
+      {
+        "claim": "The database service logged a warning about WAL sync duration of 6100ms and a storage queue depth of 94, indicating storage subsystem delays.",
+        "evidence_ids": [
+          "test-04:02"
+        ]
+      },
+      {
+        "claim": "A read-only probe to the database completed quickly (2ms), suggesting the database was responsive to simple queries during the incident.",
+        "evidence_ids": [
+          "test-04:05"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed database internal metrics on lock contention or CPU usage",
+      "Network latency or transport error logs between ledger and database",
+      "Connection pool usage and limits for ledger and database services"
+    ],
+    "alternatives": [
+      {
+        "claim": "Long commit times could be caused by storage subsystem delays, as indicated by the WAL sync duration and storage queue depth warning in the database logs.",
+        "evidence_ids": [
+          "test-04:02"
+        ]
+      },
+      {
+        "claim": "The ledger service's commit timeout could be due to a client deadline shorter than the actual commit duration, as suggested by the runbook on distinguishing upstream latency from short client deadlines.",
+        "evidence_ids": [
+          "runbook:timeouts",
+          "test-04:03"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The long commit times in the ledger are explained by slow database commit durability caused by storage subsystem delays, specifically a high WAL sync duration and storage queue depth, leading to commit durations exceeding 6 seconds.",
+      "evidence_ids": [
+        "test-04:02",
+        "test-04:04",
+        "test-04:03"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check database storage subsystem health and performance metrics, especially WAL sync times and queue depths.",
+      "Review ledger and database connection pool usage and limits to rule out resource exhaustion.",
+      "Correlate ledger commit request timestamps with database commit completion times to confirm timing relationships.",
+      "Inspect network latency and error logs between ledger and database services to exclude transport delays."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "ledger",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "a6ea338872177737891e2f1ba290a68cf5ad01fd78dcd663c62cba211d99fd75",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-04:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "read-only probe elapsed_ms=2",
+              "timestamp": "2026-01-01T10:00:07.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:04",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "transaction le9 commit durable after 6120ms",
+              "timestamp": "2026-01-01T10:00:07.120000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "WARNING",
+              "message": "WAL sync duration_ms=6100; storage_queue_depth=94",
+              "timestamp": "2026-01-01T10:00:07.100000Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:03",
+            "kind": "log",
+            "content": {
+              "service": "ledger",
+              "level": "ERROR",
+              "message": "commit response exceeded 5000ms deadline; transaction outcome unknown to client",
+              "timestamp": "2026-01-01T10:00:06Z"
+            }
+          },
+          {
+            "evidence_id": "test-04:01",
+            "kind": "log",
+            "content": {
+              "service": "ledger",
+              "level": "INFO",
+              "message": "transaction le9 statements finished in 11ms; awaiting commit",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3132080310024321
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "ledger",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "c8054699b5f6d1661b64aaa1449bca76edd41781224bedf0e4eb88701ca841da",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:7ee8ade063200efe5a275b7d047094108298ff7d2dfe69cad7c29263071d0d7b",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "database",
+                  "level": "INFO",
+                  "count": 2
+                },
+                {
+                  "service": "database",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "ledger",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "ledger",
+                  "level": "INFO",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16370799858123064
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "What explains long commit times in the ledger?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.0657500242814422
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1869,
+    "output_tokens": 477,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00151080",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00657440",
+  "input_token_reservation": 12340,
+  "elapsed_ms": 4000.568707997445,
+  "provenance": {
+    "case_id": "test-04",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "f9e9acf96a2994cfea8a6943de2ebf8c694b59122c8f6670aa39f6f6594d5991",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

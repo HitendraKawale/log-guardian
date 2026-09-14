@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:49:48.229447+00:00",
+  "question": "What caused the search timeouts?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The gateway service experienced search request timeouts waiting for response headers after 2000ms.",
+        "evidence_ids": [
+          "dev-06:01",
+          "dev-06:02"
+        ]
+      },
+      {
+        "claim": "The collector service logged a warning that the search log export was unavailable for the interval, indicating no data was received before the window.",
+        "evidence_ids": [
+          "dev-06:03"
+        ]
+      },
+      {
+        "claim": "The gateway service had a local connection pool with active connections at 2 and a max of 50, with no queue wait time, indicating no connection pool exhaustion.",
+        "evidence_ids": [
+          "dev-06:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Upstream service logs and traces to determine if the delay was caused by the collector or another upstream dependency",
+      "Detailed timing data distinguishing transport delay from handler delay"
+    ],
+    "alternatives": [],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check upstream service logs and traces for delays or errors during the incident window",
+      "Collect detailed timing data to distinguish between transport delays and handler processing delays"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector",
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "timeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2799580106511712
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector",
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.4028749535791576
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "collector",
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "179cb32d8be184803a475a8c60957402ebac57419cb9e2786756261b7200ad96",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-06:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "search log export unavailable for this interval; last_received_before_window=true",
+              "timestamp": "2026-01-01T10:00:05Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s41 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "ERROR",
+              "message": "search request s40 timed out waiting for response headers after 2000ms",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-06:04",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "local connection pool active=2 max=50; queue_wait_ms=0",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.7438329630531371
+    }
+  ],
+  "model_requests": 4,
+  "tool_executions": 3,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 913,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00045000",
+      "input_token_reservation": 9176
+    },
+    {
+      "usage": {
+        "input_tokens": 1067,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00051160",
+      "input_token_reservation": 9744
+    },
+    {
+      "usage": {
+        "input_tokens": 1221,
+        "output_tokens": 49,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00025960",
+      "input_token_reservation": 10310
+    },
+    {
+      "usage": {
+        "input_tokens": 1597,
+        "output_tokens": 221,
+        "cached_input_tokens": 1152
+      },
+      "estimated_cost_usd": "0.00064680",
+      "input_token_reservation": 11786
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 4798,
+    "output_tokens": 376,
+    "cached_input_tokens": 2176
+  },
+  "estimated_cost_usd": "0.00186800",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 11786,
+  "estimated_max_cost_usd": "0.00635280",
+  "elapsed_ms": 6123.896541947033,
+  "provenance": {
+    "case_id": "dev-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "47248a62bfc8b04667542096320df07374d3e87f3796ef31455cc3c61df6aeae",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "998ed1382e7a2668a0aede31ae03a86845560484",
+    "code_dirty": false,
+    "implementation_sha256": "12fa6bad02c451730aa494194236f937a3aeb9797c68474b819fd1b9cfdc4144"
+  }
+}

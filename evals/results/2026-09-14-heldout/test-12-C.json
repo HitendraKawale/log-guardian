@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:21.557579+00:00",
+  "question": "Why is the gateway logging many 404 responses?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "c3bf29907ca9a2518f8f4b5d6a0f615f83aff705a23b4bfc2566885bbb648377",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The gateway is logging many 404 responses for requests to the path /v9/legacy.",
+        "evidence_ids": [
+          "test-12:01",
+          "test-12:04"
+        ]
+      },
+      {
+        "claim": "The 404 responses are associated with a user agent named retired-mobile-client.",
+        "evidence_ids": [
+          "test-12:01"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Logs explaining why the path /v9/legacy is not found or why the retired-mobile-client is making these requests"
+    ],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The 404 responses are likely caused by requests from a retired or deprecated client (retired-mobile-client) to a legacy API path (/v9/legacy) that no longer exists or is not supported by the gateway.",
+      "evidence_ids": [
+        "test-12:01",
+        "test-12:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the configuration or routing rules for the /v9/legacy path in the gateway to confirm if it is deprecated or removed.",
+      "Investigate the retired-mobile-client to understand why it is still making requests to the legacy path.",
+      "Check if there are any redirects or updated endpoints for the legacy API that the client should use instead."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "404",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "f534b0755cde905d35d6ad6f6eccf4d865b8830fab1d401bf058b4995a59a045",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-12:04",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "window 404_count=40 all_path=/v9/legacy; upstream_5xx_count=0",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "test-12:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "WARNING",
+              "message": "GET /v9/legacy returned 404; user_agent=retired-mobile-client",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.5848339642398059
+    }
+  ],
+  "model_requests": 2,
+  "tool_executions": 1,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 914,
+        "output_tokens": 51,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00044720",
+      "input_token_reservation": 9176
+    },
+    {
+      "usage": {
+        "input_tokens": 1189,
+        "output_tokens": 254,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00088200",
+      "input_token_reservation": 10176
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 2103,
+    "output_tokens": 305,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00132920",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 10176,
+  "estimated_max_cost_usd": "0.00570880",
+  "elapsed_ms": 4437.123249983415,
+  "provenance": {
+    "case_id": "test-12",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "ba77d7878b6414c45b155f63042ee4de0b81e990dafadb9bc38235d9ca918301",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

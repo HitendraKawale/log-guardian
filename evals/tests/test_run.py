@@ -28,7 +28,7 @@ def invoke(*arguments):
     )
 
 
-@pytest.mark.parametrize("system,count", [("A", 1), ("B", 3)])
+@pytest.mark.parametrize("system,count", [("A", 1), ("B", 3), ("C", 0)])
 def test_dry_run_has_provenance_evidence_and_zero_requests(system, count):
     completed = invoke("--system", system, "--dry-run")
     assert completed.returncode == 0, completed.stderr
@@ -54,7 +54,11 @@ def test_case_selection_does_not_accept_paths_or_held_out_ids():
     for case in ("../../labels.jsonl", "test-01"):
         denied = invoke("--system", "A", "--dry-run", "--case", case)
         assert denied.returncode == 2
-        assert "development case" in denied.stderr
+        assert "unknown case ID" in denied.stderr
+    accepted = invoke("--system", "A", "--dry-run", "--case", "test-01", "--held-out")
+    assert accepted.returncode == 0
+    denied = invoke("--system", "A", "--dry-run", "--case", "../../labels.jsonl", "--held-out")
+    assert denied.returncode == 2
 
 
 def test_existing_output_is_never_overwritten(tmp_path):

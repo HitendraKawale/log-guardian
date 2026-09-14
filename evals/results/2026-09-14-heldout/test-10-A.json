@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:46.230924+00:00",
+  "question": "Why does the export client reject the object-store connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The exporter service attempts to connect to the object-store using the URL https://store-new.internal.",
+        "evidence_ids": [
+          "test-10:01"
+        ]
+      },
+      {
+        "claim": "The exporter service encounters a TLS hostname verification failure because the requested hostname is store-new.internal but the certificate's Subject Alternative Name (SAN) is store-old.internal.",
+        "evidence_ids": [
+          "test-10:02"
+        ]
+      },
+      {
+        "claim": "The object-store service's certificate validity check passed and the certificate expires on 2027-01-01.",
+        "evidence_ids": [
+          "test-10:03"
+        ]
+      },
+      {
+        "claim": "The object-store service successfully completed a request using the hostname store-old.internal with status 200.",
+        "evidence_ids": [
+          "test-10:04"
+        ]
+      },
+      {
+        "claim": "The exporter service logs a warning that the export batch was not uploaded due to a failure occurring before authentication.",
+        "evidence_ids": [
+          "test-10:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "The export client rejects the object-store connection due to a TLS hostname verification failure caused by a mismatch between the requested hostname (store-new.internal) and the certificate SAN (store-old.internal).",
+      "evidence_ids": [
+        "test-10:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify that the export client is configured to use the correct object-store URL that matches the certificate SAN.",
+      "Check the TLS certificate on the object-store service to ensure it includes the hostname store-new.internal if that is the intended URL.",
+      "Review the export client's TLS settings and hostname verification configuration."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "exporter",
+          "object-store"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "5e2e84219826557363f723db8e0dea36ae1db6b33a97ac945998395eaace09e3",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-10:05",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "WARNING",
+              "message": "export batch not uploaded; failure occurred before authentication",
+              "timestamp": "2026-01-01T10:00:03.001000Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:04",
+            "kind": "log",
+            "content": {
+              "service": "object-store",
+              "level": "INFO",
+              "message": "request using store-old.internal completed status=200",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:02",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "ERROR",
+              "message": "TLS hostname verification failed: requested store-new.internal; certificate SAN=store-old.internal",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:03",
+            "kind": "log",
+            "content": {
+              "service": "object-store",
+              "level": "INFO",
+              "message": "certificate validity check passed; expiry=2027-01-01T00:00:00Z",
+              "timestamp": "2026-01-01T10:00:01.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:01",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "INFO",
+              "message": "object_store_url=https://store-new.internal",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3233330207876861
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 993,
+    "output_tokens": 315,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00090120",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00521000",
+  "input_token_reservation": 8929,
+  "elapsed_ms": 3454.6554590342566,
+  "provenance": {
+    "case_id": "test-10",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "fee4925c6285fc62a5077bf3f19d169c461896ff1a2c0aaf0cabf54e18197463",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:08.416090+00:00",
+  "question": "Why did product reads become slow while the database remained reachable?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The database remained reachable and responsive, as indicated by a fast SELECT 1 probe returning in 1ms.",
+        "evidence_ids": [
+          "test-03:05"
+        ]
+      },
+      {
+        "claim": "The products service experienced query cancellations due to statement timeouts set at 3000ms.",
+        "evidence_ids": [
+          "test-03:04"
+        ]
+      },
+      {
+        "claim": "The products service queries were waiting for a relation lock on the products table, with wait times close to the statement timeout threshold.",
+        "evidence_ids": [
+          "test-03:02"
+        ]
+      },
+      {
+        "claim": "A database session named migration-8 acquired an AccessExclusiveLock on the products table, blocking other sessions including products-pr5.",
+        "evidence_ids": [
+          "test-03:01",
+          "test-03:03"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [],
+    "likely_cause": {
+      "claim": "Product reads became slow because the database session migration-8 held an AccessExclusiveLock on the products table, causing products service queries to wait for the lock and eventually time out.",
+      "evidence_ids": [
+        "test-03:01",
+        "test-03:02",
+        "test-03:03",
+        "test-03:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check for long-running transactions or migrations holding exclusive locks on the products table.",
+      "Review statement timeout settings in the products service to understand query cancellation thresholds.",
+      "Monitor lock contention and wait times on the products table during migrations or schema changes."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "database",
+          "products"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "6632a3e8ce6d354cd6bac4be05177f51bacb6d5027ec31c2add19d4f48e75cff",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-03:05",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "SELECT 1 probe returned in 1ms; session migration-8 transaction still open",
+              "timestamp": "2026-01-01T10:00:04.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-03:04",
+            "kind": "log",
+            "content": {
+              "service": "products",
+              "level": "ERROR",
+              "message": "query pr5 cancelled at statement_timeout_ms=3000",
+              "timestamp": "2026-01-01T10:00:04.100000Z"
+            }
+          },
+          {
+            "evidence_id": "test-03:03",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "WARNING",
+              "message": "blocked_session=products-pr5 blocker=migration-8 relation=products",
+              "timestamp": "2026-01-01T10:00:04.010000Z"
+            }
+          },
+          {
+            "evidence_id": "test-03:02",
+            "kind": "log",
+            "content": {
+              "service": "products",
+              "level": "WARNING",
+              "message": "query pr5 waiting for relation lock; wait_ms=2900",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "test-03:01",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "session migration-8 acquired AccessExclusiveLock on products",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.320709019433707
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 995,
+    "output_tokens": 289,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00086040",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00520200",
+  "input_token_reservation": 8909,
+  "elapsed_ms": 3327.9161670361646,
+  "provenance": {
+    "case_id": "test-03",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "c584ff51124ea6788454dfdab33f98fffa7af072cd74f4b7566cd03d9cd6fa0e",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

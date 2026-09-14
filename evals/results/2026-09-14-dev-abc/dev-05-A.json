@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T01:15:11.673068+00:00",
+  "question": "Do these payment ERROR messages indicate a payment service outage?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Payment service logs show some payment charges were rejected with error codes indicating business reasons such as 'card_declined' and 'insufficient_funds'.",
+        "evidence_ids": [
+          "dev-05:01",
+          "dev-05:03"
+        ]
+      },
+      {
+        "claim": "Payment service log summary indicates 100 attempts with 97 approved, 3 business declines, and 0 transport failures, suggesting no transport or service outage.",
+        "evidence_ids": [
+          "dev-05:04"
+        ]
+      },
+      {
+        "claim": "Checkout service logs show a payment displayed as declined requiring customer action, consistent with business declines rather than service errors.",
+        "evidence_ids": [
+          "dev-05:05"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [
+      {
+        "claim": "The ERROR messages reflect business-level payment declines, not a payment service outage.",
+        "evidence_ids": [
+          "dev-05:01",
+          "dev-05:03",
+          "dev-05:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The payment ERROR messages indicate business declines (e.g., card declined, insufficient funds) rather than a payment service outage.",
+      "evidence_ids": [
+        "dev-05:01",
+        "dev-05:03",
+        "dev-05:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Review payment service transport and error logs for any transport failures or service errors beyond business declines.",
+      "Check payment provider status for any reported outages during the timeframe.",
+      "Verify if the payment service health checks were passing during the incident window."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "payments",
+          "checkout"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "d3a14a9a13e321872c3ca9355736d96a712d4666c1ea262358ee81e06830f1d5",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-05:05",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "INFO",
+              "message": "payment p20 displayed as declined; customer action required",
+              "timestamp": "2026-01-01T10:00:04.200000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-05:04",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "INFO",
+              "message": "window complete: attempts=100 approved=97 business_declines=3 transport_failures=0",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "dev-05:03",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "ERROR",
+              "message": "charge p22 rejected; provider_code=insufficient_funds; response_status=402",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "dev-05:02",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "INFO",
+              "message": "charge p21 approved; response_status=201; elapsed_ms=180",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "dev-05:01",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "ERROR",
+              "message": "charge p20 rejected; provider_code=card_declined; response_status=402",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3160000196658075
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 999,
+    "output_tokens": 292,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00086680",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00520720",
+  "input_token_reservation": 8922,
+  "elapsed_ms": 2830.9298340172973,
+  "provenance": {
+    "case_id": "dev-05",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "7c0c05b145e650f95cc5c958e6a4253e4c4d40a42aca2c31dc633330a26beaff",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

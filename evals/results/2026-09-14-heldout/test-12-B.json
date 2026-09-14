@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:17.257571+00:00",
+  "question": "Why is the gateway logging many 404 responses?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The gateway logs show many 404 responses for the path /v9/legacy.",
+        "evidence_ids": [
+          "test-12:01",
+          "test-12:04"
+        ]
+      },
+      {
+        "claim": "The gateway route table does not include the path /v9/legacy, but includes /v2/orders.",
+        "evidence_ids": [
+          "test-12:03"
+        ]
+      },
+      {
+        "claim": "Requests to /v2/orders return 200 successfully, indicating that the gateway is functioning correctly for registered routes.",
+        "evidence_ids": [
+          "test-12:02"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "logs or telemetry showing the source of requests to /v9/legacy",
+      "configuration changes or deployment logs explaining why /v9/legacy is not registered"
+    ],
+    "alternatives": [
+      {
+        "claim": "The 404 responses are caused by clients (such as retired-mobile-client) requesting an unregistered or deprecated API path /v9/legacy.",
+        "evidence_ids": [
+          "test-12:01",
+          "test-12:03"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The gateway is logging many 404 responses because clients are making requests to the unregistered path /v9/legacy, which is not included in the gateway's route table.",
+      "evidence_ids": [
+        "test-12:01",
+        "test-12:03",
+        "test-12:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check client request logs to identify which clients are requesting /v9/legacy and why.",
+      "Verify if /v9/legacy was recently deprecated or removed from the gateway route configuration.",
+      "Confirm if there are any client updates or communications needed to stop requests to /v9/legacy."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "e602c26290fea830a0cc917a96f6c367e694e4c57d9525289651eff3771a43db",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-12:04",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "window 404_count=40 all_path=/v9/legacy; upstream_5xx_count=0",
+              "timestamp": "2026-01-01T10:00:04Z"
+            }
+          },
+          {
+            "evidence_id": "test-12:03",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "route table includes /v2/orders; /v9/legacy is not registered",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-12:02",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "INFO",
+              "message": "GET /v2/orders returned 200 in 18ms",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-12:01",
+            "kind": "log",
+            "content": {
+              "service": "gateway",
+              "level": "WARNING",
+              "message": "GET /v9/legacy returned 404; user_agent=retired-mobile-client",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2627079957164824
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "gateway"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "25db0b4182bb55e2db517aaec396fcca051429fc7cb3efff13d8019c050060d9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:be5e57ceb2cef69941c2ea42eb02a6bfdd2bd96ab810a9ab2f369ef46ff80c04",
+            "kind": "summary",
+            "content": {
+              "total": 4,
+              "groups": [
+                {
+                  "service": "gateway",
+                  "level": "INFO",
+                  "count": 3
+                },
+                {
+                  "service": "gateway",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.13875000877305865
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why is the gateway logging many 404 responses?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.6821669521741569
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1362,
+    "output_tokens": 332,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00107600",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00552200",
+  "input_token_reservation": 9709,
+  "elapsed_ms": 3844.97229201952,
+  "provenance": {
+    "case_id": "test-12",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "ba77d7878b6414c45b155f63042ee4de0b81e990dafadb9bc38235d9ca918301",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

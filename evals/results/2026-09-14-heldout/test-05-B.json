@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:39.733621+00:00",
+  "question": "Why are several small application pools failing to open database sessions?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The database service logged an error indicating that the remaining connection slots are reserved and the total connections have reached the maximum allowed (100).",
+        "evidence_ids": [
+          "test-05:02"
+        ]
+      },
+      {
+        "claim": "The orders and billing services logged errors with SQLSTATE 53300 indicating that the server rejected connection attempts due to connection limits.",
+        "evidence_ids": [
+          "test-05:04",
+          "test-05:05"
+        ]
+      },
+      {
+        "claim": "The orders service logged an info message showing it was attempting to open another connection while having 3 checked-out connections in a pool of size 20.",
+        "evidence_ids": [
+          "test-05:01"
+        ]
+      },
+      {
+        "claim": "The analytics service logged a warning about starting a batch with 90 parallel database sessions, indicating high database connection usage.",
+        "evidence_ids": [
+          "test-05:03"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed database connection pool metrics per application pool",
+      "Upstream network or socket errors from application pools",
+      "Database server configuration changes or capacity metrics"
+    ],
+    "alternatives": [
+      {
+        "claim": "The failure to open database sessions is due to the database server reaching its maximum allowed connections, causing connection rejections.",
+        "evidence_ids": [
+          "test-05:02",
+          "test-05:04",
+          "test-05:05"
+        ]
+      },
+      {
+        "claim": "The application pools may be exhausting their local connection pools or hitting client-side limits, but the database server connection limit is the primary cause of rejection.",
+        "evidence_ids": [
+          "test-05:01",
+          "test-05:04",
+          "test-05:05"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The database server has reached its maximum connection limit (100), causing it to reject new connection attempts from several small application pools, resulting in failures to open database sessions.",
+      "evidence_ids": [
+        "test-05:02",
+        "test-05:04",
+        "test-05:05"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check database server connection limit configuration and current usage metrics.",
+      "Review application pool connection pool configurations and usage statistics.",
+      "Inspect database server logs for connection limit events and capacity warnings.",
+      "Verify if any recent changes increased connection usage or reduced connection limits."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "orders",
+          "database",
+          "analytics",
+          "billing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "e3d8af1db1a7a0a891fc0b83e09d7113d104b2a08d38cbb11304b38c5ec269e9",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-05:05",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "server rejected connect with SQLSTATE 53300; local_pool_active=2",
+              "timestamp": "2026-01-01T10:00:01.003000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:04",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "ERROR",
+              "message": "server rejected connect with SQLSTATE 53300",
+              "timestamp": "2026-01-01T10:00:01.001000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:02",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "ERROR",
+              "message": "remaining connection slots are reserved; total_connections=100 max_connections=100",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:01",
+            "kind": "log",
+            "content": {
+              "service": "orders",
+              "level": "INFO",
+              "message": "local pool checked_out=3 size=20; opening another connection",
+              "timestamp": "2026-01-01T10:00:00.800000Z"
+            }
+          },
+          {
+            "evidence_id": "test-05:03",
+            "kind": "log",
+            "content": {
+              "service": "analytics",
+              "level": "WARNING",
+              "message": "batch started with 90 parallel database sessions",
+              "timestamp": "2026-01-01T10:00:00.500000Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.31224999111145735
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "orders",
+          "database",
+          "analytics",
+          "billing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "e93139ec53a8f0bb2cb4bb12b65762afdcba87195fa244c1c014c5ac6a30241e",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:fe4eef98e181fbf159b0bf4b3cc16fd517eff70a7c1be7e4b5fbf2143f077d83",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "analytics",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "billing",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "database",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "orders",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "orders",
+                  "level": "INFO",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.172999978531152
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why are several small application pools failing to open database sessions?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.0477910400368273
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1897,
+    "output_tokens": 427,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00144200",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00662360",
+  "input_token_reservation": 12463,
+  "elapsed_ms": 4692.793041002005,
+  "provenance": {
+    "case_id": "test-05",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "95d1243fad064f97fc56e58bf4c62bc24d04d02279b73d08d93fc7fd154a6e0b",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

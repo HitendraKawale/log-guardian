@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "system": "C",
+  "mode": "live",
+  "started_at": "2026-09-14T01:14:49.802393+00:00",
+  "question": "Why did billing lose database access after its rollout?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "d48a6378403995a07b6c5a30375cb54600924b2abc384cc9701ec097b299655f",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "failed",
+  "error": "model_budget",
+  "report": null,
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "error",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.2812080201692879
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "timeout",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.47404199722222984
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": "database",
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.26570798945613205
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "94ae86bacac45d298db90339d63fd6de379cb5a47d69ee84929062a5820a75d4",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-03:04",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "connect failed with SQLSTATE 28P01; no queries executed",
+              "timestamp": "2026-01-01T10:00:03.010000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:01",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "INFO",
+              "message": "startup completed; credential_revision=17",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.7383330084849149
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing"
+        ],
+        "start": "2026-01-01T09:59:00Z",
+        "end": "2026-01-01T10:00:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": null,
+        "start": null,
+        "end": null,
+        "items": [],
+        "truncated": false,
+        "error": "scope_violation"
+      },
+      "elapsed_ms": 0.155624991748482
+    },
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "billing"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:01:00Z",
+        "text": null,
+        "limit": 50
+      },
+      "result": {
+        "source": "replay",
+        "version": "94ae86bacac45d298db90339d63fd6de379cb5a47d69ee84929062a5820a75d4",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:01:00Z",
+        "items": [
+          {
+            "evidence_id": "dev-03:04",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "ERROR",
+              "message": "connect failed with SQLSTATE 28P01; no queries executed",
+              "timestamp": "2026-01-01T10:00:03.010000Z"
+            }
+          },
+          {
+            "evidence_id": "dev-03:01",
+            "kind": "log",
+            "content": {
+              "service": "billing",
+              "level": "INFO",
+              "message": "startup completed; credential_revision=17",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.480709015391767
+    }
+  ],
+  "model_requests": 6,
+  "tool_executions": 6,
+  "model_calls": [
+    {
+      "usage": {
+        "input_tokens": 893,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00044200",
+      "input_token_reservation": 9086
+    },
+    {
+      "usage": {
+        "input_tokens": 1047,
+        "output_tokens": 53,
+        "cached_input_tokens": 0
+      },
+      "estimated_cost_usd": "0.00050360",
+      "input_token_reservation": 9651
+    },
+    {
+      "usage": {
+        "input_tokens": 1201,
+        "output_tokens": 51,
+        "cached_input_tokens": 1024
+      },
+      "estimated_cost_usd": "0.00025480",
+      "input_token_reservation": 10218
+    },
+    {
+      "usage": {
+        "input_tokens": 1353,
+        "output_tokens": 47,
+        "cached_input_tokens": 1152
+      },
+      "estimated_cost_usd": "0.00027080",
+      "input_token_reservation": 10773
+    },
+    {
+      "usage": {
+        "input_tokens": 1606,
+        "output_tokens": 47,
+        "cached_input_tokens": 1280
+      },
+      "estimated_cost_usd": "0.00033360",
+      "input_token_reservation": 11733
+    },
+    {
+      "usage": {
+        "input_tokens": 1693,
+        "output_tokens": 47,
+        "cached_input_tokens": 1536
+      },
+      "estimated_cost_usd": "0.00029160",
+      "input_token_reservation": 12177
+    }
+  ],
+  "cache_usage_complete": true,
+  "usage": {
+    "input_tokens": 7793,
+    "output_tokens": 298,
+    "cached_input_tokens": 4992
+  },
+  "estimated_cost_usd": "0.00209640",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536,
+    "max_model_requests": 6,
+    "max_tool_executions": 8
+  },
+  "input_token_reservation": 12177,
+  "estimated_max_cost_usd": "0.00650920",
+  "elapsed_ms": 6405.353665992152,
+  "provenance": {
+    "case_id": "dev-03",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "66a37277749f21960946a32c6dfc6f141e385b000f55cf46d0509dfb1e357070",
+    "corpus_sha256": "7f7cef620e6a4cebe37cd429a303324ba1caa8de0ca947a8133d22b028b8b164",
+    "code_revision": "ad7f95f0ba86b2a9e0182680dccfb9c1161e51ef",
+    "code_dirty": false,
+    "implementation_sha256": "c8ee3368db17a38968c3d5c979c4cc2909d0b0d8ee8134dd1e391bd34e348551"
+  }
+}

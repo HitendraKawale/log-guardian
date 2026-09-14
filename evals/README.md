@@ -23,7 +23,7 @@ Success exits 0. Invalid data or missing files exit 1 with an error on stderr. I
 
 CI runs the evaluation tests as their own matrix entry. The tests validate the checked-in corpus and mutate small independent examples to exercise rejection behavior. They do not call a model or consume API credits.
 
-## Run the A/B baselines
+## Run investigations
 
 The runner uses the ingestion service's tools and report schema. Install the shared environment with `make install`; unlike the validator, the runner requires the service dependencies, including pinned `openai==2.11.0`.
 
@@ -35,6 +35,12 @@ Inspect a development case without a provider key or network request:
 ```
 
 A uses one log query. B always uses a log query, a full-scope summary, and runbook retrieval using the first 512 characters of the sanitized question. Each then makes exactly one SDK request. Neither is an adaptive agent. The model receives evidence as tool messages, not system instructions.
+
+C uses `--system C` through the same CLI and `run_investigation` interface. It starts with no evidence and lets the model select the three existing read-only tools or return a report. Native tool calls execute sequentially with validated arguments and scope checks. Limits are six model requests, eight tool executions, 120 seconds, 64 KiB total evidence, and 1,024 output tokens per request. Duplicate normalized queries, unknown tools and malformed arguments stop the run. There are no automatic retries, staying below the plan's one-retry ceiling and avoiding ambiguous billing.
+
+C preserves partial evidence and per-request usage in `model_calls`. Unknown request usage makes the run's total usage/cost null and stops execution. Missing cache counts receive no discount; aggregate cached tokens sum only known counts, with `cache_usage_complete=false` when any request omitted them. Cost reservations include the growing message history and prior known spend. Its dry run previews the first request only and collects no predetermined evidence; it does not predict the eventual query sequence or total cost.
+
+Offline scripted SDK tests demonstrate evidence-dependent next queries and boundary handling, not live model quality. C has not yet been evaluated against the provider. All existing paid allowances remain exhausted.
 
 Live execution requires separate owner approval, `OPENAI_API_KEY`, a clean committed worktree, `--allow-live`, and an explicit per-run allowance. `--model` can also come from `LLM_MODEL`; there is no model default. The only currently supported snapshot is `gpt-4.1-mini-2025-04-14`. Missing credentials never produce a fabricated report. The CLI uses the official API endpoint, not an environment-supplied proxy URL.
 

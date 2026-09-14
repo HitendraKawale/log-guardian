@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:30.896350+00:00",
+  "question": "Did the cache restart cause the checkout failures?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The cache service process restarted at 10:05:00 with an unknown reason.",
+        "evidence_ids": [
+          "test-13:02"
+        ]
+      },
+      {
+        "claim": "After the cache restart, a health probe returned a successful PONG response at 10:06:25.",
+        "evidence_ids": [
+          "test-13:05"
+        ]
+      },
+      {
+        "claim": "A checkout request failed waiting for the cache at 10:04:50, before the cache restart event.",
+        "evidence_ids": [
+          "test-13:01"
+        ]
+      },
+      {
+        "claim": "There was a warning in the checkout service about missing trace context and unavailable upstream attempt timestamps at 10:06:20.",
+        "evidence_ids": [
+          "test-13:04"
+        ]
+      },
+      {
+        "claim": "The collector service reported a warning about cache clock offset uncertainty by 120 seconds at 10:06:15.",
+        "evidence_ids": [
+          "test-13:03"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed request correlation logs between checkout and cache services around the failure times",
+      "Upstream timing data to distinguish transport delay from handler delay in checkout requests",
+      "More detailed error logs or metrics from cache service around the restart and failure times"
+    ],
+    "alternatives": [
+      {
+        "claim": "The checkout failures were not caused by the cache restart because the failure occurred before the cache restarted.",
+        "evidence_ids": [
+          "test-13:01",
+          "test-13:02"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The checkout failure at 10:04:50 was not caused by the cache restart at 10:05:00, as the failure preceded the restart event.",
+      "evidence_ids": [
+        "test-13:01",
+        "test-13:02"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check detailed request correlation logs between checkout and cache services around the failure times to confirm causality",
+      "Review upstream timing data to distinguish transport delay from handler delay in checkout requests",
+      "Examine more detailed error logs or metrics from cache service around the restart and failure times to identify any transient issues"
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "cache",
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "6aebd7878edcc826892afd013e1917c112e4f86975f4ffc68a1b70b01716b4aa",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-13:05",
+            "kind": "log",
+            "content": {
+              "service": "cache",
+              "level": "INFO",
+              "message": "probe after restart returned PONG",
+              "timestamp": "2026-01-01T10:06:25Z"
+            }
+          },
+          {
+            "evidence_id": "test-13:04",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "WARNING",
+              "message": "trace context missing for co2; upstream attempt timestamps unavailable",
+              "timestamp": "2026-01-01T10:06:20Z"
+            }
+          },
+          {
+            "evidence_id": "test-13:03",
+            "kind": "log",
+            "content": {
+              "service": "collector",
+              "level": "WARNING",
+              "message": "cache clock offset estimate uncertain by 120s; timestamps are collector receipt times",
+              "timestamp": "2026-01-01T10:06:15Z"
+            }
+          },
+          {
+            "evidence_id": "test-13:02",
+            "kind": "log",
+            "content": {
+              "service": "cache",
+              "level": "WARNING",
+              "message": "process restarted; local_event_time=10:05:00; reason unavailable",
+              "timestamp": "2026-01-01T10:06:10Z"
+            }
+          },
+          {
+            "evidence_id": "test-13:01",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request co2 failed waiting for cache; local_event_time=10:04:50",
+              "timestamp": "2026-01-01T10:06:05Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.31066598603501916
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "cache",
+          "collector"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "71a61299f5823e44e34b6ea54a0bf710a88521434f36cc376e4e8fa3ef0f0010",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:4b39be58ee561f0cd9c62f814a8bd0dcb73e1c30debe4720249906871bf89e87",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "cache",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "cache",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "checkout",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "checkout",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "collector",
+                  "level": "WARNING",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16904197400435805
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Did the cache restart cause the checkout failures?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:benign-errors",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish expected rejections from outages",
+              "body": "Error severity and a word such as failure are triage hints, not a diagnosis. Compare business declines, unsupported routes, corrected hardware events, and transport failures with successful requests in the same bounded scope.\n\nRead actual counts and the period they describe. A sample containing only failures does not establish a system-wide failure rate. Successful requests can contradict a claim of total unavailability without proving that every customer or route is unaffected.\n\nDescribe the supported explanation narrowly. A corrected error does not guarantee that hardware will remain healthy. Independent failures in two dependencies do not automatically have a common root cause."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:insufficient-evidence",
+            "kind": "runbook",
+            "content": {
+              "title": "Stop when a causal claim is unsupported",
+              "body": "Identify missing upstream records, denied collection access, truncated results, uncertain clocks, or absent request correlation. Empty evidence and a failed evidence source are different states. Try a narrower relevant query when results are truncated; do not treat an omitted record as proof that an event did not occur.\n\nIf available observations cannot distinguish plausible explanations, return an inconclusive outcome. Name the observations that are established and the specific additional evidence needed. Do not invent traces, metrics, deployments, or citation IDs. Suggest read-only checks rather than remediation that assumes an unproven cause."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.366791024338454
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1985,
+    "output_tokens": 396,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00142760",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00680680",
+  "input_token_reservation": 12921,
+  "elapsed_ms": 3741.263042029459,
+  "provenance": {
+    "case_id": "test-13",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "82b514afa622dc44009f362352d05d26c885b17e5f13919666d8b0979e85a980",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

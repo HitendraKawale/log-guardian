@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:53:56.303745+00:00",
+  "question": "Why does the fulfillment service stop accepting work after a small number of requests?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The fulfillment service has a connection pool size of 4, with 4 connections checked out and 0 returned, indicating no connections are being released back to the pool.",
+        "evidence_ids": [
+          "test-06:01"
+        ]
+      },
+      {
+        "claim": "There are 6 waiters waiting for a connection and 4 connections checked out, with 0 in-flight requests, suggesting requests are waiting for connections that are not being returned.",
+        "evidence_ids": [
+          "test-06:03"
+        ]
+      },
+      {
+        "claim": "A request failed acquiring a connection after 1500ms, indicating a timeout waiting for a connection from the pool.",
+        "evidence_ids": [
+          "test-06:05"
+        ]
+      },
+      {
+        "claim": "A request response was sent but the borrowed connection remains owned by that request, indicating a connection leak or failure to return the connection to the pool.",
+        "evidence_ids": [
+          "test-06:02"
+        ]
+      },
+      {
+        "claim": "The database shows 4 idle sessions for fulfillment with no idle transactions, indicating the database is not overloaded or blocking connections.",
+        "evidence_ids": [
+          "test-06:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed configuration of the fulfillment service connection pool size and timeout settings",
+      "Logs or telemetry showing connection pool return events or errors related to connection release",
+      "Database server connection limits and errors"
+    ],
+    "alternatives": [
+      {
+        "claim": "The fulfillment service stops accepting work due to connection pool exhaustion caused by connections not being returned to the pool after requests complete, leading to timeouts acquiring connections.",
+        "evidence_ids": [
+          "test-06:01",
+          "test-06:02",
+          "test-06:03",
+          "test-06:05"
+        ]
+      },
+      {
+        "claim": "The database is not the bottleneck since it has idle sessions and no idle transactions, so the issue is likely in the fulfillment service connection pool management.",
+        "evidence_ids": [
+          "test-06:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The fulfillment service stops accepting work after a small number of requests because it exhausts its connection pool by not returning connections after requests complete, causing subsequent requests to fail acquiring a connection and time out.",
+      "evidence_ids": [
+        "test-06:01",
+        "test-06:02",
+        "test-06:03",
+        "test-06:05"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check fulfillment service connection pool configuration and ensure connections are properly returned after request completion.",
+      "Inspect fulfillment service code or logs for connection leaks or failure to release connections.",
+      "Verify database server connection limits and monitor for connection errors or rejections."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "fulfillment",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "8718c51f7ad497c4dcb883de73882333ae1baffa541030ce71da1451960e3571",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-06:05",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "ERROR",
+              "message": "request f13 failed acquiring connection after 1500ms",
+              "timestamp": "2026-01-01T10:00:02.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:04",
+            "kind": "log",
+            "content": {
+              "service": "database",
+              "level": "INFO",
+              "message": "fulfillment sessions idle=4 idle_in_transaction=0",
+              "timestamp": "2026-01-01T10:00:01.300000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:03",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "WARNING",
+              "message": "pool waiters=6 checked_out=4; in_flight_requests=0",
+              "timestamp": "2026-01-01T10:00:01.200000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:02",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "WARNING",
+              "message": "request f12 response sent but borrowed connection remains owned_by=f12",
+              "timestamp": "2026-01-01T10:00:01.100000Z"
+            }
+          },
+          {
+            "evidence_id": "test-06:01",
+            "kind": "log",
+            "content": {
+              "service": "fulfillment",
+              "level": "INFO",
+              "message": "pool_size=4; completed_requests=4; total_checkouts=4 total_returns=0",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.30824996065348387
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "fulfillment",
+          "database"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "b945db3c4955e6396ec0206b3d02149b92408c88be079564cfd393bad4903c6d",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:7a971b9b9a34715b635ca721e8f0b197dba8841ede85a9424acf20da68679ee5",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "database",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "fulfillment",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "fulfillment",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "fulfillment",
+                  "level": "WARNING",
+                  "count": 2
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.16558298375457525
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why does the fulfillment service stop accepting work after a small number of requests?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:benign-errors",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish expected rejections from outages",
+              "body": "Error severity and a word such as failure are triage hints, not a diagnosis. Compare business declines, unsupported routes, corrected hardware events, and transport failures with successful requests in the same bounded scope.\n\nRead actual counts and the period they describe. A sample containing only failures does not establish a system-wide failure rate. Successful requests can contradict a claim of total unavailability without proving that every customer or route is unaffected.\n\nDescribe the supported explanation narrowly. A corrected error does not guarantee that hardware will remain healthy. Independent failures in two dependencies do not automatically have a common root cause."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          }
+        ],
+        "truncated": true,
+        "error": null
+      },
+      "elapsed_ms": 1.9842920009978116
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 2038,
+    "output_tokens": 497,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00161040",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00693200",
+  "input_token_reservation": 13234,
+  "elapsed_ms": 4819.0790000371635,
+  "provenance": {
+    "case_id": "test-06",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "c23f95e1995b66f754bf5b2d3244ec30cb5a56d447dad4809b378b538db24288",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

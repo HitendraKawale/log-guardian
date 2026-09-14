@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "system": "A",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:40.411820+00:00",
+  "question": "What single fault caused the checkout errors in this interval?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The checkout service encountered errors related to both the payments and inventory dependencies during the interval.",
+        "evidence_ids": [
+          "test-14:01",
+          "test-14:02"
+        ]
+      },
+      {
+        "claim": "The payments service reported an error indicating an invalid token signature for request a1, which caused a 401 error in the checkout service when charging the card.",
+        "evidence_ids": [
+          "test-14:01",
+          "test-14:03"
+        ]
+      },
+      {
+        "claim": "The inventory service rejected request b2 during a deployment drain, causing a 503 error in the checkout service when reserving stock.",
+        "evidence_ids": [
+          "test-14:02",
+          "test-14:04"
+        ]
+      }
+    ],
+    "missing_evidence": [],
+    "alternatives": [
+      {
+        "claim": "The invalid token signature in the payments service caused checkout errors due to failed card charging attempts.",
+        "evidence_ids": [
+          "test-14:01",
+          "test-14:03"
+        ]
+      },
+      {
+        "claim": "The deployment drain in the inventory service caused checkout errors due to failed stock reservation attempts.",
+        "evidence_ids": [
+          "test-14:02",
+          "test-14:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The single fault causing the checkout errors was the deployment drain in the inventory service, which rejected requests and caused 503 errors in the checkout service when reserving stock.",
+      "evidence_ids": [
+        "test-14:02",
+        "test-14:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Check the deployment status and logs of the inventory service around 2026-01-01T10:00:00Z to confirm the deployment drain and its impact.",
+      "Verify if the payments service token signature errors were isolated or part of a broader issue.",
+      "Review the retry and fallback mechanisms in the checkout service for handling inventory service deployment drains."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "payments",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "96e9e33733ec9dfa1c1f1c896f15ff37e5ab19d3275e71fe39283c5fdbe5cf21",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-14:05",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "WARNING",
+              "message": "only two request records retained; affected cohort counts unavailable",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:02",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request b2 failed reserving stock: response_status=503; dependency=inventory",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:04",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "WARNING",
+              "message": "request b2 rejected during deployment drain",
+              "timestamp": "2026-01-01T10:00:01.900000Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:01",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request a1 failed charging card: response_status=401; dependency=payments",
+              "timestamp": "2026-01-01T10:00:01.010000Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:03",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "ERROR",
+              "message": "request a1 token signature invalid",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3400410059839487
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 985,
+    "output_tokens": 355,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00096200",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00520680",
+  "input_token_reservation": 8921,
+  "elapsed_ms": 3660.925541014876,
+  "provenance": {
+    "case_id": "test-14",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "a61b83d7ea0fc0c720d47e1a331acc944d97cf4158798783baa93e4d56511f47",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

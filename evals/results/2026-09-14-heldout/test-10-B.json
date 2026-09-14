@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:54:50.142009+00:00",
+  "question": "Why does the export client reject the object-store connection?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "The exporter service logs an error indicating TLS hostname verification failure due to a mismatch between the requested hostname 'store-new.internal' and the certificate SAN 'store-old.internal'.",
+        "evidence_ids": [
+          "test-10:02"
+        ]
+      },
+      {
+        "claim": "The exporter service logs a warning that the export batch was not uploaded because the failure occurred before authentication.",
+        "evidence_ids": [
+          "test-10:05"
+        ]
+      },
+      {
+        "claim": "The object-store service logs show that a request using 'store-old.internal' completed successfully with status 200 and that the certificate validity check passed with expiry in 2027.",
+        "evidence_ids": [
+          "test-10:04",
+          "test-10:03"
+        ]
+      },
+      {
+        "claim": "The exporter service is configured to use the object store URL 'https://store-new.internal'.",
+        "evidence_ids": [
+          "test-10:01"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "Detailed network connection logs between exporter and object-store",
+      "Authentication logs showing the exact rejection reason from the object-store"
+    ],
+    "alternatives": [
+      {
+        "claim": "The export client rejects the object-store connection due to TLS hostname verification failure caused by a mismatch between the configured object store URL and the certificate's SAN.",
+        "evidence_ids": [
+          "test-10:02",
+          "test-10:01",
+          "test-10:04"
+        ]
+      }
+    ],
+    "likely_cause": {
+      "claim": "The export client rejects the object-store connection because the TLS certificate presented by the object-store is valid for 'store-old.internal' but the exporter is configured to connect to 'store-new.internal', causing hostname verification to fail.",
+      "evidence_ids": [
+        "test-10:02",
+        "test-10:01",
+        "test-10:04"
+      ]
+    },
+    "outcome": "supported",
+    "suggested_checks": [
+      "Verify and align the object-store URL configured in the exporter with the certificate SAN on the object-store service.",
+      "Check the TLS certificate configuration on the object-store service to ensure it includes 'store-new.internal' as a valid SAN.",
+      "Review exporter logs for any other TLS or authentication errors after hostname verification failure."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "exporter",
+          "object-store"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "5e2e84219826557363f723db8e0dea36ae1db6b33a97ac945998395eaace09e3",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-10:05",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "WARNING",
+              "message": "export batch not uploaded; failure occurred before authentication",
+              "timestamp": "2026-01-01T10:00:03.001000Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:04",
+            "kind": "log",
+            "content": {
+              "service": "object-store",
+              "level": "INFO",
+              "message": "request using store-old.internal completed status=200",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:02",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "ERROR",
+              "message": "TLS hostname verification failed: requested store-new.internal; certificate SAN=store-old.internal",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:03",
+            "kind": "log",
+            "content": {
+              "service": "object-store",
+              "level": "INFO",
+              "message": "certificate validity check passed; expiry=2027-01-01T00:00:00Z",
+              "timestamp": "2026-01-01T10:00:01.500000Z"
+            }
+          },
+          {
+            "evidence_id": "test-10:01",
+            "kind": "log",
+            "content": {
+              "service": "exporter",
+              "level": "INFO",
+              "message": "object_store_url=https://store-new.internal",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.3600419731810689
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "exporter",
+          "object-store"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "9d1052567b49002b13900d793d32234c3f4d6cfc1589ab2fe6a112ce000d057e",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:2b4348758c8a94d761daf855cb51cef1f27a8a4ef631161ef909549eadf08c3e",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "exporter",
+                  "level": "ERROR",
+                  "count": 1
+                },
+                {
+                  "service": "exporter",
+                  "level": "INFO",
+                  "count": 1
+                },
+                {
+                  "service": "exporter",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "object-store",
+                  "level": "INFO",
+                  "count": 2
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.17324998043477535
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "Why does the export client reject the object-store connection?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:connection-pools",
+            "kind": "runbook",
+            "content": {
+              "title": "Investigate connection pool exhaustion",
+              "body": "For a pool acquire timeout, compare checked-out connections, configured pool capacity, waiting requests, and observed returns. Pool exhaustion in one application does not imply that the database server has reached its connection limit.\n\nRead database session states and connection counts when available. Active work, idle transactions, and idle borrowed connections support different explanations. Compare resource ownership with completed requests before claiming a leak. A shared HTTP connection pool can be occupied by long-lived requests even when the upstream service answers independent probes.\n\nAlso check whether the process can create new sockets. A file-descriptor limit failure occurs before an upstream response and does not prove that the upstream rejected a connection. Report the observed resource limit and its scope. Increasing every client pool can worsen a server-wide connection shortage; do not recommend it without capacity evidence."
+            }
+          },
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:timeouts",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish upstream latency from a short client deadline",
+              "body": "For a timeout, find the caller's configured deadline and the matching upstream request. Compare request start, acceptance, completion, and cancellation times. Normalize timestamp offsets before ordering events. Match request IDs where available; nearby times alone do not establish that two records concern the same request.\n\nA read timeout can reflect slow upstream handling, transport delay, or a client deadline below normal response time. A connection timeout happens before response handling. Inspect queue wait, lock wait, synchronous processing, retry counts, and dependency timing when logs expose them. Do not infer CPU exhaustion or network failure without corresponding evidence.\n\nA successful health probe does not establish that the affected endpoint is healthy. Distinguish a committed operation whose acknowledgement was late from one known to have rolled back. Suggest checking idempotency before retrying a state-changing operation; never execute the retry."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.5855419915169477
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 2076,
+    "output_tokens": 403,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00147520",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00703400",
+  "input_token_reservation": 13489,
+  "elapsed_ms": 4129.344167013187,
+  "provenance": {
+    "case_id": "test-10",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "fee4925c6285fc62a5077bf3f19d169c461896ff1a2c0aaf0cabf54e18197463",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}

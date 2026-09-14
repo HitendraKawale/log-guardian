@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "system": "B",
+  "mode": "live",
+  "started_at": "2026-09-14T02:55:44.527634+00:00",
+  "question": "What single fault caused the checkout errors in this interval?",
+  "model_requested": "gpt-4.1-mini-2025-04-14",
+  "model_returned": "gpt-4.1-mini-2025-04-14",
+  "sdk_version": "2.11.0",
+  "prompt_sha256": "cb18775883d13c3740332ed3e98b1b0f7358b4a494967a2e360cafd77e2f66c6",
+  "parameters": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "store": false,
+    "max_retries": 0
+  },
+  "status": "completed",
+  "error": null,
+  "report": {
+    "observations": [
+      {
+        "claim": "Checkout service logged errors for failed card charging with 401 response status due to payments dependency.",
+        "evidence_ids": [
+          "test-14:01"
+        ]
+      },
+      {
+        "claim": "Payments service logged an error indicating an invalid token signature for request a1.",
+        "evidence_ids": [
+          "test-14:03"
+        ]
+      },
+      {
+        "claim": "Checkout service logged errors for failed stock reservation with 503 response status due to inventory dependency.",
+        "evidence_ids": [
+          "test-14:02"
+        ]
+      },
+      {
+        "claim": "Inventory service logged a warning that request b2 was rejected during deployment drain.",
+        "evidence_ids": [
+          "test-14:04"
+        ]
+      }
+    ],
+    "missing_evidence": [
+      "detailed request correlation logs or traces linking checkout errors to a single root cause"
+    ],
+    "alternatives": [
+      {
+        "claim": "Checkout errors could be caused by payments service authentication failure due to invalid token signature.",
+        "evidence_ids": [
+          "test-14:01",
+          "test-14:03"
+        ]
+      },
+      {
+        "claim": "Checkout errors could be caused by inventory service rejecting requests during deployment drain leading to 503 errors.",
+        "evidence_ids": [
+          "test-14:02",
+          "test-14:04"
+        ]
+      }
+    ],
+    "likely_cause": null,
+    "outcome": "inconclusive",
+    "suggested_checks": [
+      "Check detailed request correlation logs or traces to determine if checkout errors are primarily caused by payments authentication failures or inventory deployment drain.",
+      "Verify if the invalid token signature in payments service is a systemic issue affecting multiple requests.",
+      "Confirm the timing and impact of the inventory deployment drain and whether it coincides with the checkout errors."
+    ]
+  },
+  "trace": [
+    {
+      "tool": "query_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "payments",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "96e9e33733ec9dfa1c1f1c896f15ff37e5ab19d3275e71fe39283c5fdbe5cf21",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "test-14:05",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "WARNING",
+              "message": "only two request records retained; affected cohort counts unavailable",
+              "timestamp": "2026-01-01T10:00:03Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:02",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request b2 failed reserving stock: response_status=503; dependency=inventory",
+              "timestamp": "2026-01-01T10:00:02Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:04",
+            "kind": "log",
+            "content": {
+              "service": "inventory",
+              "level": "WARNING",
+              "message": "request b2 rejected during deployment drain",
+              "timestamp": "2026-01-01T10:00:01.900000Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:01",
+            "kind": "log",
+            "content": {
+              "service": "checkout",
+              "level": "ERROR",
+              "message": "request a1 failed charging card: response_status=401; dependency=payments",
+              "timestamp": "2026-01-01T10:00:01.010000Z"
+            }
+          },
+          {
+            "evidence_id": "test-14:03",
+            "kind": "log",
+            "content": {
+              "service": "payments",
+              "level": "ERROR",
+              "message": "request a1 token signature invalid",
+              "timestamp": "2026-01-01T10:00:01Z"
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.33312500454485416
+    },
+    {
+      "tool": "summarize_logs",
+      "arguments": {
+        "services": [
+          "checkout",
+          "payments",
+          "inventory"
+        ],
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z"
+      },
+      "result": {
+        "source": "replay",
+        "version": "f1e66101abe95414195da47046481dae3f1190b8d7ffdc7c1b1b9951e15d1a91",
+        "start": "2026-01-01T10:00:00Z",
+        "end": "2026-01-01T10:10:00Z",
+        "items": [
+          {
+            "evidence_id": "summary:550322f8c4659f6a5b19e16f31d17c1f8b399ec96d68bb047b4b0774e6eff675",
+            "kind": "summary",
+            "content": {
+              "total": 5,
+              "groups": [
+                {
+                  "service": "checkout",
+                  "level": "ERROR",
+                  "count": 2
+                },
+                {
+                  "service": "checkout",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "inventory",
+                  "level": "WARNING",
+                  "count": 1
+                },
+                {
+                  "service": "payments",
+                  "level": "ERROR",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 0.17745798686519265
+    },
+    {
+      "tool": "search_runbooks",
+      "arguments": {
+        "query": "What single fault caused the checkout errors in this interval?",
+        "limit": 3
+      },
+      "result": {
+        "source": "runbooks",
+        "version": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+        "start": null,
+        "end": null,
+        "items": [
+          {
+            "evidence_id": "runbook:credentials-configuration",
+            "kind": "runbook",
+            "content": {
+              "title": "Separate authentication and configuration failures",
+              "body": "Use sanitized authentication error codes, credential revision identifiers, startup validation, and configuration changes. Never collect password values, tokens, private keys, or credential files. A rejected login is not proof that the whole database is unavailable.\n\nFor a token rejection, inspect the recorded reason and expected issuer or audience. Different clients succeeding with different settings can narrow the fault. Do not suggest disabling authentication to hide a rejection.\n\nFor DNS or connection failures, compare configured hostnames and ports with service registration and listener startup logs. For TLS failures, distinguish certificate expiry, hostname mismatch, trust-chain errors, and client-clock problems. A TCP listener being ready does not prove that TLS or HTTP succeeded. Do not suggest disabling certificate validation."
+            }
+          },
+          {
+            "evidence_id": "runbook:benign-errors",
+            "kind": "runbook",
+            "content": {
+              "title": "Distinguish expected rejections from outages",
+              "body": "Error severity and a word such as failure are triage hints, not a diagnosis. Compare business declines, unsupported routes, corrected hardware events, and transport failures with successful requests in the same bounded scope.\n\nRead actual counts and the period they describe. A sample containing only failures does not establish a system-wide failure rate. Successful requests can contradict a claim of total unavailability without proving that every customer or route is unaffected.\n\nDescribe the supported explanation narrowly. A corrected error does not guarantee that hardware will remain healthy. Independent failures in two dependencies do not automatically have a common root cause."
+            }
+          }
+        ],
+        "truncated": false,
+        "error": null
+      },
+      "elapsed_ms": 1.2390000047162175
+    }
+  ],
+  "model_requests": 1,
+  "usage": {
+    "input_tokens": 1819,
+    "output_tokens": 303,
+    "cached_input_tokens": 0
+  },
+  "estimated_cost_usd": "0.00121240",
+  "pricing": {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "checked_at": "2026-09-13",
+    "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+    "input_per_million_usd": "0.40",
+    "cached_input_per_million_usd": "0.10",
+    "output_per_million_usd": "1.60"
+  },
+  "limits": {
+    "max_cost_usd": "0.025",
+    "deadline_seconds": 120,
+    "max_output_tokens": 1024,
+    "max_evidence_bytes": 65536
+  },
+  "estimated_max_cost_usd": "0.00647320",
+  "input_token_reservation": 12087,
+  "elapsed_ms": 3089.344333973713,
+  "provenance": {
+    "case_id": "test-14",
+    "dataset_version": "1.0.0",
+    "origin": "authored",
+    "case_sha256": "a61b83d7ea0fc0c720d47e1a331acc944d97cf4158798783baa93e4d56511f47",
+    "corpus_sha256": "89ef39b550190e42b39e78d93c688ec7a841dd192669c5cd9df70b3ac6cabb57",
+    "code_revision": "7f3889b65be190ebfd87a0c5aabf9c69ab2561bb",
+    "code_dirty": false,
+    "implementation_sha256": "c329f0cdbc3718f93c91fc18efd24b27113bce4b5df506253022995267b90520"
+  }
+}
