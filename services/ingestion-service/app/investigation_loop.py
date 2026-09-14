@@ -24,6 +24,7 @@ from .investigation_schemas import (
     InvestigationReport,
     InvestigationScope,
     LogQuery,
+    MetricQuery,
     RunbookQuery,
 )
 from .investigation_tools import MAX_RESULT_BYTES, redact
@@ -34,6 +35,7 @@ TOOL_SCHEMAS = {
     "query_logs": LogQuery,
     "summarize_logs": InvestigationScope,
     "search_runbooks": RunbookQuery,
+    "read_metric_series": MetricQuery,
 }
 TOOLS = [
     {
@@ -53,6 +55,11 @@ TOOLS = [
         ),
         ("summarize_logs", "Count all scoped logs by service and level, not only a query page."),
         ("search_runbooks", "Search curated operational guidance; not incident evidence."),
+        (
+            "read_metric_series",
+            "Read one fixed metric (request_rate, error_rate, latency_p95) for one scoped"
+            " service. Unavailable in deployments without instrumented metrics.",
+        ),
     )
 ]
 AGENT_PROMPT = PROMPT.replace(

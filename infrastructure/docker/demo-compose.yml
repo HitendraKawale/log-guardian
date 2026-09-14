@@ -1,0 +1,93 @@
+# Minimal demo stack: no Kafka, Grafana, or Kubernetes. The full stack in
+# docker-compose.yml is unchanged and remains available separately.
+#
+# Fault controls are exposed on 127.0.0.1 only and are never registered as
+# agent tools. The investigation worker is profile-gated and requires keys.
+name: log-guardian-demo
+
+services:
+  ingestion-service:
+    build:
+      context: ../../services/ingestion-service
+      dockerfile: Dockerfile
+    container_name: lgd-ingestion
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/demo.db
+      AI_SERVICE_URL: http://unused:1
+      INVESTIGATION_API_KEY: ${INVESTIGATION_API_KEY:-}
+      PROMETHEUS_URL: http://prometheus:9090
+    volumes:
+      - demo-data:/data
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    container_name: lgd-frontend
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - ingestion-service
+
+  checkout:
+    build:
+      context: ../../demo
+      dockerfile: Dockerfile
+    container_name: lgd-checkout
+    environment:
+      DEMO_ROLE: checkout
+      INVENTORY_URL: http://inventory:9001
+      INGESTION_URL: http://ingestion-service:8000
+      CHECKOUT_DEADLINE_MS: "1000"
+    ports:
+      - "127.0.0.1:9001:9001"
+    depends_on:
+      - ingestion-service
+      - inventory
+
+  inventory:
+    build:
+      context: ../../demo
+      dockerfile: Dockerfile
+    container_name: lgd-inventory
+    environment:
+      DEMO_ROLE: inventory
+      INGESTION_URL: http://ingestion-service:8000
+    ports:
+      - "127.0.0.1:9002:9001"
+      # Owner-only fault controls: localhost binding, private to this machine.
+      - "127.0.0.1:9101:9101"
+    depends_on:
+      - ingestion-service
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: lgd-prometheus
+    volumes:
+      - ../../demo/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  investigation-worker:
+    build:
+      context: ../../services/ingestion-service
+      dockerfile: Dockerfile
+    container_name: lgd-worker
+    command: ["python", "-m", "app.investigator"]
+    healthcheck:
+      disable: true
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/demo.db
+      INVESTIGATION_API_KEY: ${INVESTIGATION_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PROMETHEUS_URL: http://prometheus:9090
+    volumes:
+      - demo-data:/data
+    depends_on:
+      - ingestion-service
+    profiles: ["investigations"]
+
+volumes:
+  demo-data:

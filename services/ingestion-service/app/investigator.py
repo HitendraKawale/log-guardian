@@ -135,11 +135,14 @@ async def execute_run(session_factory, run_id: str, client, model: str = MODEL) 
         # The worker owns a database session per tool call through the factory;
         # EvidenceTools needs one live session for the whole run instead.
         async with session_factory() as evidence_session:
+            from .config import settings
+
             tools = RecordingTools(
                 InvestigationScope(**scope),
                 session_factory,
                 run_id,
                 session=evidence_session,
+                prometheus_url=settings.prometheus_url or None,
             )
             config = BaselineConfig(model=model, max_cost_usd="0.025")
             result = await run_investigation(system, question, tools, client, config)
