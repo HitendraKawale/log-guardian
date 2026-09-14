@@ -59,3 +59,9 @@ async def client(make_client):
     anomaly = AIResponse(anomaly_score=0.92, is_anomaly=True, predicted_severity=Severity.HIGH)
     async with make_client(anomaly) as c:
         yield c
+
+
+@pytest_asyncio.fixture
+async def session_factory(engine):
+    """Direct database access for tests that seed or inspect rows."""
+    return async_sessionmaker(engine, expire_on_commit=False)
