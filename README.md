@@ -7,9 +7,11 @@ evidence** and missing evidence yields an honest *inconclusive* instead of a
 guessed root cause.
 
 **[90-second recorded demo](docs/media/demo-90s.webm)** · **[evaluation method
-and full scorecard](docs/evaluation.md)** · static recorded demo:
-`python scripts/export_static_demo.py` then open `site/index.html` (no
-provider key needed; explicitly marked recorded).
+and full scorecard](docs/evaluation.md)** ·
+[Public recorded demo](https://hitendrakawale.github.io/log-guardian/).
+No provider key needed. For a local preview, run
+`python scripts/export_static_demo.py` then `python -m http.server 8080 --directory site`
+and open <http://localhost:8080/>.
 
 Headline results, measured (see the scorecard for everything, including
 failures): on the held-out split, fixed retrieval **B scored 13/16** core
@@ -17,6 +19,12 @@ review passes at $0.024 total, the adaptive agent **C scored 11/16** at
 $0.029 — the adaptive hypothesis was **not supported** on this corpus. All 92
 live runs (152 requests, est. $0.128 total) are preserved byte-for-byte with
 provenance under `evals/results/`.
+
+A separate [live sandbox investigation](demo/investigations/2026-09-14-live-sandbox/)
+completed through the queue worker for $0.00229760. C cited real logs showing
+inventory latency exceeding checkout's deadline. The archive records the
+scenario-label leakage and missing worker revision; this is not another held-out
+benchmark. Total estimated spend including this run is $0.13033360.
 
 ## What is shipped, what is an experiment, what is deferred
 
@@ -43,7 +51,8 @@ make demo-down
 Investigations are disabled until `INVESTIGATION_API_KEY` is set (every
 endpoint returns 503). The worker (`python -m app.investigator`) fails closed
 without `OPENAI_API_KEY` — no fabricated reports. Live model calls cost real
-money; nothing in this repository spends without explicit owner opt-in flags.
+money. Starting a configured worker enables spending on queued investigations;
+it has no account-wide allowance ledger.
 
 ---
 
