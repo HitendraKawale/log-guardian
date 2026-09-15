@@ -291,10 +291,11 @@ cd services/ingestion-service && alembic upgrade head
 
 ## Tests
 
-91 tests in two tiers. The first needs nothing:
+284 tests in two tiers. The first needs nothing:
 
 ```bash
-make test              # 67 tests: ai-service, ingestion, ml, contract
+make test              # 242 tests: ai-service, ingestion, ml, contract, evals
+make test-demo         # 3 more: the in-process fault/recovery sandbox
 ```
 
 The second needs the stack running, because it is specifically about the seams
@@ -303,7 +304,7 @@ the first tier replaces with fakes:
 ```bash
 make up
 make test-integration  # 16 tests against real containers
-make test-e2e          # 8 chromium tests against the dashboard
+make test-e2e          # 23 chromium tests against the dashboard
 make smoke             # probe a deployment from outside
 ```
 
@@ -323,9 +324,10 @@ What the integration tier buys, given the unit suites mock every boundary:
 A contract test compares the two services' JSON schemas, since they duplicate
 the wire format deliberately and nothing else stops them drifting.
 
-CI runs six jobs: four unit suites in a matrix, lint, `kubectl kustomize`, the
-integration and browser tests against a Compose stack, and a training smoke
-test. Dashboard screenshots are uploaded as a build artifact.
+CI defines five jobs: a matrix over the five infra-free suites, lint,
+`kubectl kustomize`, the integration and browser tests against a Compose stack,
+and a training smoke test. Dashboard screenshots are uploaded as a build
+artifact. The demo sandbox suite is not in CI.
 
 ### Load
 
