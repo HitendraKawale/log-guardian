@@ -83,3 +83,40 @@ class InvestigationEvent(Base):
     kind: Mapped[str] = mapped_column(String(32))  # tool_call, model_request, status
     payload: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class InvestigationCandidate(Base):
+    """A log the trigger selected as worth investigating.
+
+    A candidate is a suggestion, never a commitment: nothing in this table
+    spends money, and promoting one into an ``Investigation`` is a separate,
+    key-gated, human action. Keeping the two tables apart is what stops log
+    volume from driving paid execution.
+
+    ``(service, template)`` is unique because the trigger's memory is
+    per-process: a restart, or a second replica, re-fires a family the first
+    one already surfaced. The constraint absorbs that, so a family yields one
+    reviewable row however many workers see it.
+    """
+
+    __tablename__ = "investigation_candidates"
+    __table_args__ = (
+        Index("ix_candidates_service_template", "service", "template", unique=True),
+        Index("ix_candidates_status_created", "status", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_id)
+    service: Mapped[str] = mapped_column(String(128))
+    level: Mapped[str] = mapped_column(String(16))
+    message: Mapped[str] = mapped_column(String)
+    template: Mapped[str] = mapped_column(String)
+    reason: Mapped[str] = mapped_column(String(32))
+    # Validated InvestigationScope dump, so a reviewer can act without
+    # reconstructing the window the candidate refers to.
+    scope: Mapped[dict] = mapped_column(JSON)
+    # "new" until a human dismisses it. Terminal states stay terminal.
+    status: Mapped[str] = mapped_column(String(16), default="new")
+    log_id: Mapped[int | None] = mapped_column(ForeignKey("logs.id", ondelete="SET NULL"))
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

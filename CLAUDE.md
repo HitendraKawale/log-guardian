@@ -88,6 +88,13 @@ the platform is the substrate it investigates and the honest-negative ML case st
   than extrapolating. Held out: F1 0.973 / ROC-AUC 0.999, against a 0.588 / 0.500 bar.
   It is domain-specific — BGL is supercomputer RAS logging, not application logs.
 
+**Candidate queue**: selected logs persist to `investigation_candidates` (migration `0004`)
+and are reviewed via `routes/candidates.py`. That router sits behind the **log** API key, not
+`INVESTIGATION_API_KEY`, because it cannot spend — there is deliberately no promote-to-
+investigation route, and a test asserts the queue creates no `Investigation` rows. De-duplication
+is delegated to a unique index on `(service, template)`: the trigger's memory is per-process, so
+restarts and replicas re-fire and the database absorbs it.
+
 **Investigation trigger**: `app/trigger.py` selects which logs are worth investigating
 without labels or a model call — severity gate plus unseen-template novelty — and
 `persist_log` calls it **best-effort**, same contract as `ai_client`. `app/templates.py` is the

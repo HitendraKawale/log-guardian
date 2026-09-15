@@ -292,7 +292,13 @@ Ingestion service:
 - `POST /logs/{id}/feedback` — attach a human label (`{"is_anomaly": bool}`)
 - `GET /feedback/export` — labelled examples for retraining
 - `GET /model/info` — active model version + metrics (proxied from the AI service)
+- `GET /candidates?status=&service=&limit=&offset=` — the investigation queue
+- `GET /candidates/{id}` · `POST /candidates/{id}/dismiss` — review one
 - `GET /health` · `GET /readiness` · `GET /metrics`
+
+Candidates are what the label-free trigger selected as worth investigating. That
+router can list and dismiss; it cannot start an investigation, because starting
+one spends money. Promotion stays a separate, key-gated, human action.
 
 AI service:
 
