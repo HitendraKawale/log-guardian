@@ -91,6 +91,41 @@ REST route, so both paths are behaviourally identical. Kafka is gated behind
   AI service, ingestion (with a HorizontalPodAutoscaler) and frontend behind an
   ingress. The ingestion image applies Alembic migrations on startup.
 
+## Candidate selection (what to investigate)
+
+```
+persist_log ──▶ InvestigationTrigger.consider()      no labels, no model call
+                   │  severity gate + unseen template (per service)
+                   ▼
+            investigation_candidates  ──review──▶ GET /candidates        (log key)
+                   │                              POST /candidates/{id}/dismiss
+                   │ promote (human)
+                   ▼
+            POST /investigations/from-candidate/{id}                (investigation key)
+```
+
+- The anomaly scorer answers "is this line anomalous?" and cannot answer "what
+  should we investigate?": it needs labels no deployment has, and it is fitted
+  on BGL's vocabulary, so it returns 0.0 for application traffic. Selection is
+  therefore label-free — a severity gate plus "this service has not emitted this
+  message template before". Held out on BGL it surfaces 76.5% of alerting
+  message families while raising candidates on 0.84% of rows.
+- `app/templates.py` is the single source of truth for templating and has two
+  callers with opposite verdicts: it *lowered* held-out ROC-AUC for the
+  supervised scorer, and novelty detection is meaningless without it, because
+  every new path or request id would otherwise make a line unique. See
+  docs/model-comparison.md.
+- The trigger is called best-effort from `persist_log`, after the log commits,
+  so a trigger failure can neither fail nor delay a write. Its memory is
+  per-process; de-duplication is delegated to a unique index on
+  `(service, template)`, so restarts and replicas re-fire harmlessly.
+- **Selecting is not spending.** Reviewing the queue needs the log API key;
+  promoting a candidate into a paid run needs `INVESTIGATION_API_KEY`. The
+  dashboard holds only the former and has no promote control. Promotion is
+  idempotent through the candidate's `investigation_id` link, and its default
+  question omits the log message so attacker-controlled text never reaches the
+  instruction position.
+
 ## Investigation subsystem (added with the agentic work)
 
 ```
