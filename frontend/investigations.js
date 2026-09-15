@@ -21,7 +21,7 @@
       document.querySelectorAll(".tab").forEach((t) =>
         t.classList.toggle("active", t === tab)
       );
-      for (const view of ["investigations", "logs", "evaluations"]) {
+      for (const view of ["investigations", "candidates", "logs", "evaluations"]) {
         $(`view-${view}`).hidden = view !== tab.dataset.view;
       }
       if (tab.dataset.view !== "investigations") stopPolling();

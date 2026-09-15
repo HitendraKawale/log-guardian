@@ -114,3 +114,19 @@ def test_naive_timestamps_are_treated_as_utc():
 def test_degenerate_messages_do_not_raise(message):
     trigger = InvestigationTrigger(warmup_logs=0)
     trigger.consider("checkout", "CRITICAL", message, _at())
+
+
+def test_novelty_is_tracked_per_service():
+    """A family one service emits routinely is still new for another.
+
+    This matches the queue's unique index on (service, template): the same
+    failure appearing somewhere it never has before is worth surfacing.
+    """
+    trigger = InvestigationTrigger(warmup_logs=5)
+    _warm(trigger, 5)
+    first = trigger.consider("checkout", "CRITICAL", "disk controller reset", _at())
+    other = trigger.consider("inventory", "CRITICAL", "disk controller reset", _at(1))
+    again = trigger.consider("checkout", "CRITICAL", "disk controller reset", _at(2))
+    assert first is not None
+    assert other is not None, "a different service emitting it is a separate finding"
+    assert again is None

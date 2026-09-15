@@ -135,6 +135,10 @@ table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
 .lvl-DEBUG, .lvl-INFO { background: #21323f; color: #79c0ff; }
 .lvl-WARNING { background: #3a2f12; color: var(--yellow); }
 .lvl-ERROR, .lvl-CRITICAL { background: #3a1715; color: var(--red); }
+/* Candidate review states. "new" is the queue; the others are outcomes. */
+.status-new { background: #21323f; color: #79c0ff; }
+.status-dismissed { background: #262b31; color: var(--muted, #8b949e); }
+.status-promoted { background: #16331d; color: var(--green); }
 .sev-low { background: #16331d; color: var(--green); }
 .sev-medium { background: #3a2f12; color: var(--yellow); }
 .sev-high { background: #3a1715; color: var(--red); }
@@ -161,7 +165,7 @@ table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
 }
-.tabs { display: flex; gap: 4px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
 .tab {
   background: none; border: 1px solid transparent; color: #8b949e;
   padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 14px;
@@ -239,6 +243,10 @@ table.logs { width: 100%; border-collapse: collapse; font-size: 13px; }
   .key-input { width: 110px; }
   main { padding: 12px; }
   .logs { display: block; overflow-x: auto; }
+  /* Four tabs no longer fit beside the brand and the key field, so the bar
+     scrolls rather than pushing the page wider than the viewport. */
+  .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 6px 10px; white-space: nowrap; }
 }
 .inv-form input, .inv-form select { width: 100%; min-width: 0; box-sizing: border-box; }
 .inv-side, .inv-main { min-width: 0; }
