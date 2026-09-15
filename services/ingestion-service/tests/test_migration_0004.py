@@ -132,3 +132,38 @@ def test_downgrade_removes_the_queue_and_keeps_investigations(tmp_path):
         }
         assert "investigation_candidates" not in tables
         assert "investigations" in tables
+
+
+def test_0005_adds_the_investigation_link_and_downgrades(tmp_path):
+    """0004 -> 0005 adds one nullable column and keeps existing candidates."""
+    database = tmp_path / "link.db"
+    env = _env(tmp_path, database)
+    assert alembic(env, "upgrade", "0004").returncode == 0
+
+    engine = sa.create_engine(f"sqlite:///{database}")
+    with engine.begin() as connection:
+        connection.execute(
+            sa.text(CANDIDATE), {"id": "c1", "message": "m", "template": "disk error"}
+        )
+
+    result = alembic(env, "upgrade", "0005")
+    assert result.returncode == 0, result.stderr
+    with engine.connect() as connection:
+        columns = {
+            row[1]
+            for row in connection.execute(sa.text("PRAGMA table_info(investigation_candidates)"))
+        }
+        assert "investigation_id" in columns
+        rows = connection.execute(
+            sa.text("SELECT id, investigation_id FROM investigation_candidates")
+        ).all()
+        assert rows == [("c1", None)], "existing candidates survive, unlinked"
+
+    down = alembic(env, "downgrade", "0004")
+    assert down.returncode == 0, down.stderr
+    with engine.connect() as connection:
+        columns = {
+            row[1]
+            for row in connection.execute(sa.text("PRAGMA table_info(investigation_candidates)"))
+        }
+        assert "investigation_id" not in columns

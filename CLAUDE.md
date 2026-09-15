@@ -90,8 +90,12 @@ the platform is the substrate it investigates and the honest-negative ML case st
 
 **Candidate queue**: selected logs persist to `investigation_candidates` (migration `0004`)
 and are reviewed via `routes/candidates.py`. That router sits behind the **log** API key, not
-`INVESTIGATION_API_KEY`, because it cannot spend — there is deliberately no promote-to-
-investigation route, and a test asserts the queue creates no `Investigation` rows. De-duplication
+`INVESTIGATION_API_KEY`, because it cannot spend — a test asserts the queue creates no
+`Investigation` rows. Promotion (`POST /investigations/from-candidate/{id}`, migration `0005`)
+lives on the investigations router behind the execution key, so reviewing and spending are
+separate capabilities; it is idempotent via the candidate's `investigation_id` link, and its
+default question deliberately omits the log message so attacker-controlled text never reaches
+the instruction position. De-duplication
 is delegated to a unique index on `(service, template)`: the trigger's memory is per-process, so
 restarts and replicas re-fire and the database absorbs it.
 

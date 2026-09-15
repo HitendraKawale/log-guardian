@@ -3,15 +3,14 @@
 Nothing here spends money, and that is the point of keeping it separate from
 `routes/investigations.py`. A candidate is the trigger's suggestion that a
 message family is worth a human's attention; an investigation is a paid model
-run. This router can list candidates and dismiss them, and it cannot start one.
+run. This router can list candidates and dismiss them, and it cannot start one:
+promotion lives on the investigations router behind INVESTIGATION_API_KEY, so
+the capability to review and the capability to spend are separate keys.
 
 It therefore sits behind the ordinary log API key rather than
 `INVESTIGATION_API_KEY`: reading the queue is no more sensitive than reading the
 logs it was derived from, and gating it behind the execution key would imply a
-spending capability it does not have. Promoting a candidate into an
-investigation is deliberately absent -- when it lands it belongs on the
-investigations router, behind that key, as an explicit human action.
-"""
+spending capability it does not have."""
 
 from datetime import UTC, datetime
 from typing import Literal
@@ -31,6 +30,8 @@ DISMISSABLE = {"new"}
 
 
 class CandidateOut(BaseModel):
+    """``investigation_id`` is set only once a human promoted this candidate."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str
@@ -42,6 +43,7 @@ class CandidateOut(BaseModel):
     scope: dict
     status: str
     log_id: int | None
+    investigation_id: str | None
     occurred_at: datetime
     created_at: datetime
     dismissed_at: datetime | None

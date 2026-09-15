@@ -114,9 +114,15 @@ class InvestigationCandidate(Base):
     # Validated InvestigationScope dump, so a reviewer can act without
     # reconstructing the window the candidate refers to.
     scope: Mapped[dict] = mapped_column(JSON)
-    # "new" until a human dismisses it. Terminal states stay terminal.
+    # "new" -> "dismissed" | "promoted". Terminal states stay terminal.
     status: Mapped[str] = mapped_column(String(16), default="new")
     log_id: Mapped[int | None] = mapped_column(ForeignKey("logs.id", ondelete="SET NULL"))
+    # Set when a human promotes this candidate into a paid run. The link is the
+    # idempotency record: promoting twice returns the first investigation rather
+    # than queueing a second one.
+    investigation_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("investigations.id", ondelete="SET NULL"), nullable=True
+    )
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

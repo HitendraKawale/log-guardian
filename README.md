@@ -298,7 +298,13 @@ Ingestion service:
 
 Candidates are what the label-free trigger selected as worth investigating. That
 router can list and dismiss; it cannot start an investigation, because starting
-one spends money. Promotion stays a separate, key-gated, human action.
+one spends money. Promotion lives on the investigations router instead:
+
+- `POST /investigations/from-candidate/{id}` — queue a paid run from a candidate
+
+so reviewing the queue and spending against it are separate keys. Promotion is
+idempotent through the candidate's investigation link: promoting twice returns
+the first run rather than paying for the same question again.
 
 AI service:
 
