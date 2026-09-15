@@ -49,9 +49,12 @@ def test_anomalous_scores_higher_than_benign():
 
 
 def test_clear_anomaly_is_flagged():
+    # Only the flag is asserted here, because severity depends on which artifact
+    # is loaded: the heuristic is confident about this line, a model trained on
+    # supercomputer RAS logs is not, and both are legitimate. The "high" grading
+    # is pinned deterministically against the heuristic in test_analyzer.py.
     body = _score(ANOMALOUS)
     assert body["is_anomaly"] is True
-    assert body["predicted_severity"] == "high"
 
 
 def test_model_info_reports_version_and_metrics():

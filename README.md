@@ -200,8 +200,39 @@ same precision, same recall, it flags all 222,395 rows. Its ROC-AUC of 0.407 is
 below 0.5, i.e. it ranks alerts *worse* than a coin flip, because the keyword
 boost is its only source of variation and the boost points the wrong way.
 
-Anything that ships has to beat 0.588 F1 and 0.5 AUC. Nothing does yet — see
-[limitations](#known-limitations).
+Anything that ships has to beat 0.588 F1 and 0.5 AUC.
+
+### Clearing it
+
+`python ml/training/train_bgl.py` fits the shipped artifact on the real split;
+`python ml/training/evaluate.py` scores it once on the same 222,395 held-out
+rows:
+
+```
+  model      v20260915-020822 (source: bgl), threshold 0.03
+  precision      0.947
+  recall         1.000
+  f1             0.973
+  roc-auc        0.999
+```
+
+Two of the three fixes were bugs rather than modelling. The training holdout was
+a *random* split, which on bursty logs scores memorisation as skill; it is now
+chronological. The decision threshold was assumed to be 0.50 rather than fitted;
+it is now chosen on a holdout inside the training window and recorded on the
+registry entry. The third fix was replacing the five numeric features — level is
+constant on the CRITICAL subset and the hand-written keywords point the wrong
+way — with the message text.
+
+The plan had been to template the messages first, replacing paths and addresses
+with placeholders the way Drain does. Measured, that makes it worse, and worst
+on exactly the rows it was meant to help: on held-out lines whose template was
+never seen in training, ROC-AUC falls from 0.989 to 0.932. BGL's variable parts
+are not noise — `ciod: Error loading /bgl/apps/SWL/...` is a user's own broken
+job, and the path is the evidence. The full comparison against Drain3 and the
+loglizer baselines is in
+[`docs/model-comparison.md`](docs/model-comparison.md); the feature ablation is
+in [`ml/README.md`](ml/README.md).
 
 ## Design decisions
 
@@ -291,10 +322,11 @@ cd services/ingestion-service && alembic upgrade head
 
 ## Tests
 
-91 tests in two tiers. The first needs nothing:
+284 tests in two tiers. The first needs nothing:
 
 ```bash
-make test              # 67 tests: ai-service, ingestion, ml, contract
+make test              # 242 tests: ai-service, ingestion, ml, contract, evals
+make test-demo         # 3 more: the in-process fault/recovery sandbox
 ```
 
 The second needs the stack running, because it is specifically about the seams
@@ -303,7 +335,7 @@ the first tier replaces with fakes:
 ```bash
 make up
 make test-integration  # 16 tests against real containers
-make test-e2e          # 8 chromium tests against the dashboard
+make test-e2e          # 23 chromium tests against the dashboard
 make smoke             # probe a deployment from outside
 ```
 
@@ -323,9 +355,10 @@ What the integration tier buys, given the unit suites mock every boundary:
 A contract test compares the two services' JSON schemas, since they duplicate
 the wire format deliberately and nothing else stops them drifting.
 
-CI runs six jobs: four unit suites in a matrix, lint, `kubectl kustomize`, the
-integration and browser tests against a Compose stack, and a training smoke
-test. Dashboard screenshots are uploaded as a build artifact.
+CI defines five jobs: a matrix over the five infra-free suites, lint,
+`kubectl kustomize`, the integration and browser tests against a Compose stack,
+and a training smoke test. Dashboard screenshots are uploaded as a build
+artifact. The demo sandbox suite is not in CI.
 
 ### Load
 
@@ -358,10 +391,15 @@ are in [`infrastructure/kubernetes/README.md`](infrastructure/kubernetes/README.
 
 Things that are wrong or missing, in roughly the order they'd bite:
 
-- **The deployed model is still the synthetic one.** BGL data, split and
-  baselines exist; the retrain on real data does not. `registry.json` reports
-  metrics measured on the synthetic set, which for the reasons above should be
-  read as meaningless rather than good.
+- **The deployed model only scores CRITICAL logs.** It is fitted on BGL's
+  CRITICAL subset, where every operator-labelled alert lives, and the registry
+  records that pool so the service returns 0.0 for other severities rather than
+  extrapolating. That is the honest behaviour, but it means the model
+  contributes nothing to the application-log demo, whose traffic is mostly
+  ERROR and WARNING. The severity gate is a deliberate rule, not a learned one.
+- **The model is domain-specific.** BGL is supercomputer RAS logging. Nothing
+  here shows the templates transfer to application logs, and the demo sandbox's
+  messages are out of its vocabulary.
 - **The rate limiter is per process.** `RateLimiter` keeps hits in a local dict,
   but the deployment runs 2 replicas and scales to 6, so the effective limit is
   up to 6× what's configured. Needs Redis to be real.
@@ -385,7 +423,7 @@ Things that are wrong or missing, in roughly the order they'd bite:
 
 ## Next
 
-- [ ] Drain3 template features, then retrain on BGL and see if it clears 0.588 F1
+- [ ] A labelled application-log corpus, so the scorer is useful to the demo it ships with
 - [ ] Build and push images from CI so the k8s manifests point at a registry
 - [ ] Deploy it somewhere real, with the API key actually set
 - [ ] Move the rate limiter to Redis, or document it as per-pod and move on

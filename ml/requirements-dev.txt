@@ -1,3 +1,6 @@
 -r requirements.txt
 pytest==8.3.4
 ruff==0.8.4
+# Reference log parser for ml/training/compare.py only. Not imported by the
+# service or by the shipped training path.
+drain3==0.9.11

@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train train-bgl evaluate compare retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -63,8 +63,17 @@ format: ## Auto-fix lint issues and format with ruff
 loadtest: ## Run the k6 load test (override BASE_URL to target a host)
 	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js
 
-train: ## Train the model on synthetic data and register it
+train: ## Train the model on synthetic data and register it (smoke test only)
 	$(PY) ml/training/train.py
+
+train-bgl: ## Train the shipped model on the real BGL split and register it
+	$(PY) ml/training/train_bgl.py
+
+evaluate: ## Score the registered model on the held-out BGL window
+	$(PY) ml/training/evaluate.py
+
+compare: ## Compare the shipped model against established methods (slow)
+	$(PY) ml/training/compare.py
 
 retrain: ## Retrain on synthetic + collected feedback (set INGESTION_URL)
 	$(PY) ml/training/retrain.py
