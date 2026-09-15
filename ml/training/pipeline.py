@@ -5,8 +5,12 @@
 versioned artifact, updates the "current" model the AI service loads, and
 appends an entry to ``registry.json`` so model quality is tracked over time.
 
-Two decisions here were wrong before and are worth naming, because both
-inflate a score without improving a model:
+Several decisions here were wrong before, and each of them inflates a score
+without improving a model:
+
+**The text is not templated.** See ``ml/training/templates.py``: abstracting
+paths and addresses away, the standard preprocessing step for log data, cost
+held-out ROC-AUC here and cost most on novel message families.
 
 **The holdout is chronological, never random.** This previously used
 ``train_test_split(..., shuffle=True, stratify=y)``. Log failures arrive in
@@ -14,6 +18,10 @@ bursts -- on BGL, one day is 152,183 lines that are 100% alerts -- so a shuffled
 split scatters near-identical lines from a single event across both sides and
 scores memorisation as skill. Rows are sorted by timestamp and cut at a time
 boundary instead.
+
+**The artifact is refitted on the whole window.** The threshold and the metrics
+come from a holdout, but the model that ships is then refitted on every row --
+keeping the holdout model would throw away a quarter of the training data.
 
 **The decision threshold is fitted, not assumed.** 0.50 is only meaningful for a
 calibrated model on a balanced problem, and this is neither. The threshold that
@@ -32,7 +40,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 AI_SERVICE = REPO_ROOT / "services" / "ai-service"
 sys.path.insert(0, str(AI_SERVICE))
 
-from app.features import normalize_message  # noqa: E402
+from app.features import prepare_message  # noqa: E402
 
 MODEL_DIR = AI_SERVICE / "app" / "model"
 CURRENT_MODEL = MODEL_DIR / "anomaly_model.joblib"
@@ -50,14 +58,14 @@ def load_registry() -> dict:
 
 
 def build_estimator():
-    """TF-IDF over message templates into a random forest.
+    """TF-IDF word n-grams over the lowercased message into a random forest.
 
-    Word n-grams over the normalised template, not raw text: after
-    ``normalize_message`` the vocabulary is small (a few hundred tokens on BGL),
-    so bigrams are affordable and carry the phrase structure that separates
-    "error loading <path> invalid or missing program image" (a user's broken job,
-    benign) from "error reading message prefix on ciostream socket to <addr>
-    link has been severed" (a real failure).
+    Whitespace tokenisation keeps a path or a socket address as one token rather
+    than shredding it, and bigrams carry the phrase structure that separates
+    "error loading ... invalid or missing program image" (a user's broken job,
+    benign) from "error reading message prefix on ciostream socket to ...
+    link has been severed" (a real failure). Templating the message first was
+    measured and lost -- see ml/training/templates.py.
     """
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -129,9 +137,9 @@ def train_and_register(
     from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
 
     train, test = chronological_split(records)
-    x_train = [normalize_message(r["message"]) for r in train]
+    x_train = [prepare_message(r["message"]) for r in train]
     y_train = [int(r["label"]) for r in train]
-    x_test = [normalize_message(r["message"]) for r in test]
+    x_test = [prepare_message(r["message"]) for r in test]
     y_test = np.array([int(r["label"]) for r in test])
 
     model = build_estimator()
@@ -146,10 +154,17 @@ def train_and_register(
     # both classes present in the holdout to be defined at all.
     auc = float(roc_auc_score(y_test, proba)) if len(set(y_test.tolist())) > 1 else None
 
-    all_scores = model.predict_proba([normalize_message(r["message"]) for r in records])[:, 1]
+    # Refit on the whole window now that the threshold is settled. The metrics
+    # above describe the holdout model and stay the honest generalisation
+    # estimate; the artifact that ships should still see every row it can, and
+    # discarding a quarter of the training window costs real held-out ROC-AUC.
+    all_messages = [prepare_message(r["message"]) for r in records]
+    model = build_estimator()
+    model.fit(all_messages, [int(r["label"]) for r in records])
+
     # Mean score over all data - the baseline the AI service compares against
     # for drift detection.
-    train_mean_score = float(np.mean(all_scores))
+    train_mean_score = float(np.mean(model.predict_proba(all_messages)[:, 1]))
 
     version = datetime.now(UTC).strftime("v%Y%m%d-%H%M%S")
     MODEL_DIR.mkdir(parents=True, exist_ok=True)

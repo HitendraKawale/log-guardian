@@ -12,7 +12,7 @@ Two interchangeable strategies implement the same interface:
 
 from __future__ import annotations
 
-from .features import keyword_count, normalize_message
+from .features import keyword_count, prepare_message
 from .model import current_version, load_model
 from .schemas import AnalyzeRequest, AnalyzeResponse, Severity
 
@@ -68,7 +68,7 @@ class HeuristicAnalyzer:
 
 
 class ModelAnalyzer:
-    """Wraps a trained message-template pipeline exposing ``predict_proba``.
+    """Wraps a trained text pipeline exposing ``predict_proba``.
 
     Two things come from the registry entry rather than being hardcoded, because
     both are properties of the data the artifact was fitted on:
@@ -100,7 +100,7 @@ class ModelAnalyzer:
         if self._candidate_levels and request.level.value not in self._candidate_levels:
             return _build_response(0.0, self.threshold)
         # Probability of the positive (anomaly) class.
-        score = float(self._model.predict_proba([normalize_message(request.message)])[0][1])
+        score = float(self._model.predict_proba([prepare_message(request.message)])[0][1])
         return _build_response(score, self.threshold)
 
 

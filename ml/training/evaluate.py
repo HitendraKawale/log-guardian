@@ -21,7 +21,7 @@ AI_SERVICE = REPO_ROOT / "services" / "ai-service"
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(AI_SERVICE))
 
-from app.features import normalize_message  # noqa: E402
+from app.features import prepare_message  # noqa: E402
 from app.model import MODEL_PATH, current_version  # noqa: E402
 
 from ml.data.prepare import TEST_PATH, read_jsonl  # noqa: E402
@@ -43,7 +43,7 @@ def main() -> None:
 
     records = read_jsonl(TEST_PATH)
     y_true = np.array([int(r["label"]) for r in records])
-    scores = model.predict_proba([normalize_message(r["message"]) for r in records])[:, 1]
+    scores = model.predict_proba([prepare_message(r["message"]) for r in records])[:, 1]
     predictions = (scores >= threshold).astype(int)
 
     precision, recall, f1, _ = precision_recall_fscore_support(

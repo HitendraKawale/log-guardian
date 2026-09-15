@@ -77,11 +77,16 @@ the platform is the substrate it investigates and the honest-negative ML case st
   behaviour; `heuristic_analyze()` exists as the deterministic entry point tests pin against.
 - `app/features.py` is the **single source of truth for featurization**, imported by both
   serving and the offline trainer (`ml/training/pipeline.py` inserts `services/ai-service`
-  onto `sys.path` to get it). Changing `FEATURE_NAMES`/`featurize` invalidates the committed
-  model — retrain in the same change.
-- The shipped scorer is a documented negative result: synthetic-trained, F1 0.588 /
-  ROC-AUC 0.407 on real BGL data (identical to "always alert"). It is a display signal,
-  not an investigation trigger. See `ml/README.md` and README "What the real data changed".
+  onto `sys.path` to get it). `prepare_message` is the seam; changing it invalidates the
+  committed model — retrain in the same change (`make train-bgl`, then `make evaluate`).
+  It only lowercases, and that is a measured result: templating the message first (the
+  standard log-parsing step, kept in `ml/training/templates.py`) lowers held-out ROC-AUC,
+  most on novel message families. Don't re-add it without re-running `make compare`.
+- The model is fitted on BGL's CRITICAL subset only. The registry entry carries
+  `decision_threshold` (fitted on a chronological holdout, **not** 0.50) and
+  `candidate_levels`; `ModelAnalyzer` reads both, and scores 0.0 outside the pool rather
+  than extrapolating. Held out: F1 0.973 / ROC-AUC 0.999, against a 0.588 / 0.500 bar.
+  It is domain-specific — BGL is supercomputer RAS logging, not application logs.
 
 **Shared wire contract**: ingestion's `LogCreate`/`AIResponse` and the AI service's
 `AnalyzeRequest`/`AnalyzeResponse` are intentionally identical, duplicated in two
@@ -174,6 +179,11 @@ not entailment — semantic review is still a human step.
   but containers run `alembic upgrade head`.
 - **Model artifacts**: only `anomaly_model.joblib` and `registry.json` are committed;
   `anomaly_model_v*.joblib` is gitignored. Training appends to the registry — don't hand-edit it.
+  `make train` (synthetic) is a CI smoke test and will overwrite the committed artifact
+  locally; `make train-bgl` is what produces the real one.
+- **Never evaluate on the BGL test split while tuning.** `train_bgl.py` reads only
+  `bgl_train.jsonl.gz` and carves its own holdout for the threshold; `evaluate.py` is the
+  only reader of `bgl_test.jsonl.gz` and fits nothing.
 - **Security is off by default for logs, on by default for investigations**: `API_KEY=""`
   disables the `X-API-Key` dependency and `RATE_LIMIT_PER_MINUTE=0` disables the limiter,
   but an empty `INVESTIGATION_API_KEY` returns 503 everywhere. The rate limiter is

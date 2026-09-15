@@ -30,10 +30,10 @@ def _req(level: LogLevel, message: str = "data TLB error interrupt") -> AnalyzeR
     )
 
 
-def test_model_receives_the_normalised_template_not_raw_text():
+def test_model_receives_the_prepared_message():
     model = StubModel(0.9)
     ModelAnalyzer(model).analyze(_req(LogLevel.CRITICAL, "Error loading /home/a/b.rts"))
-    assert model.seen == ["error loading <path>"]
+    assert model.seen == ["error loading /home/a/b.rts"]
 
 
 def test_score_below_fitted_threshold_is_not_an_anomaly():

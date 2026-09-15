@@ -108,16 +108,82 @@ components it finds are rare afterwards.
 **0.588 F1 and 0.5 AUC is the bar.** A model that doesn't clear both is
 strictly worse than an `if` statement.
 
+## The shipped model
+
+`train_bgl.py` fits the artifact the service loads, on the real split.
+`evaluate.py` scores it once on the held-out five months (222,395 rows the model
+never saw, in a window starting after every row it was fitted on):
+
+| | precision | recall | f1 | roc-auc |
+| --- | --- | --- | --- | --- |
+| shipped heuristic (previous) | 0.416 | 1.000 | 0.588 | 0.407 |
+| **TF-IDF + random forest** | **0.947** | **1.000** | **0.973** | **0.999** |
+
+Three things got it there, and two of them were bugs rather than modelling.
+
+**The holdout was random.** `train_and_register` used
+`train_test_split(shuffle=True, stratify=y)`. Given bursts where one day is
+152,183 lines that are 100% alerts, that scatters near-identical lines across
+both sides and scores memorisation as skill. It now cuts at a timestamp
+boundary, and refits on the whole window once the threshold is settled.
+
+**The threshold was assumed.** 0.50 is only meaningful for a calibrated model on
+a balanced problem. It is now fitted on a chronological holdout *inside* the
+training window and stored on the registry entry, so serving uses the operating
+point the metrics describe.
+
+**The features were the wrong ones.** The five numeric features carried almost
+no signal on the CRITICAL subset: level is constant there by construction, and
+the hand-written keywords are anti-correlated with real alerts. The message text
+replaced them.
+
+### What did not work: templating
+
+The obvious move for log data is to template the message first — replace paths,
+addresses and numbers with placeholders so one family collapses to one string.
+That is what Drain exists to do and what this project planned to do. Measured,
+it makes the model worse, and worst where it was supposed to help:
+
+| held-out stratum | rows | raw text | templated |
+| --- | ---: | ---: | ---: |
+| familiar template | 138,864 (62.4%) | 1.0000 | 1.0000 |
+| novel template | 83,531 (37.6%) | 0.9891 | 0.9320 |
+
+BGL's variable parts are not noise: `ciod: Error loading /bgl/apps/SWL/...` is a
+user's broken job and benign, and the path is the evidence for that.
+`ml/training/templates.py` keeps the rejected variant, and
+[`docs/model-comparison.md`](../docs/model-comparison.md) has the full table
+against Drain3 and the loglizer classifiers.
+
+### What the numeric features did
+
+Each was added to the message text and measured on the inner validation split.
+Every one made the model worse, so `features.py` no longer exports them:
+
+| features | roc-auc | best f1 |
+| --- | --- | --- |
+| text only | **0.984** | **0.915** |
+| \+ level ordinal | 0.974 | 0.910 |
+| \+ message length | 0.960 | 0.863 |
+| \+ hour of day | 0.955 | 0.860 |
+| \+ digit count | 0.930 | 0.664 |
+| \+ all four | 0.944 | 0.824 |
+
+`hour_of_day` is the instructive one: it lets the model learn *when* the June
+bursts happened instead of what they said. `level_ordinal` is constant on this
+subset, so it can only add noise — the severity gate lives outside the model, as
+an explicit rule, which is all the data supports. The registry records
+`candidate_levels`, and the serving path scores 0.0 outside that pool rather
+than extrapolating into severities it has no evidence about.
+
 ## Still synthetic
 
-`generate_data.py`, `train.py` and `retrain.py` are the original pipeline and
-still fit on generated data via `pipeline.train_and_register`. They work, and
-`make train` will happily produce a model, but the metrics that lands in
-`registry.json` are measured against labels drawn from a sigmoid over the same
-variables the featurizer extracts. Treat them as a smoke test, not a result.
-
-Replacing them means template features — Drain3 or similar — over the BGL split,
-which is the next piece of work.
+`generate_data.py`, `train.py` and `retrain.py` still fit on generated data via
+`pipeline.train_and_register`. They work, and `make train` will produce a model,
+but the metrics that lands in `registry.json` are measured against labels drawn
+from a sigmoid over the same variables the featurizer reads. Treat them as a
+smoke test that the pipeline runs, not a result. `make train-bgl` is what
+produces the committed artifact.
 
 ## Layout
 
@@ -130,9 +196,12 @@ ml/
     prepare.py       critical subset -> chronological train/test split
   training/
     baseline.py      trivial baselines on the held-out window
+    compare.py       shipped model vs. Drain3 and the loglizer classifiers
+    evaluate.py      score the registered model on the held-out window
     generate_data.py synthetic generator (superseded, still wired to train.py)
     pipeline.py      train -> evaluate -> version -> register
-    train.py         train on synthetic data
+    train.py         train on synthetic data (smoke test)
+    train_bgl.py     train the shipped model on the real split
     retrain.py       train on synthetic + human feedback
   tests/             parser and split tests, fixture cut from real BGL lines
   datasets/          raw and prepared data (gitignored)

@@ -1,5 +1,5 @@
 {
-  "current": "v20260915-014601",
+  "current": "v20260915-020822",
   "versions": [
     {
       "version": "v20260620-090444",
@@ -32,6 +32,25 @@
         "f1": 0.8855
       },
       "train_mean_score": 0.3647
+    },
+    {
+      "version": "v20260915-020822",
+      "created_at": "2026-09-15T02:08:22.873652+00:00",
+      "source": "bgl",
+      "n_samples": 633977,
+      "split": "chronological",
+      "holdout_fraction": 0.25,
+      "decision_threshold": 0.03,
+      "candidate_levels": [
+        "CRITICAL"
+      ],
+      "metrics": {
+        "roc_auc": 0.8752,
+        "precision": 0.9158,
+        "recall": 0.561,
+        "f1": 0.6958
+      },
+      "train_mean_score": 0.4036
     }
   ]
 }
