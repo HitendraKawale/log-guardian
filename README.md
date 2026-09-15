@@ -92,7 +92,7 @@ make logs      # tail logs
 make down      # stop
 ```
 
-- **Dashboard** — <http://localhost:8080>
+- **Dashboard** — <http://localhost:8080> (Investigations · Candidates · Logs · Evaluations)
 - **API docs** — <http://localhost:8000/docs>
 - **Grafana** — <http://localhost:3000> (admin/admin)
 - **Prometheus** — <http://localhost:9090>

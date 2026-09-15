@@ -37,7 +37,10 @@ INVESTIGATION_CANDIDATES = Counter(
 # replica therefore learns its own vocabulary and will flag a template the
 # others have already seen -- acceptable while a candidate is a suggestion and
 # not a spend, and the reason this is not a cross-replica rate limiter.
-investigation_trigger = InvestigationTrigger(candidate_levels=settings.trigger_levels)
+investigation_trigger = InvestigationTrigger(
+    candidate_levels=settings.trigger_levels,
+    warmup_logs=settings.trigger_warmup_logs,
+)
 
 
 async def persist_log(session, log: LogCreate, ai: AIClient) -> Log:

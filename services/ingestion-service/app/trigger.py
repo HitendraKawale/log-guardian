@@ -12,8 +12,10 @@ So candidate selection is done here instead, with no labels and no model call:
 this alone gives 100% recall at 41% precision, because every operator-labelled
 alert sits at CRITICAL -- an ``if`` statement that no model improved on.
 
-**Template novelty.** A line whose template has not been seen before is a
-candidate. Held out on BGL, "the template is new" scores F1 0.75 with no labels
+**Template novelty.** A line whose template this service has not emitted before
+is a candidate. Novelty is per service, matching the unique index the queue
+uses: "checkout has started emitting a family it never emitted before" is worth
+a look even when another service emits it routinely. Held out on BGL, "the template is new" scores F1 0.75 with no labels
 at all, and 79.2% of held-out rows carrying an unseen template are real alerts.
 That is well short of the supervised scorer and needs nothing to train.
 
@@ -53,9 +55,10 @@ DEFAULT_CANDIDATE_LEVELS: tuple[str, ...] = ("ERROR", "CRITICAL")
 # and a cold start would flag the entire first minute of traffic.
 DEFAULT_WARMUP_LOGS = 500
 
-# Templates retained. Bounded so a pathological stream cannot grow this without
-# limit; the oldest template is evicted first, so a long-quiet family can go
-# novel again. That is a memory bound, not a claim that re-firing is desirable.
+# (service, template) pairs retained. Bounded so a pathological stream cannot
+# grow this without limit; the oldest pair is evicted first, so a long-quiet
+# family can go novel again. That is a memory bound, not a claim that re-firing
+# is desirable -- the queue's unique index absorbs the repeat.
 DEFAULT_MAX_TEMPLATES = 20_000
 
 # How much context an investigation of a candidate should carry. The scope
@@ -108,8 +111,8 @@ class InvestigationTrigger:
         self._levels = {level.upper() for level in candidate_levels} if candidate_levels else set()
         self._warmup_logs = warmup_logs
         self._max_templates = max_templates
-        # Ordered so eviction is oldest-first; the value is unused.
-        self._seen: OrderedDict[str, None] = OrderedDict()
+        # Keyed by (service, template), ordered so eviction is oldest-first.
+        self._seen: OrderedDict[tuple[str, str], None] = OrderedDict()
         self.observed = 0
 
     @property
@@ -125,8 +128,9 @@ class InvestigationTrigger:
         at CRITICAL.
         """
         template = normalize_message(message)
-        novel = template not in self._seen
-        self._remember(template)
+        key = (service, template)
+        novel = key not in self._seen
+        self._remember(key)
         self.observed += 1
 
         if not self.warm:
@@ -144,10 +148,10 @@ class InvestigationTrigger:
             reason="unseen-template",
         )
 
-    def _remember(self, template: str) -> None:
-        if template in self._seen:
-            self._seen.move_to_end(template)
+    def _remember(self, key: tuple[str, str]) -> None:
+        if key in self._seen:
+            self._seen.move_to_end(key)
             return
-        self._seen[template] = None
+        self._seen[key] = None
         if len(self._seen) > self._max_templates:
             self._seen.popitem(last=False)

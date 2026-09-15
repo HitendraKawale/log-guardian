@@ -7,6 +7,8 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # A demo stack never sees 500 logs before someone looks at the queue.
+      TRIGGER_WARMUP_LOGS: "20"
       AI_SERVICE_URL: http://ai-service:8001
       AI_TIMEOUT: "2"
       DATABASE_URL: postgresql+asyncpg://logguardian:logguardian@postgres:5432/logguardian

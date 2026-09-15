@@ -43,6 +43,17 @@ _TEMPLATE_SUBSTITUTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     ),
     # Absolute filesystem paths (the dominant source of distinct lines).
     (re.compile(r"(?<![\w.])/[^\s:,()]{2,}"), " <path> "),
+    # UUIDs before the hex rules: only their first group is 8+ hex characters,
+    # so without this a uuid becomes "<hex> 32b4 4d6c 81d9 <hex>" and every
+    # request id yields its own template -- the exact fragmentation templating
+    # exists to prevent.
+    (
+        re.compile(
+            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+            re.IGNORECASE,
+        ),
+        " <uuid> ",
+    ),
     (re.compile(r"\b0x[0-9a-fA-F]+\b"), " <hex> "),
     (re.compile(r"\b[0-9a-fA-F]{8,}\b"), " <hex> "),
     (re.compile(r"\b\d+\b"), " <num> "),

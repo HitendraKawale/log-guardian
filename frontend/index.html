@@ -17,6 +17,7 @@
     </div>
     <nav class="tabs" aria-label="Views">
       <button class="tab active" data-view="investigations">Investigations</button>
+      <button class="tab" data-view="candidates">Candidates</button>
       <button class="tab" data-view="logs">Logs</button>
       <button class="tab" data-view="evaluations">Evaluations</button>
     </nav>
@@ -159,6 +160,40 @@
     </section>
   </main>
 
+  <main id="view-candidates" class="view" hidden>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Investigation candidates</h2>
+        <div class="filters">
+          <select id="c-status">
+            <option value="new" selected>New</option>
+            <option value="dismissed">Dismissed</option>
+            <option value="">All</option>
+          </select>
+          <input id="c-service" placeholder="filter service&hellip;" />
+          <button id="c-refresh" class="ghost" type="button">Refresh</button>
+        </div>
+      </div>
+      <p class="callout">Selected by the label-free trigger &mdash; a severity gate plus
+        &ldquo;this message template has not been seen before&rdquo;. No model was called and
+        no labels were used. You can <strong>dismiss</strong> here; starting an investigation
+        spends money and is deliberately not possible from this dashboard, which holds only
+        the log API key. Promote with
+        <code>POST /investigations/from-candidate/{id}</code> using the investigation key.</p>
+      <table class="logs">
+        <thead>
+          <tr>
+            <th>First seen</th><th>Service</th><th>Level</th><th>Message</th>
+            <th>Why</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="candidates-body">
+          <tr><td colspan="7" class="empty">No candidates yet.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
   <main id="view-evaluations" class="view" hidden>
     <section class="panel">
       <h2>Recorded evaluation results</h2>
@@ -173,6 +208,7 @@
 
   <script src="app.js"></script>
   <script src="investigations.js"></script>
+  <script src="candidates.js"></script>
   <script src="evaluations.js"></script>
 </body>
 </html>

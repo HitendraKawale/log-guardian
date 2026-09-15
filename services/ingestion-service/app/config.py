@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     # how the services being ingested use log levels, not on anything learned.
     trigger_candidate_levels: str = "ERROR,CRITICAL"
 
+    # Logs the trigger observes before it trusts novelty. A cold start would
+    # otherwise flag the first line of every family it has ever seen. Small
+    # deployments need a smaller number or the queue never fills; 0 disables the
+    # warmup entirely.
+    trigger_warmup_logs: int = 500
+
     # Per-client-IP request cap per minute. 0 disables rate limiting.
     rate_limit_per_minute: int = 0
 

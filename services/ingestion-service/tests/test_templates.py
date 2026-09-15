@@ -51,3 +51,22 @@ def test_distinct_message_families_stay_distinct():
 
 def test_template_is_lowercased_and_whitespace_normalised():
     assert normalize_message("  DATA   TLB	error  interrupt ") == "data tlb error interrupt"
+
+
+def test_uuids_collapse_to_one_template():
+    """Seen in the dashboard: two logs of one family queued as two candidates.
+
+    Only a uuid's first group is 8+ hex characters, so the generic hex rule
+    leaves the middle groups intact and every request id looks like a new
+    message family.
+    """
+    a = normalize_message("feedback row 7ec8d7e5-32b4-4d6c-81d9-f6ac0173e2b1 accepted")
+    b = normalize_message("feedback row 4391c8a9-1f15-496b-8912-b8dd7f0c1a22 accepted")
+    assert a == b
+    assert "<uuid>" in a
+
+
+def test_uppercase_uuids_collapse_too():
+    a = normalize_message("trace 7EC8D7E5-32B4-4D6C-81D9-F6AC0173E2B1 failed")
+    b = normalize_message("trace 4391c8a9-1f15-496b-8912-b8dd7f0c1a22 failed")
+    assert a == b
