@@ -38,7 +38,9 @@ def test_upgrade_from_0002_preserves_logs_and_adds_tables(tmp_path):
                 " '2026-01-01 10:00:00')"
             )
         )
-    final = alembic(env, "upgrade", "head")
+    # Pinned to 0003 rather than "head": this test is about what 0003 does, and
+    # asserting the head revision would break every time a migration is added.
+    final = alembic(env, "upgrade", "0003")
     assert final.returncode == 0, final.stderr
     with engine.connect() as connection:
         revision = connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar()

@@ -8,10 +8,11 @@ import logging
 from datetime import UTC
 
 from prometheus_client import Counter
+from sqlalchemy.exc import IntegrityError
 
 from .ai_client import AIClient
 from .config import settings
-from .models import Log
+from .models import InvestigationCandidate, Log
 from .schemas import LogCreate
 from .trigger import InvestigationTrigger
 
@@ -65,7 +66,8 @@ async def persist_log(session, log: LogCreate, ai: AIClient) -> Log:
 
     # Best-effort, exactly like the AI call: selecting a candidate must never
     # fail or delay a write. A lost candidate costs an investigation someone
-    # might have run; a raised exception costs the log itself.
+    # might have run; a raised exception costs the log itself. The log is
+    # committed above, so nothing below can roll it back.
     try:
         candidate = investigation_trigger.consider(
             service=record.service,
@@ -74,9 +76,47 @@ async def persist_log(session, log: LogCreate, ai: AIClient) -> Log:
             timestamp=timestamp,
         )
         if candidate is not None:
-            INVESTIGATION_CANDIDATES.labels(reason=candidate.reason).inc()
-            logger.info("investigation candidate: %s (%s)", candidate.service, candidate.reason)
+            await _record_candidate(session, candidate, record.id)
     except Exception:  # pragma: no cover - defensive
         logger.warning("investigation trigger failed; log stored anyway", exc_info=True)
 
     return record
+
+
+def _scope_payload(candidate) -> dict:
+    """Serialise the candidate's scope to JSON-safe values."""
+    scope = candidate.scope()
+    return {
+        "services": list(scope["services"]),
+        "start": scope["start"].isoformat(),
+        "end": scope["end"].isoformat(),
+    }
+
+
+async def _record_candidate(session, candidate, log_id: int) -> None:
+    """Persist a candidate, tolerating the duplicate another replica already wrote.
+
+    The unique index on (service, template) is the coordination point: rather
+    than checking first and racing, the insert is attempted and an
+    IntegrityError is read as "another writer already surfaced this family" --
+    a success for the queue, even though this writer lost.
+    """
+    session.add(
+        InvestigationCandidate(
+            service=candidate.service,
+            level=candidate.level,
+            message=candidate.message,
+            template=candidate.template,
+            reason=candidate.reason,
+            scope=_scope_payload(candidate),
+            log_id=log_id,
+            occurred_at=candidate.timestamp,
+        )
+    )
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        return
+    INVESTIGATION_CANDIDATES.labels(reason=candidate.reason).inc()
+    logger.info("investigation candidate: %s (%s)", candidate.service, candidate.reason)
