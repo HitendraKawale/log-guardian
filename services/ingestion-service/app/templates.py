@@ -1,23 +1,28 @@
-"""Message templating -- the variant that was measured and **not** shipped.
+"""Message templating: replace the parts of a log line that vary between
+otherwise identical messages (paths, socket addresses, node coordinates, hex
+words, numbers) with placeholders, so one message family collapses to one
+string.
 
-Replacing the parts of a log line that vary between otherwise identical
-messages (paths, socket addresses, node coordinates, hex words, numbers) with
-placeholders is the standard first step in log anomaly detection: it is what
-Drain and every parser built on it exist to do, and it collapses BGL's 884
-distinct training lines into a few hundred families.
+This is the single source of truth for templating. Two callers, opposite
+verdicts, and the contrast is the point:
 
-It also loses. On the held-out window it cost ROC-AUC against simply lowercasing
-the raw message, and it cost most on the rows it was supposed to help:
+**The anomaly scorer rejected it.** Templating the message before fitting the
+supervised model *lowered* held-out ROC-AUC on BGL, and lowered it most on the
+rows it was meant to help -- 0.9891 raw against 0.9320 templated on held-out
+lines whose template was never seen in training. BGL's variable parts are not
+noise there: ``ciod: Error loading /bgl/apps/SWL/...`` is a user's own broken
+job, and the path segments are the evidence for that. See
+``docs/model-comparison.md``.
 
-    held-out rows with a NOVEL template (37.6%)   raw 0.9891   templated 0.9320
+**The investigation trigger depends on it.** Novelty detection asks a different
+question -- "have I seen this kind of line before?" -- and without templating
+the answer is always no, because every new request id and file path makes a
+line unique. Here collapsing the variable parts is exactly what makes the
+question answerable.
 
-BGL's variable parts are not noise. ``ciod: Error loading /bgl/apps/SWL/...``
-is a user's own broken job and carries no alert; the path segments are the
-evidence for that, and ``<path>`` deletes them.
-
-Kept because ``compare.py`` runs it as one of the parsers, and a rejected
-approach with numbers attached is worth more than an unexamined assumption. It
-is not imported by the service or by the shipped training path.
+``ml/training/compare.py`` imports this module to run it as one of the parsers
+it compares, the same way the offline trainer imports the AI service's
+featurizer.
 """
 
 from __future__ import annotations
