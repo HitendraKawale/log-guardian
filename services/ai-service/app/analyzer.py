@@ -12,15 +12,27 @@ Two interchangeable strategies implement the same interface:
 
 from __future__ import annotations
 
-from .features import featurize, keyword_count
-from .model import load_model
+from .features import keyword_count, normalize_message
+from .model import current_version, load_model
 from .schemas import AnalyzeRequest, AnalyzeResponse, Severity
 
 
-def _severity_for(score: float) -> Severity:
-    if score >= 0.70:
+def _severity_for(score: float, threshold: float) -> Severity:
+    """Grade severity by how far past the decision threshold a score sits.
+
+    The bands used to be fixed at 0.70/0.30, which silently assumed the scorer
+    flags at ~0.50. A fitted threshold breaks that assumption: the BGL model
+    flags at 0.025, so under fixed bands a score twelve times its threshold
+    still reads "medium" and nothing below 0.70 could ever read "high".
+    Measuring the margin into the [threshold, 1] band keeps severity meaningful
+    for any operating point, including the heuristic's 0.70.
+    """
+    if score < threshold:
+        return Severity.LOW
+    margin = (score - threshold) / (1.0 - threshold) if threshold < 1.0 else 1.0
+    if margin >= 0.50:
         return Severity.HIGH
-    if score >= 0.30:
+    if margin >= 0.15:
         return Severity.MEDIUM
     return Severity.LOW
 
@@ -30,7 +42,7 @@ def _build_response(score: float, threshold: float) -> AnalyzeResponse:
     return AnalyzeResponse(
         anomaly_score=score,
         is_anomaly=score >= threshold,
-        predicted_severity=_severity_for(score),
+        predicted_severity=_severity_for(score, threshold),
     )
 
 
@@ -56,26 +68,53 @@ class HeuristicAnalyzer:
 
 
 class ModelAnalyzer:
-    """Wraps a trained classifier exposing ``predict_proba``."""
+    """Wraps a trained message-template pipeline exposing ``predict_proba``.
+
+    Two things come from the registry entry rather than being hardcoded, because
+    both are properties of the data the artifact was fitted on:
+
+    ``decision_threshold``
+        Chosen by maximising F1 on a chronological holdout at training time. The
+        old fixed 0.50 was arbitrary; on BGL it costs roughly 0.35 F1.
+    ``candidate_levels``
+        The severity pool the model saw. A model fitted only on CRITICAL lines
+        has no evidence about INFO lines, so rather than extrapolate it scores
+        anything outside the pool 0.0 -- the severity gate stays an explicit
+        rule, which is all the data supports (every BGL alert is CRITICAL).
+    """
 
     name = "model"
     threshold = 0.50
 
-    def __init__(self, model) -> None:
+    def __init__(
+        self,
+        model,
+        threshold: float = 0.50,
+        candidate_levels: tuple[str, ...] | None = None,
+    ) -> None:
         self._model = model
+        self.threshold = threshold
+        self._candidate_levels = candidate_levels
 
     def analyze(self, request: AnalyzeRequest) -> AnalyzeResponse:
-        features = [featurize(request.level.value, request.message, request.timestamp)]
+        if self._candidate_levels and request.level.value not in self._candidate_levels:
+            return _build_response(0.0, self.threshold)
         # Probability of the positive (anomaly) class.
-        score = float(self._model.predict_proba(features)[0][1])
+        score = float(self._model.predict_proba([normalize_message(request.message)])[0][1])
         return _build_response(score, self.threshold)
 
 
 def _select_analyzer():
     model = load_model()
-    if model is not None:
-        return ModelAnalyzer(model)
-    return HeuristicAnalyzer()
+    if model is None:
+        return HeuristicAnalyzer()
+    entry = current_version() or {}
+    levels = entry.get("candidate_levels")
+    return ModelAnalyzer(
+        model,
+        threshold=float(entry.get("decision_threshold", 0.50)),
+        candidate_levels=tuple(levels) if levels else None,
+    )
 
 
 # Active analyzer, chosen once at import time.
