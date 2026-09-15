@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..database import get_session
 from ..investigation_schemas import InvestigationScope
-from ..models import Investigation, InvestigationEvent
+from ..models import Investigation, InvestigationCandidate, InvestigationEvent
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
 
@@ -36,6 +36,15 @@ async def require_investigation_key(x_api_key: str | None = Header(default=None)
         )
     if x_api_key != settings.investigation_api_key:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or missing API key")
+
+
+class PromoteCandidate(BaseModel):
+    """Optional overrides when promoting a candidate into a paid run."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    question: str | None = Field(None, min_length=1, max_length=2048)
+    system: Literal["A", "B", "C"] = "B"
 
 
 class InvestigationCreate(BaseModel):
@@ -128,6 +137,75 @@ async def create_investigation(
         await session.delete(run)
         await session.commit()
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Investigation queue is full")
+    return _public(run)
+
+
+@router.post(
+    "/from-candidate/{candidate_id}",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_investigation_key)],
+)
+async def promote_candidate(
+    candidate_id: str,
+    body: PromoteCandidate | None = None,
+    session: AsyncSession = Depends(get_session),
+):
+    """Turn a reviewed candidate into a queued investigation.
+
+    This is the only path from the candidate queue to paid execution, and it
+    lives here rather than on the candidates router for that reason: it is
+    behind INVESTIGATION_API_KEY, so the capability to spend and the capability
+    to review are separate keys. Nothing automatic reaches it -- the trigger
+    fills the queue, a human empties it.
+    """
+    body = body or PromoteCandidate()
+    candidate = await session.get(InvestigationCandidate, candidate_id)
+    if candidate is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Candidate not found")
+
+    # The link is the idempotency record: a second promotion returns the first
+    # run instead of paying for the same question twice.
+    if candidate.investigation_id:
+        existing = await session.get(Investigation, candidate.investigation_id)
+        if existing is not None:
+            return _public(existing)
+    if candidate.status == "dismissed":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Candidate was dismissed; undismiss it before promoting"
+        )
+
+    pending = await session.scalar(
+        select(func.count()).select_from(Investigation).where(Investigation.status.in_(PENDING))
+    )
+    if pending >= MAX_PENDING:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Investigation queue is full")
+
+    # The default question deliberately omits the log message. Message text is
+    # attacker-controllable and already reaches the model as tool evidence,
+    # where the prompt treats it as untrusted data; copying it into the question
+    # would additionally place it in the instruction position for no benefit.
+    # The agent finds the line itself through the log tools.
+    question = body.question or (
+        f"A message pattern not seen before appeared in {candidate.service} at "
+        f"{candidate.occurred_at.isoformat()}. What is going on?"
+    )
+    scope = dict(candidate.scope)
+    digest = hashlib.sha256(
+        json.dumps({"candidate": candidate.id, "question": question}, sort_keys=True).encode()
+    ).hexdigest()
+
+    run = Investigation(
+        question=question,
+        system=body.system,
+        scope=scope,
+        request_sha256=digest,
+    )
+    session.add(run)
+    await session.flush()
+    candidate.investigation_id = run.id
+    candidate.status = "promoted"
+    await session.commit()
+    await session.refresh(run)
     return _public(run)
 
 
