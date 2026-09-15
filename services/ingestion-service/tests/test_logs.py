@@ -79,3 +79,29 @@ async def test_list_logs_returns_newest_first(make_client):
         assert response.status_code == 200
         messages = [item["message"] for item in response.json()]
         assert messages == ["second", "first"]
+
+
+async def test_trigger_failure_does_not_fail_the_write(client, monkeypatch):
+    """The trigger is best-effort, exactly like the AI client.
+
+    A candidate is a suggestion someone may act on; the log is the product. If
+    selecting a candidate raises, the write must still succeed.
+    """
+    from app import service
+
+    def explode(**kwargs):
+        raise RuntimeError("trigger is broken")
+
+    monkeypatch.setattr(service.investigation_trigger, "consider", explode)
+
+    response = await client.post(
+        "/logs",
+        json={
+            "service": "payment-api",
+            "level": "CRITICAL",
+            "message": "database connection refused",
+            "timestamp": "2026-06-18T10:00:00Z",
+        },
+    )
+    assert response.status_code == 201
+    assert response.json()["message"] == "database connection refused"

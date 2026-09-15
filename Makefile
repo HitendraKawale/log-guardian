@@ -1,4 +1,4 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train train-bgl evaluate compare retrain clean
+.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train train-bgl evaluate compare measure-trigger retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
@@ -74,6 +74,9 @@ evaluate: ## Score the registered model on the held-out BGL window
 
 compare: ## Compare the shipped model against established methods (slow)
 	$(PY) ml/training/compare.py
+
+measure-trigger: ## Score the label-free investigation trigger (BGL + app logs)
+	$(PY) ml/training/measure_trigger.py
 
 retrain: ## Retrain on synthetic + collected feedback (set INGESTION_URL)
 	$(PY) ml/training/retrain.py

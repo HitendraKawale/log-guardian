@@ -234,6 +234,28 @@ loglizer baselines is in
 [`docs/model-comparison.md`](docs/model-comparison.md); the feature ablation is
 in [`ml/README.md`](ml/README.md).
 
+### What the scorer still cannot do
+
+F1 0.973 does not make it deployable as a detector. It needs labels — BGL has
+them because LLNL operators tagged 348,460 lines by hand — and it is fitted on
+one machine's vocabulary, so it returns 0.0 for the ERROR-level traffic the demo
+sandbox emits.
+
+So selecting what to investigate is a separate, label-free step
+(`services/ingestion-service/app/trigger.py`, `make measure-trigger`): a
+severity gate plus "this message template has not been seen before". Held out on
+BGL it surfaces **76.5% of alerting message families** while raising candidates
+on **0.84% of rows**, with nothing to train. On the demo capture — where the
+scorer is silent — it raised one candidate, the incident line itself.
+
+The same templating that *lost* for the model wins here: novelty detection is
+meaningless without it, because every new file path would make a line unique.
+Details and the honest caveats are in [`ml/README.md`](ml/README.md).
+
+Selecting is not spending. A candidate is a suggestion for a human or an
+explicitly-budgeted worker; wiring it straight into the investigation worker
+would make log volume drive paid execution.
+
 ## Design decisions
 
 **AI calls are best effort.** A timeout or error from the AI service is logged

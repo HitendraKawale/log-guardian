@@ -19,7 +19,8 @@ Two axes vary:
 
 *Parser* -- how a raw line becomes a comparable token sequence. ``none`` is the
 lowercased message, which is what the service ships; ``regex`` is the template
-variant in ``templates.py``, measured and rejected; ``drain3`` is the
+variant in the ingestion service's ``app/templates.py``, rejected here and used
+by the investigation trigger instead; ``drain3`` is the
 Drain algorithm (He et al. 2017), the standard log parser, fitted on the
 training window only and then frozen so test lines are matched, never learned.
 
@@ -45,12 +46,31 @@ AI_SERVICE = REPO_ROOT / "services" / "ai-service"
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(AI_SERVICE))
 
+
+def _load_templates():
+    """Load the ingestion service's templating module by path.
+
+    Both services root their packages at ``app.*``, so putting them both on
+    sys.path makes ``app`` ambiguous. The AI service is the one imported
+    normally here (it owns the heuristic and the featurizer), so the ingestion
+    module is loaded explicitly instead of fighting over the name.
+    """
+    import importlib.util
+
+    path = REPO_ROOT / "services" / "ingestion-service" / "app" / "templates.py"
+    spec = importlib.util.spec_from_file_location("ingestion_templates", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 from app.analyzer import HeuristicAnalyzer  # noqa: E402
 from app.schemas import AnalyzeRequest  # noqa: E402
 
 from ml.data.prepare import TEST_PATH, TRAIN_PATH, read_jsonl  # noqa: E402
 from ml.training.pipeline import chronological_split  # noqa: E402
-from ml.training.templates import normalize_message  # noqa: E402
+
+normalize_message = _load_templates().normalize_message
 
 
 def drain_parser(train_messages: list[str]):

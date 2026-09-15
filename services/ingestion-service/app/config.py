@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     # disables the tool (it reports source_unavailable).
     prometheus_url: str = ""
 
+    # Severities the investigation trigger will consider, comma separated.
+    # Empty considers every severity. This is deployment-specific: it depends on
+    # how the services being ingested use log levels, not on anything learned.
+    trigger_candidate_levels: str = "ERROR,CRITICAL"
+
     # Per-client-IP request cap per minute. 0 disables rate limiting.
     rate_limit_per_minute: int = 0
 
@@ -44,6 +49,14 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.cors_allow_origins.split(",")]
+
+    @property
+    def trigger_levels(self) -> tuple[str, ...]:
+        return tuple(
+            level.strip().upper()
+            for level in self.trigger_candidate_levels.split(",")
+            if level.strip()
+        )
 
 
 settings = Settings()

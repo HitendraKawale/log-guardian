@@ -1,10 +1,11 @@
-"""Tests for the template variant retained by ml/training/compare.py.
+"""Templating behaviour.
 
-It is not shipped -- see the module docstring for the measurement that rejected
-it -- but it still runs in the comparison, so its behaviour is pinned.
+Rejected for the supervised scorer (it lowered held-out ROC-AUC) and required by
+the investigation trigger (novelty detection is meaningless without it). Both
+callers depend on these collapses holding, so they are pinned here.
 """
 
-from ml.training.templates import normalize_message
+from app.templates import normalize_message
 
 
 def test_normalization_is_deterministic():

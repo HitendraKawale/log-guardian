@@ -176,6 +176,53 @@ an explicit rule, which is all the data supports. The registry records
 `candidate_levels`, and the serving path scores 0.0 outside that pool rather
 than extrapolating into severities it has no evidence about.
 
+## The trigger the scorer cannot be
+
+The scorer reaches F1 0.973 and still cannot select what to investigate, for a
+reason accuracy does not fix: it needs labels. BGL is usable because LLNL
+operators tagged 348,460 lines by hand; no deployment arrives with that, and the
+scorer is fitted on one machine's vocabulary besides — it returns 0.0 for the
+ERROR-level traffic the demo sandbox emits, by construction.
+
+`services/ingestion-service/app/trigger.py` selects candidates instead, with no
+labels and no model call: a severity gate, plus "this message template has not
+been seen before". Run `make measure-trigger`.
+
+On the held-out BGL window, scored per **message family** rather than per row:
+
+| | |
+| --- | --- |
+| alerting families surfaced | 1,604 / 2,096 = **76.5%** |
+| candidates raised | 1,867 = **0.84%** of rows |
+| share of candidates that are alerting families | 85.9% |
+
+Per-row recall for the same run is 0.017, and that number is meaningless here: a
+single BGL alert family spans up to 39,696 rows and the trigger fires once per
+family on purpose. Per-row recall measures how badly a trigger fails to repeat
+itself. An on-call engineer wants one candidate per novel failure mode.
+
+Read that 85.9% precisely: the trigger does **not** discriminate within new
+families — it surfaces every family it sees for the first time after warmup, and
+85.9% is simply the share of new families that happen to carry an alert in this
+window. The 23.5% of alerting families it misses are ones first seen during the
+500-line warmup.
+
+On the demo sandbox capture — 38 application logs at INFO and ERROR, where the
+scorer is silent — it raised one candidate:
+
+```
+[ERROR] checkout: order fault-0 inventory read timed out after 1000ms; status=504
+```
+
+which is the incident. One capture is an anecdote, not a measurement; that
+bundle carries no alert labels, so this is coverage, not accuracy.
+
+The first version of this defaulted to `CRITICAL` only, copied from BGL's
+candidate pool, and was **inert** on those application logs — zero candidates.
+The severity pool is a property of how the services being ingested use log
+levels, not something learned, so it is configurable
+(`TRIGGER_CANDIDATE_LEVELS`) and defaults to ERROR and above.
+
 ## Still synthetic
 
 `generate_data.py`, `train.py` and `retrain.py` still fit on generated data via

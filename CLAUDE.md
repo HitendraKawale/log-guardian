@@ -88,6 +88,13 @@ the platform is the substrate it investigates and the honest-negative ML case st
   than extrapolating. Held out: F1 0.973 / ROC-AUC 0.999, against a 0.588 / 0.500 bar.
   It is domain-specific — BGL is supercomputer RAS logging, not application logs.
 
+**Investigation trigger**: `app/trigger.py` selects which logs are worth investigating
+without labels or a model call — severity gate plus unseen-template novelty — and
+`persist_log` calls it **best-effort**, same contract as `ai_client`. `app/templates.py` is the
+single source of truth for templating and has two callers with opposite verdicts: it *lowered*
+held-out ROC-AUC for the supervised scorer (so serving does not use it) and novelty detection is
+meaningless without it. Selecting is not spending: a candidate never triggers paid execution.
+
 **Shared wire contract**: ingestion's `LogCreate`/`AIResponse` and the AI service's
 `AnalyzeRequest`/`AnalyzeResponse` are intentionally identical, duplicated in two
 `schemas.py`. Change both together or the services silently disagree —
