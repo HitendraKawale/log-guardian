@@ -5,6 +5,7 @@ ports: an injected inventory delay must produce a genuine checkout timeout,
 and resetting it must restore success. No Docker or network stubbing.
 """
 
+import json
 import socket
 import sys
 import threading
@@ -14,6 +15,7 @@ from pathlib import Path
 import httpx
 import pytest
 import uvicorn
+from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -81,6 +83,37 @@ def test_fault_controls_reject_out_of_bounds_delay(sandbox):
         response = client.post(f"{sandbox['faults']}/fault/delay", json={"seconds": 3600})
         assert response.status_code == 422
         assert sandbox["fault_state"]["delay_seconds"] == 0
+
+
+@pytest.mark.parametrize("direct", [False, True])
+def test_application_record_reaches_stdout_with_optional_direct_delivery(
+    capsys, monkeypatch, direct
+):
+    delivered = []
+
+    def ingest(request):
+        delivered.append(json.loads(request.content))
+        return httpx.Response(201, json={"id": 1})
+
+    original = httpx.AsyncClient
+    monkeypatch.setattr(
+        httpx,
+        "AsyncClient",
+        lambda **kwargs: original(transport=httpx.MockTransport(ingest), **kwargs),
+    )
+    app, faults, _ = create_apps("inventory", ingestion_url="http://ingestion" if direct else "")
+    with TestClient(app) as client:
+        assert client.get("/stock/42").status_code == 200
+    with TestClient(faults) as client:
+        assert client.post("/fault/delay", json={"seconds": 0.1}).status_code == 200
+        assert client.post("/fault/reset").status_code == 200
+    lines = capsys.readouterr().out.splitlines()
+    assert len(lines) == 1
+    record = json.loads(lines[0])
+    assert record["service"] == "inventory"
+    assert record["level"] == "INFO"
+    assert "stock request 42 completed" in record["message"]
+    assert delivered == ([record] if direct else [])
 
 
 def test_fault_endpoints_are_not_on_the_public_app_port(sandbox):

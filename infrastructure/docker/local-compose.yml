@@ -1,0 +1,29 @@
+# Single-owner local installation. No model worker or provider credentials.
+name: log-guardian-local
+
+services:
+  ingestion-service:
+    build:
+      context: ../../services/ingestion-service
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/local.db
+      API_KEY: ${LOG_GUARDIAN_API_KEY:?Set LOG_GUARDIAN_API_KEY}
+      AI_SERVICE_URL: ""
+      INVESTIGATION_API_KEY: ""
+      KAFKA_ENABLED: "false"
+      CORS_ALLOW_ORIGINS: http://localhost:${LG_DASHBOARD_PORT:-8080},http://127.0.0.1:${LG_DASHBOARD_PORT:-8080}
+    volumes:
+      - local-data:/data
+    ports:
+      - "127.0.0.1:${LG_API_PORT:-8000}:8000"
+
+  frontend:
+    build:
+      context: ../../frontend
+    ports:
+      - "127.0.0.1:${LG_DASHBOARD_PORT:-8080}:80"
+    depends_on:
+      - ingestion-service
+
+volumes:
+  local-data:

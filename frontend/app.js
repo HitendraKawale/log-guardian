@@ -7,6 +7,8 @@ const $ = (id) => document.getElementById(id);
 
 let refreshTimer = null;
 let paused = false;
+let latestLogId = null;
+let latestLogObservation = "No logs received.";
 
 // --- API key (persisted locally) ------------------------------------------
 const keyInput = $("api-key");
@@ -34,7 +36,10 @@ window.LG = {
 // --- rendering helpers ------------------------------------------------------
 function setStatus(online) {
   $("status-dot").className = "dot " + (online ? "online" : "offline");
-  $("status-text").textContent = online ? "connected" : "offline";
+  $("status-text").textContent = online ? "API connected" : "API offline or unauthorized";
+  $("latest-log").textContent = online
+    ? latestLogObservation
+    : `${latestLogObservation} Observation stale; API unavailable.`;
 }
 
 function severityBadge(sev) {
@@ -172,11 +177,23 @@ function queryString() {
 
 async function refresh() {
   try {
-    const res = await fetch(`${API_BASE}/logs?${queryString()}`, {
-      headers: authHeaders(),
-    });
-    if (!res.ok) throw new Error(res.status);
+    const [res, latestRes] = await Promise.all([
+      fetch(`${API_BASE}/logs?${queryString()}`, { headers: authHeaders() }),
+      fetch(`${API_BASE}/logs?limit=1`, { headers: authHeaders() }),
+    ]);
+    if (!res.ok || !latestRes.ok) throw new Error("Log query failed");
     const logs = await res.json();
+    const [latest] = await latestRes.json();
+    if (!latest) {
+      latestLogId = null;
+      latestLogObservation = "No logs received.";
+    } else if (latest.id !== latestLogId) {
+      latestLogId = latest.id;
+      // SQLite returns naive timestamps; ingestion stores them in UTC.
+      const timestamp = /(?:Z|[+-]\d{2}:\d{2})$/i.test(latest.timestamp)
+        ? latest.timestamp : `${latest.timestamp}Z`;
+      latestLogObservation = `Latest stored log: ${latest.service}, event time ${new Date(timestamp).toISOString()}, observed by dashboard ${new Date().toLocaleString()}.`;
+    }
     setStatus(true);
     renderStats(logs);
     renderLogs(logs);

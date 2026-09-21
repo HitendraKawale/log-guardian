@@ -40,6 +40,18 @@ benchmark. Total estimated spend including this run is $0.13033360.
   re-evaluation after any further tuning (split is consumed), independent
   review, live-origin evaluation set beyond one captured bundle.
 
+## Connect your own local logs
+
+[Local Compose onboarding](docs/local-development.md) runs ingestion and the dashboard
+without a model worker. An owner-run Python command forwards one Compose service's
+stdout, with no Docker socket mount. The dashboard separates API reachability from
+the latest observed log. Start with `make local-up` after setting
+`LOG_GUARDIAN_API_KEY` as documented.
+
+This is a development installation, not a paid hosted release. Collection has no
+durable spool or automatic retry; retention and recurring incident detection are
+not implemented. AI execution stays disabled in the local profile.
+
 ## Investigation quick start
 
 ```bash

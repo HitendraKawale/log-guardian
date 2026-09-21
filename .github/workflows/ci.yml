@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.8.4
-      - run: ruff check services ml evals
-      - run: ruff format --check services ml evals
+      - run: ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
+      - run: ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
 
   manifests:
     name: validate k8s manifests
@@ -42,6 +42,11 @@ jobs:
             path: tests
           - name: evals
             path: evals
+          - name: forwarder
+            path: tests
+            tests: forwarder
+          - name: demo
+            path: demo
     defaults:
       run:
         working-directory: ${{ matrix.path }}
@@ -57,7 +62,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: python -m pytest -q
+        run: python -m pytest -q ${{ matrix.tests }}
 
   integration:
     name: integration tests

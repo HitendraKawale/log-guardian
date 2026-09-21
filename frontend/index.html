@@ -108,6 +108,10 @@
   </main>
 
   <main id="view-logs" class="view" hidden>
+    <section class="panel" aria-label="Log collection status">
+      <p id="latest-log" role="status">Waiting for the API.</p>
+      <p>An idle source may be healthy. API connectivity does not confirm a running collector.</p>
+    </section>
     <section class="stats" id="stats">
       <div class="card"><span class="label">Logs</span><span class="value" id="stat-total">0</span></div>
       <div class="card"><span class="label">Anomalies</span><span class="value danger" id="stat-anomalies">0</span></div>

@@ -45,7 +45,7 @@ def dashboard(page: Page) -> Page:
     page.click('.tab[data-view="logs"]')
     # The page polls every 3s; wait for the first successful round trip rather
     # than sleeping and hoping.
-    expect(page.locator("#status-text")).to_have_text("connected", timeout=15_000)
+    expect(page.locator("#status-text")).to_have_text("API connected", timeout=15_000)
     return page
 
 
