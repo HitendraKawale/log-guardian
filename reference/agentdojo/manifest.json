@@ -1,0 +1,23 @@
+{
+  "repository": "https://github.com/ethz-spylab/agentdojo",
+  "revision": "089ed468cf3ed0322acc66b0211f26d9d90dbf60",
+  "license": "MIT",
+  "usage": "Reference-only tool contracts. Replay traces are authored, not captured AgentDojo executions. Never import these files.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "source_url": "https://raw.githubusercontent.com/ethz-spylab/agentdojo/089ed468cf3ed0322acc66b0211f26d9d90dbf60/LICENSE",
+      "sha256": "4285a071f2d382338e52b4fb0a186d952984a34d43a33d8872e1a1d8cb43401e"
+    },
+    {
+      "path": "task_suite.py",
+      "source_url": "https://raw.githubusercontent.com/ethz-spylab/agentdojo/089ed468cf3ed0322acc66b0211f26d9d90dbf60/src/agentdojo/default_suites/v1/workspace/task_suite.py",
+      "sha256": "96fa51ab20f03c30cd2d7bc754b76d717ddbd68bdf39adc85f0e92fc4d2c7ec4"
+    },
+    {
+      "path": "email_client.py",
+      "source_url": "https://raw.githubusercontent.com/ethz-spylab/agentdojo/089ed468cf3ed0322acc66b0211f26d9d90dbf60/src/agentdojo/default_suites/v1/tools/email_client.py",
+      "sha256": "782adb70c81ec765919ae835494fac163dbb46f21ef46f6dcf18eab390b5e294"
+    }
+  ]
+}
