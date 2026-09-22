@@ -5,7 +5,11 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import httpx
+import pytest
 from app import investigator
+from app.investigation_loop import TOOL_SCHEMAS
+from app.investigation_schemas import InvestigationScope
+from app.investigation_tools import EvidenceTools
 from app.investigator import claim_next, execute_run, recover_stale, run_once
 from app.models import Investigation, InvestigationEvent, Log
 from openai import AsyncOpenAI
@@ -23,6 +27,19 @@ SCOPE = {
     "services": ["checkout"],
     "start": "2026-01-01T10:00:00+00:00",
     "end": "2026-01-01T10:10:00+00:00",
+}
+
+
+TOOL_ARGUMENTS = {
+    "query_logs": SCOPE,
+    "summarize_logs": SCOPE,
+    "search_runbooks": {"query": "checkout"},
+    "read_metric_series": {
+        "service": "checkout",
+        "metric_name": "error_rate",
+        "start": SCOPE["start"],
+        "end": SCOPE["end"],
+    },
 }
 
 
@@ -71,6 +88,125 @@ async def seed(session_factory, **overrides):
         return run.id
 
 
+@pytest.mark.parametrize("name", TOOL_ARGUMENTS)
+async def test_every_registered_tool_persists_its_returned_batch(session_factory, name):
+    assert set(TOOL_ARGUMENTS) == set(TOOL_SCHEMAS)
+    run_id = await seed(session_factory)
+    async with session_factory() as evidence_session:
+        tools = investigator.RecordingTools(
+            InvestigationScope(**SCOPE),
+            session_factory,
+            run_id,
+            session=evidence_session,
+        )
+        batch = await getattr(tools, name)(**TOOL_ARGUMENTS[name])
+    async with session_factory() as session:
+        events = (
+            await session.scalars(
+                select(InvestigationEvent).where(InvestigationEvent.investigation_id == run_id)
+            )
+        ).all()
+        events = sorted(events, key=lambda event: event.sequence)
+        assert len(events) == 2
+        assert events[0].sequence == 1 and events[0].kind == "tool_request"
+        assert events[0].payload == {"tool": name, "arguments": TOOL_ARGUMENTS[name]}
+        assert events[1].sequence == 2 and events[1].kind == "tool_call"
+        assert events[1].payload == {
+            "request_sequence": 1,
+            "tool": name,
+            "arguments": TOOL_ARGUMENTS[name],
+            "result": batch.model_dump(mode="json"),
+        }
+
+
+@pytest.mark.parametrize("name", TOOL_ARGUMENTS)
+async def test_every_registered_tool_checks_cancellation_before_execution(
+    session_factory, monkeypatch, name
+):
+    run_id = await seed(session_factory, status="cancelling")
+
+    async def forbidden(self, **arguments):
+        raise AssertionError("tool executed after cancellation")
+
+    monkeypatch.setattr(EvidenceTools, name, forbidden)
+    async with session_factory() as evidence_session:
+        tools = investigator.RecordingTools(
+            InvestigationScope(**SCOPE),
+            session_factory,
+            run_id,
+            session=evidence_session,
+        )
+        with pytest.raises(asyncio.CancelledError):
+            await getattr(tools, name)(**TOOL_ARGUMENTS[name])
+    async with session_factory() as session:
+        assert (
+            await session.scalar(
+                select(InvestigationEvent).where(InvestigationEvent.investigation_id == run_id)
+            )
+            is None
+        )
+
+
+@pytest.mark.parametrize("service", ["checkout", "inventory"])
+async def test_metric_success_and_scope_denial_are_persisted(session_factory, monkeypatch, service):
+    run_id = await seed(session_factory)
+    requests = []
+
+    def prometheus(request):
+        requests.append(request)
+        assert request.url.host == "prometheus.test"
+        assert 'service="checkout"' in request.url.params["query"]
+        return httpx.Response(
+            200,
+            json={
+                "status": "success",
+                "data": {
+                    "result": [
+                        {
+                            "values": [
+                                [datetime.fromisoformat(SCOPE["start"]).timestamp() + 60, "0.25"]
+                            ]
+                        }
+                    ]
+                },
+            },
+        )
+
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(
+        httpx,
+        "AsyncClient",
+        lambda **kwargs: real_client(transport=httpx.MockTransport(prometheus), **kwargs),
+    )
+    async with session_factory() as evidence_session:
+        tools = investigator.RecordingTools(
+            InvestigationScope(**SCOPE),
+            session_factory,
+            run_id,
+            session=evidence_session,
+            prometheus_url="http://prometheus.test",
+        )
+        batch = await tools.read_metric_series(
+            **{**TOOL_ARGUMENTS["read_metric_series"], "service": service}
+        )
+    if service == "checkout":
+        assert len(requests) == 1 and batch.error is None
+        assert batch.items[0].kind == "metric"
+        assert batch.items[0].content["points"][0][1] == "0.25"
+    else:
+        assert requests == [] and batch.error == "scope_violation"
+    async with session_factory() as session:
+        event = await session.scalar(
+            select(InvestigationEvent).where(
+                InvestigationEvent.investigation_id == run_id,
+                InvestigationEvent.kind == "tool_call",
+            )
+        )
+        assert event is not None
+        assert event.payload["tool"] == "read_metric_series"
+        assert event.payload["result"] == batch.model_dump(mode="json")
+
+
 async def test_claim_is_atomic_and_single_winner(session_factory):
     await seed(session_factory)
     winners = await asyncio.gather(*[claim_next(session_factory, f"w{n}") for n in range(4)])
@@ -96,9 +232,9 @@ async def test_completed_run_persists_report_events_usage_and_timings(session_fa
             )
         ).all()
         kinds = [event.kind for event in events]
-        assert kinds[:3] == ["tool_call", "tool_call", "tool_call"]  # B's fixed retrieval
+        assert kinds[:-1] == ["tool_request", "tool_call"] * 3  # B's fixed retrieval
         assert kinds[-1] == "status" and events[-1].payload["status"] == "completed"
-        assert events[0].payload["result"]["items"][0]["evidence_id"] == "log:1"
+        assert events[1].payload["result"]["items"][0]["evidence_id"] == "log:1"
 
 
 async def test_provider_outage_fails_run_and_ingestion_keeps_working(session_factory, make_client):

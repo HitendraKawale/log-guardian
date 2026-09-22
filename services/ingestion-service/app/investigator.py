@@ -18,8 +18,9 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from .investigation_agent import MODEL, BaselineConfig, run_investigation
+from .investigation_loop import TOOL_SCHEMAS
 from .investigation_schemas import InvestigationScope
-from .investigation_tools import EvidenceTools
+from .investigation_tools import EvidenceTools, redact
 from .models import Investigation, InvestigationEvent
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def _code_revision() -> str | None:
 
 
 class RecordingTools(EvidenceTools):
-    """Persists one ordered event per tool execution, honoring a cancel check."""
+    """Commit intent before execution; a missing completion leaves outcome unknown."""
 
     def __init__(self, scope, session_factory, run_id, **kwargs):
         super().__init__(scope, **kwargs)
@@ -51,18 +52,20 @@ class RecordingTools(EvidenceTools):
         self._run_id = run_id
         self._sequence = 0
 
-    async def _record(self, kind: str, payload: dict) -> None:
+    async def _record(self, kind: str, payload: dict) -> int:
         self._sequence += 1
+        sequence = self._sequence
         async with self._factory() as session:
             session.add(
                 InvestigationEvent(
                     investigation_id=self._run_id,
-                    sequence=self._sequence,
+                    sequence=sequence,
                     kind=kind,
                     payload=payload,
                 )
             )
             await session.commit()
+        return sequence
 
     async def _cancelling(self) -> bool:
         async with self._factory() as session:
@@ -75,17 +78,26 @@ class RecordingTools(EvidenceTools):
         async def call(**arguments):
             if await self._cancelling():
                 raise asyncio.CancelledError
+            recorded_arguments = redact(arguments)
+            audit = {"tool": name, "arguments": recorded_arguments}
+            if recorded_arguments != arguments:
+                audit["arguments_redacted"] = True
+            request_sequence = await self._record("tool_request", audit)
             batch = await getattr(super(RecordingTools, self), name)(**arguments)
             await self._record(
                 "tool_call",
-                {"tool": name, "arguments": arguments, "result": batch.model_dump(mode="json")},
+                {
+                    **audit,
+                    "request_sequence": request_sequence,
+                    "result": batch.model_dump(mode="json"),
+                },
             )
             return batch
 
         return call
 
     def __getattribute__(self, name):
-        if name in {"query_logs", "summarize_logs", "search_runbooks"}:
+        if name in TOOL_SCHEMAS:
             return object.__getattribute__(self, "_wrap")(name)
         return object.__getattribute__(self, name)
 
