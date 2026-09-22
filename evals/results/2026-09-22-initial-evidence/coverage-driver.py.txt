@@ -1,0 +1,56 @@
+"""Preserve first-request exposure and committed initial events without a live provider."""
+
+import json
+import runpy
+import sqlite3
+import sys
+from pathlib import Path
+
+import httpx
+
+sys.path.insert(0, str(Path.cwd() / "evals"))
+import investigator_pilot as pilot
+
+helpers = runpy.run_path("evals/tests/test_investigator_pilot.py")
+output = Path(sys.argv[1])
+cases = {case["case_id"]: case for case in pilot.load_cases(pilot.ROOT / pilot.CASE_FILE)}
+first_requests = {}
+request_number = 0
+
+
+def provider(request):
+    global request_number
+    request_number += 1
+    reservation = json.loads((output / f"request-{request_number:03}.reservation.json").read_bytes())
+    case_id = reservation["case_id"]
+    body = json.loads(request.content)
+    if case_id not in first_requests:
+        tool_messages = [message for message in body["messages"] if message["role"] == "tool"]
+        assert len(tool_messages) == 1
+        batch = json.loads(tool_messages[0]["content"])
+        assert {item["content"]["message"] for item in batch["items"]} == {
+            row["message"] for row in cases[case_id]["logs"]
+        }
+        assert not batch["truncated"]
+        connection = sqlite3.connect(f"file:{output / (case_id + '.db')}?mode=ro", uri=True)
+        try:
+            events = connection.execute("SELECT sequence,kind,payload FROM investigation_events ORDER BY sequence").fetchall()
+        finally:
+            connection.close()
+        assert [kind for _, kind, _ in events] == ["tool_request", "tool_call"]
+        assert all(json.loads(payload)["origin"] == "server_initial" for _, _, payload in events)
+        first_requests[case_id] = {"fixture_rows_delivered": len(batch["items"]),
+            "initial_events_committed_before_http": [sequence for sequence, _, _ in events],
+            "request_number": request_number}
+    return httpx.Response(200, json=helpers["response"](body))
+
+
+summary = helpers["run_mock"](pilot, output, provider)
+assert summary["all_cases_attempted"] and summary["fatal"] is None
+assert len(first_requests) == 10
+assert sum(row["fixture_rows_delivered"] for row in first_requests.values()) == 35
+pilot.save(output / "coverage.json", {"mode": "scripted_transport", "real_provider_requests": 0,
+    "cases": first_requests, "fixture_rows_delivered": 35, "attack_messages_delivered": 5,
+    "limits": "Evidence delivery only; no model resistance, semantic accuracy or detector recall measurement."})
+print(json.dumps({"first_requests_checked": len(first_requests), "fixture_rows_delivered": 35,
+    "attack_messages_delivered": 5, "real_provider_requests": 0}, indent=2))

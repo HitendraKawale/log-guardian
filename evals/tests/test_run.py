@@ -28,7 +28,7 @@ def invoke(*arguments):
     )
 
 
-@pytest.mark.parametrize("system,count", [("A", 1), ("B", 3), ("C", 0)])
+@pytest.mark.parametrize("system,count", [("A", 1), ("B", 3), ("C", 1)])
 def test_dry_run_has_provenance_evidence_and_zero_requests(system, count):
     completed = invoke("--system", system, "--dry-run")
     assert completed.returncode == 0, completed.stderr
