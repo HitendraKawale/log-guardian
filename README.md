@@ -40,6 +40,22 @@ benchmark. Total estimated spend including this run is $0.13033360.
   re-evaluation after any further tuning (split is consumed), independent
   review, live-origin evaluation set beyond one captured bundle.
 
+## Connect your own local logs
+
+[Local Compose onboarding](docs/local-development.md) runs ingestion and the dashboard
+without a model worker. An owner-run Python command forwards one Compose service's
+stdout, with no Docker socket mount. The dashboard separates API reachability from
+the latest observed log. Start with `make local-up` after setting
+`LOG_GUARDIAN_API_KEY` as documented.
+
+This is a development installation, not a paid hosted release. Collection has no
+durable spool or automatic retry, and retention is not implemented. Recurring
+error detection uses persisted per-service learning and groups repeats until ten
+quiet minutes pass. The Candidates view explains each signal and learning state.
+See [detector policy and upgrades](docs/local-development.md#detector-policy-and-upgrades)
+for thresholds, timestamp exclusions and failure limits. AI execution stays disabled
+in the local profile.
+
 ## Investigation quick start
 
 ```bash
@@ -241,8 +257,8 @@ them because LLNL operators tagged 348,460 lines by hand — and it is fitted on
 one machine's vocabulary, so it returns 0.0 for the ERROR-level traffic the demo
 sandbox emits.
 
-So selecting what to investigate is a separate, label-free step
-(`services/ingestion-service/app/trigger.py`, `make measure-trigger`): a
+The original novelty-only baseline remains in
+`services/ingestion-service/app/trigger.py` for `make measure-trigger`: a
 severity gate plus "this message template has not been seen before". Held out on
 BGL it surfaces **76.5% of alerting message families** while raising candidates
 on **0.84% of rows**, with nothing to train. On the demo capture — where the
@@ -251,6 +267,11 @@ scorer is silent — it raised one candidate, the incident line itself.
 The same templating that *lost* for the model wins here: novelty detection is
 meaningless without it, because every new file path would make a line unique.
 Details and the honest caveats are in [`ml/README.md`](ml/README.md).
+
+The runtime detector now adds persisted per-service burst detection and recurring
+incident grouping in `app/incident_detection.py`. The BGL measurements above
+remain historical novelty-only results, not accuracy measurements for this new
+application-log detector.
 
 Selecting is not spending. A candidate is a suggestion for a human or an
 explicitly-budgeted worker; wiring it straight into the investigation worker
@@ -293,6 +314,7 @@ Ingestion service:
 - `GET /feedback/export` — labelled examples for retraining
 - `GET /model/info` — active model version + metrics (proxied from the AI service)
 - `GET /candidates?status=&service=&limit=&offset=` — the investigation queue
+- `GET /candidates/detectors?service=&limit=&offset=` — per-service detector readiness
 - `GET /candidates/{id}` · `POST /candidates/{id}/dismiss` — review one
 - `GET /health` · `GET /readiness` · `GET /metrics`
 
@@ -351,7 +373,7 @@ one. Logs are JSON with the active `trace_id`. Tracing only turns on when
 Alembic. The container runs `alembic upgrade head` before serving. Locally:
 
 ```bash
-cd services/ingestion-service && alembic upgrade head
+cd services/ingestion-service && ../../.venv/bin/python -m alembic upgrade head
 ```
 
 ## Tests

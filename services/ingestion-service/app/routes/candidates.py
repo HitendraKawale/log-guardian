@@ -16,13 +16,15 @@ from datetime import UTC, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..config import settings
 from ..database import get_session
-from ..models import InvestigationCandidate
+from ..models import DetectorState, InvestigationCandidate
 from ..security import require_api_key
+from ..trigger import detector_readiness
 
 router = APIRouter(prefix="/candidates", tags=["candidates"])
 
@@ -47,12 +49,24 @@ class CandidateOut(BaseModel):
     occurred_at: datetime
     created_at: datetime
     dismissed_at: datetime | None
+    last_seen_at: datetime | None
+    occurrence_count: int
+    signal_details: dict
+
+    @computed_field
+    @property
+    def activity(self) -> Literal["active", "quiet", "legacy"]:
+        if not self.signal_details or self.signal_details.get("legacy"):
+            return "legacy"
+        at = self.last_seen_at or self.occurred_at
+        at = at.replace(tzinfo=at.tzinfo or UTC)
+        return "quiet" if (datetime.now(UTC) - at).total_seconds() >= 600 else "active"
 
 
 @router.get("", dependencies=[Depends(require_api_key)])
 async def list_candidates(
     session: AsyncSession = Depends(get_session),
-    status_filter: Literal["new", "dismissed"] | None = Query(None, alias="status"),
+    status_filter: Literal["new", "dismissed", "promoted"] | None = Query(None, alias="status"),
     service: str | None = None,
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -68,12 +82,45 @@ async def list_candidates(
         counter = counter.where(InvestigationCandidate.service == service)
 
     rows = await session.execute(
-        query.order_by(InvestigationCandidate.created_at.desc()).limit(limit).offset(offset)
+        query.order_by(
+            func.coalesce(
+                InvestigationCandidate.last_seen_at, InvestigationCandidate.occurred_at
+            ).desc(),
+            InvestigationCandidate.id.desc(),
+        )
+        .limit(limit)
+        .offset(offset)
     )
     total = await session.scalar(counter)
     return {
         "total": total or 0,
         "items": [CandidateOut.model_validate(row) for row in rows.scalars()],
+    }
+
+
+@router.get("/detectors", dependencies=[Depends(require_api_key)])
+async def list_detectors(
+    session: AsyncSession = Depends(get_session),
+    service: str | None = None,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> dict:
+    query = select(DetectorState)
+    counter = select(func.count()).select_from(DetectorState)
+    if service:
+        query = query.where(DetectorState.service == service)
+        counter = counter.where(DetectorState.service == service)
+    rows = await session.scalars(query.order_by(DetectorState.service).limit(limit).offset(offset))
+    now = datetime.now(UTC)
+    return {
+        "total": await session.scalar(counter) or 0,
+        "items": [
+            {
+                "service": row.service,
+                **detector_readiness(row.data, now, settings.trigger_warmup_logs),
+            }
+            for row in rows
+        ],
     }
 
 

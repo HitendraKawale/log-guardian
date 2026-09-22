@@ -93,15 +93,14 @@ class InvestigationCandidate(Base):
     key-gated, human action. Keeping the two tables apart is what stops log
     volume from driving paid execution.
 
-    ``(service, template)`` is unique because the trigger's memory is
-    per-process: a restart, or a second replica, re-fires a family the first
-    one already surfaced. The constraint absorbs that, so a family yields one
-    reviewable row however many workers see it.
+    A nullable unique active_service groups an ongoing episode without
+    suppressing later recurrence. Review status and activity are independent.
     """
 
     __tablename__ = "investigation_candidates"
     __table_args__ = (
-        Index("ix_candidates_service_template", "service", "template", unique=True),
+        Index("ix_candidates_service_template", "service", "template"),
+        Index("ix_candidates_active_service", "active_service", unique=True),
         Index("ix_candidates_status_created", "status", "created_at"),
     )
 
@@ -126,3 +125,16 @@ class InvestigationCandidate(Base):
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    active_service: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    occurrence_count: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    signal_details: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
+
+
+class DetectorState(Base):
+    """Bounded per-service learning committed atomically with its active incident."""
+
+    __tablename__ = "detector_states"
+
+    service: Mapped[str] = mapped_column(String(128), primary_key=True)
+    data: Mapped[dict] = mapped_column(JSON, default=dict)

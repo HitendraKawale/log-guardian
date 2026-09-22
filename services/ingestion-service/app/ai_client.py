@@ -21,6 +21,8 @@ class AIClient:
         self._timeout = timeout
 
     async def analyze(self, log: LogCreate) -> AIResponse | None:
+        if not self._base_url:
+            return None
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 response = await client.post(
@@ -34,6 +36,8 @@ class AIClient:
             return None
 
     async def model_info(self) -> dict | None:
+        if not self._base_url:
+            return None
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 response = await client.get(f"{self._base_url}/model/info")

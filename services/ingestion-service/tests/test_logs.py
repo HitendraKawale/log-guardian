@@ -89,10 +89,10 @@ async def test_trigger_failure_does_not_fail_the_write(client, monkeypatch):
     """
     from app import service
 
-    def explode(**kwargs):
+    async def explode(*args, **kwargs):
         raise RuntimeError("trigger is broken")
 
-    monkeypatch.setattr(service.investigation_trigger, "consider", explode)
+    monkeypatch.setattr(service, "observe_log", explode)
 
     response = await client.post(
         "/logs",

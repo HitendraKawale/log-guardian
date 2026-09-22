@@ -108,6 +108,10 @@
   </main>
 
   <main id="view-logs" class="view" hidden>
+    <section class="panel" aria-label="Log collection status">
+      <p id="latest-log" role="status">Waiting for the API.</p>
+      <p>An idle source may be healthy. API connectivity does not confirm a running collector.</p>
+    </section>
     <section class="stats" id="stats">
       <div class="card"><span class="label">Logs</span><span class="value" id="stat-total">0</span></div>
       <div class="card"><span class="label">Anomalies</span><span class="value danger" id="stat-anomalies">0</span></div>
@@ -168,18 +172,22 @@
           <select id="c-status">
             <option value="new" selected>New</option>
             <option value="dismissed">Dismissed</option>
+            <option value="promoted">Promoted</option>
             <option value="">All</option>
           </select>
           <input id="c-service" placeholder="filter service&hellip;" />
           <button id="c-refresh" class="ghost" type="button">Refresh</button>
         </div>
       </div>
-      <p class="callout">Selected by the label-free trigger &mdash; a severity gate plus
-        &ldquo;this message template has not been seen before&rdquo;. No model was called and
-        no labels were used. You can <strong>dismiss</strong> here; starting an investigation
+      <p class="callout">Local rules select new error patterns and error bursts, grouping
+        repeated errors into one incident per service until ten quiet minutes pass.
+        Quiet means no eligible error observed, not verified recovery. Only timely received
+        logs count: no older than five minutes or more than one minute in the future.
+        No model was called. You can <strong>dismiss</strong> here; starting an investigation
         spends money and is deliberately not possible from this dashboard, which holds only
         the log API key. Promote with
         <code>POST /investigations/from-candidate/{id}</code> using the investigation key.</p>
+      <p id="detector-status" role="status" aria-live="polite">Loading detector state.</p>
       <table class="logs">
         <thead>
           <tr>

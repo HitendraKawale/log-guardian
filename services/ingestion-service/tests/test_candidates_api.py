@@ -37,23 +37,16 @@ async def _seed(session_factory, *candidates) -> list[str]:
 
 async def test_ingesting_a_novel_log_creates_a_candidate(client, session_factory, monkeypatch):
     """End to end: the trigger's selection becomes a reviewable row."""
-    from app import service as service_module
-    from app.trigger import InvestigationTrigger
+    from app.config import settings
 
-    # monkeypatch, not assignment: the trigger is a module global, and leaking a
-    # warmed-up one into other tests makes ordering matter.
-    monkeypatch.setattr(
-        service_module,
-        "investigation_trigger",
-        InvestigationTrigger(candidate_levels=("ERROR",), warmup_logs=0),
-    )
+    monkeypatch.setattr(settings, "trigger_warmup_logs", 0)
     response = await client.post(
         "/logs",
         json={
             "service": "checkout",
             "level": "ERROR",
             "message": "inventory read timed out after 1000ms",
-            "timestamp": "2026-06-18T10:00:00Z",
+            "timestamp": datetime.now(UTC).isoformat(),
         },
     )
     assert response.status_code == 201
@@ -64,6 +57,13 @@ async def test_ingesting_a_novel_log_creates_a_candidate(client, session_factory
     assert body["total"] == 1
     assert body["items"][0]["service"] == "checkout"
     assert body["items"][0]["reason"] == "unseen-template"
+    assert body["items"][0]["occurrence_count"] == 1
+    assert body["items"][0]["activity"] == "active"
+    assert body["items"][0]["signal_details"]["learning"] is True
+    detectors = (await client.get("/candidates/detectors")).json()
+    assert detectors["total"] == 1
+    assert detectors["items"][0]["novelty_ready"] is True
+    assert detectors["items"][0]["baseline_ready"] is False
 
 
 async def test_candidate_scope_is_usable_by_an_investigation(client, session_factory):

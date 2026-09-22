@@ -11,6 +11,7 @@ because it holds only the log API key.
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -57,33 +58,24 @@ def test_the_dashboard_offers_no_way_to_spend(candidates: Page) -> None:
     expect(view).to_contain_text("spends money")
 
 
-def test_a_novel_log_appears_and_can_be_dismissed(candidates: Page) -> None:
-    """End to end: ingest something never seen, review it, dismiss it."""
+def test_a_familiar_error_burst_appears_and_can_be_dismissed(candidates: Page) -> None:
+    """Cold-start error bursts qualify without bypassing per-service learning."""
     marker = uuid.uuid4().hex[:8]
-    # Warm the trigger past TRIGGER_WARMUP_LOGS with traffic that teaches it
-    # nothing new, so the novel line below is genuinely the first of its family.
-    for i in range(30):
-        candidates.request.post(
+    for _ in range(5):
+        response = candidates.request.post(
             f"{INGESTION_URL}/logs",
             data={
-                "service": "warmup",
-                "level": "INFO",
-                "message": "request completed",
-                "timestamp": "2026-06-18T09:00:00Z",
+                "service": f"svc-{marker}",
+                "level": "ERROR",
+                "message": "inventory timeout",
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         )
-    candidates.request.post(
-        f"{INGESTION_URL}/logs",
-        data={
-            "service": f"svc-{marker}",
-            "level": "ERROR",
-            "message": f"unseen failure mode {marker} in subsystem",
-            "timestamp": "2026-06-18T10:00:00Z",
-        },
-    )
+        assert response.status == 201
     candidates.click("#c-refresh")
     row = candidates.locator("#candidates-body tr", has_text=f"svc-{marker}")
-    expect(row.first).to_contain_text("unseen-template")
+    expect(row.first).to_contain_text("error-burst")
+    expect(row.first).to_contain_text("5 errors this minute")
     row.first.get_by_role("button", name="Dismiss").click()
 
     candidates.select_option("#c-status", "dismissed")

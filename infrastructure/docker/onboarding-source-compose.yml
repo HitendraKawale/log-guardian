@@ -1,0 +1,28 @@
+# Application-only source stack. Logs can reach Log Guardian only through stdout collection.
+name: log-guardian-source
+
+services:
+  checkout:
+    build:
+      context: ../../demo
+    tty: false
+    environment:
+      DEMO_ROLE: checkout
+      INVENTORY_URL: http://inventory:9001
+      INGESTION_URL: ""
+      CHECKOUT_DEADLINE_MS: "1000"
+    ports:
+      - "127.0.0.1:9001:9001"
+    depends_on:
+      - inventory
+
+  inventory:
+    build:
+      context: ../../demo
+    tty: false
+    environment:
+      DEMO_ROLE: inventory
+      INGESTION_URL: ""
+    ports:
+      - "127.0.0.1:9002:9001"
+      - "127.0.0.1:9101:9101"

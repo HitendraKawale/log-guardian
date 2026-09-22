@@ -9,6 +9,7 @@ as agent tools anywhere.
 """
 
 import asyncio
+import json
 import logging
 import os
 import time
@@ -36,19 +37,24 @@ def create_apps(role, inventory_url="", ingestion_url="", deadline_ms=1000):
     fault = {"delay_seconds": 0.0}
 
     async def emit(level: str, message: str) -> None:
-        """Best-effort structured log to the ingestion API; never fails the request."""
+        """Emit stdout evidence, with optional legacy direct API delivery."""
+        record = {
+            "service": role,
+            "level": level,
+            "message": message,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        try:
+            print(json.dumps(record), flush=True)
+        except OSError:
+            logger.warning("stdout unavailable; dropped log")
         if not ingestion_url:
             return
         try:
             async with httpx.AsyncClient(timeout=2.0) as client:
                 await client.post(
                     f"{ingestion_url}/logs",
-                    json={
-                        "service": role,
-                        "level": level,
-                        "message": message,
-                        "timestamp": datetime.now(UTC).isoformat(),
-                    },
+                    json=record,
                 )
         except httpx.HTTPError:
             logger.warning("ingestion unavailable; dropped log")

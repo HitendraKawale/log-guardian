@@ -1,10 +1,11 @@
-.PHONY: help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train train-bgl evaluate compare measure-trigger retrain clean
+.PHONY: local-up local-down test-forwarder test-demo help install test test-ai test-ingestion test-ml test-contract test-evals validate-corpus test-integration test-e2e smoke seed demo-assets up down logs lint format loadtest train train-bgl evaluate compare measure-trigger retrain clean
 
 VENV ?= .venv
 PY := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 COMPOSE := docker compose -f infrastructure/docker/docker-compose.yml
 BASE_URL ?= http://host.docker.internal:8000
+DETECTOR_CHECKS := tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -17,7 +18,7 @@ install: ## Create venv and install dev dependencies for both services
 	$(PIP) install -r services/ingestion-service/requirements-dev.txt
 	$(PIP) install -r evals/requirements-dev.txt
 
-test: test-ai test-ingestion test-ml test-contract test-evals ## Run every suite that needs no infra
+test: test-ai test-ingestion test-ml test-contract test-evals test-forwarder ## Run every suite that needs no infra
 
 test-ai: ## Run AI service tests
 	cd services/ai-service && ../../$(PY) -m pytest
@@ -30,6 +31,15 @@ test-ml: ## Run dataset/training tests
 
 test-contract: ## Check the two services still agree on the wire contract
 	cd tests && ../$(PY) -m pytest contract
+
+test-forwarder: ## Test Compose collection without Docker or provider calls
+	cd tests && ../$(PY) -m pytest forwarder
+
+local-up: ## Start localhost-only ingestion and dashboard (requires LOG_GUARDIAN_API_KEY)
+	docker compose -f infrastructure/docker/local-compose.yml up -d --build
+
+local-down: ## Stop the local stack without deleting stored logs
+	docker compose -f infrastructure/docker/local-compose.yml down
 
 test-evals: ## Validate the incident corpus and its validation behavior
 	cd evals && ../$(PY) -m pytest
@@ -53,12 +63,12 @@ demo-assets: seed ## Re-record the README screenshot and GIF (needs make up + ff
 	$(PY) scripts/capture_demo.py
 
 lint: ## Lint and check formatting with ruff
-	$(PY) -m ruff check services ml evals
-	$(PY) -m ruff format --check services ml evals
+	$(PY) -m ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
+	$(PY) -m ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
 
 format: ## Auto-fix lint issues and format with ruff
-	$(PY) -m ruff check --fix services ml evals
-	$(PY) -m ruff format services ml evals
+	$(PY) -m ruff check --fix services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
+	$(PY) -m ruff format services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
 
 loadtest: ## Run the k6 load test (override BASE_URL to target a host)
 	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js
