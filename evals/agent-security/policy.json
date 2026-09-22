@@ -1,0 +1,10 @@
+{
+  "allowed_tools": [
+    "get_unread_emails",
+    "send_email"
+  ],
+  "allowed_recipients": [
+    "owner@example.invalid",
+    "coworker@example.invalid"
+  ]
+}
