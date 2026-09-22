@@ -20,7 +20,7 @@ def require_stack():
         pytest.skip("set LG_TEST_POSTGRES_URL to a task-owned PostgreSQL server")
 
 
-def test_postgres_upgrade_concurrency_recurrence_and_deadline():
+def test_postgres_upgrade_concurrency_recurrence_and_deadline(monkeypatch):
     async def exercise():
         import asyncpg
 
@@ -55,6 +55,7 @@ def test_postgres_upgrade_concurrency_recurrence_and_deadline():
         await conn.close()
         migrate("upgrade", "0006")
         sys.path.insert(0, str(SERVICE))
+        from app import incident_detection
         from app.config import settings
         from app.incident_detection import observe_log
         from app.models import DetectorState, Investigation, InvestigationCandidate, Log
@@ -91,7 +92,15 @@ def test_postgres_upgrade_concurrency_recurrence_and_deadline():
                 assert legacy.status == "dismissed" and legacy.occurrence_count == 1
                 assert legacy.last_seen_at == legacy.occurred_at
             records = [await store(at) for _ in range(10)]
-            await asyncio.gather(*(observe(row, at) for row in records))
+            # Serialization has its own test budget; production deadlines are
+            # restored before the blocked-row check below.
+            with monkeypatch.context() as budget:
+                budget.setattr(incident_detection, "TRANSACTION_TIMEOUT_SECONDS", 10)
+                budget.setattr(incident_detection, "SQL_TIMEOUT_MS", 5000)
+                outcomes = await asyncio.gather(
+                    *(observe(row, at) for row in records), return_exceptions=True
+                )
+            assert not [result for result in outcomes if isinstance(result, BaseException)]
             await engine.dispose()
             async with factory() as session:
                 state = await session.get(DetectorState, "checkout")
@@ -117,6 +126,8 @@ def test_postgres_upgrade_concurrency_recurrence_and_deadline():
                 )
                 assert await session.scalar(select(func.count()).select_from(Investigation)) == 0
             row = await store(later)
+            assert incident_detection.TRANSACTION_TIMEOUT_SECONDS == 0.25
+            assert incident_detection.SQL_TIMEOUT_MS == 200
             async with factory() as blocker, factory() as caller:
                 await blocker.execute(
                     text("SELECT service FROM detector_states WHERE service='checkout' FOR UPDATE")

@@ -1,8 +1,8 @@
 # Recurring detection verification
 
 Implemented on `feat/33-recurring-incidents`, based on onboarding commit `4abd403`.
-Changes remain uncommitted. This verifies the operational detector, not a product
-release, security detector, or application-log accuracy benchmark.
+Initial local verification preceded commit `94bf241`. This verifies the operational
+detector, not a product release, security detector, or application-log accuracy benchmark.
 
 ## Executed checks
 
@@ -35,8 +35,8 @@ lossy downgrade. SQLite covers the same detector rules and migration behavior,
 plus connection-pool timeout restoration and deadline inclusion of pool waits.
 
 CI now installs ingestion dependencies for the PostgreSQL test and supplies its
-existing disposable Compose database URL. Hosted CI was not run: this branch has
-not been committed or pushed. The full Kafka/Jaeger/Prometheus integration stack
+existing disposable Compose database URL. Hosted CI results after the initial
+commit are recorded below. The full Kafka/Jaeger/Prometheus integration stack
 was not started locally; the existing direct/consumer unit tests were included
 in the ingestion suite. Browser tests included static-demo and investigation
 regressions, not only the new candidate view.
@@ -117,8 +117,27 @@ The disposable PostgreSQL server, sandbox containers, collector, scorer and
 browser-suite API are cleaned up after verification. The task API/frontend stay
 available on ports 18434/18435 for local review, with provider execution disabled.
 Their PIDs and logs live in `/tmp/lg33-live/`; shared onboarding containers remain
-untouched. No provider calls, BGL held-out evaluation, commits, pushes or PRs were
-performed for this milestone.
+untouched. No provider calls or BGL held-out evaluation were performed. The owner
+subsequently authorized commits and pushes; the branch is published.
+
+## CI follow-up: correctness versus deadlines
+
+[CI run 35699299411](https://github.com/HitendraKawale/log-guardian/actions/runs/35699299411)
+failed the two ten-writer exact-count checks: SQLite exhausted its 200 ms lock
+budget, and PostgreSQL exceeded the 250 ms overall deadline during the concurrent
+batch. These failures remain evidence that the best-effort detector can reject
+work under contention; the local zero-failure observations do not generalize to
+other machines or loads.
+
+The serialization checks now use explicit test-only budgets of 10 seconds overall
+and 5 seconds per SQL operation, then restore and assert the production values
+before deadline checks. Production remains 250 ms overall and 200 ms for SQL.
+Tests still require exactly ten observations and one grouped candidate; they do
+not swallow failed writes or retry them. All spawned tasks are awaited before an
+assertion, including failures, so teardown cannot strand database worker threads.
+Separate default-budget tests verify lock timeout, pool-wait timeout, preserved
+logs and usable sessions. This distinguishes atomicity checks from a hardware-
+dependent throughput requirement; it does not improve production throughput.
 
 ## Remaining product limits
 
