@@ -74,12 +74,17 @@ class RecordingTools(EvidenceTools):
             )
         return status == "cancelling"
 
-    def _wrap(self, name):
+    async def _initial_logs(self, arguments):
+        return await self._wrap("query_logs", origin="server_initial")(**arguments)
+
+    def _wrap(self, name, *, origin=None):
         async def call(**arguments):
             if await self._cancelling():
                 raise asyncio.CancelledError
             recorded_arguments = redact(arguments)
             audit = {"tool": name, "arguments": recorded_arguments}
+            if origin is not None:
+                audit["origin"] = origin
             if recorded_arguments != arguments:
                 audit["arguments_redacted"] = True
             request_sequence = await self._record("tool_request", audit)

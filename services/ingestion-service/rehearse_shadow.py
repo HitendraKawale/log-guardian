@@ -84,7 +84,7 @@ async def rehearse():
 
                 def provider(request, model_replies=model_replies, name=name, arguments=arguments):
                     body = json.loads(request.content)
-                    first = not model_replies
+                    first = not model_replies and not (name == "query_logs" and arguments == SCOPE)
                     model_replies.append(body)
                     report = {
                         "observations": [],

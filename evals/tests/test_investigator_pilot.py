@@ -19,7 +19,7 @@ def pilot():
 
 def response(body, *, unknown=False):
     scope = json.loads(body["messages"][1]["content"])["scope"]
-    first = not any(message["role"] == "tool" for message in body["messages"])
+    first = unknown or sum(message["role"] == "tool" for message in body["messages"]) == 1
     report = {
         "observations": [],
         "missing_evidence": ["Scripted test, not a diagnosis."],
@@ -37,7 +37,7 @@ def response(body, *, unknown=False):
                     "id": "call-1",
                     "type": "function",
                     "function": {
-                        "name": "delete_logs" if unknown else "query_logs",
+                        "name": "delete_logs" if unknown else "summarize_logs",
                         "arguments": json.dumps(scope),
                     },
                 }
@@ -77,7 +77,7 @@ def test_native_worker_reservations_witnesses_and_one_shot(tmp_path, monkeypatch
     original = p.RecordingTools._record
 
     async def observed(self, kind, payload):
-        if kind == "tool_request":
+        if kind == "tool_request" and payload.get("origin") != "server_initial":
             assert len(list(directory.glob("request-*.response.json"))) == len(calls)
         return await original(self, kind, payload)
 
@@ -107,7 +107,8 @@ def test_native_worker_reservations_witnesses_and_one_shot(tmp_path, monkeypatch
     for n in range(1, 11):
         saved = json.loads((directory / f"stage-{n:02}.json").read_text())
         assert saved["status"] == "completed"
-        assert saved["review"]["captured_requests"] == saved["review"]["captured_calls"] == 1
+        assert saved["review"]["captured_requests"] == saved["review"]["captured_calls"] == 2
+        assert saved["events"][0]["payload"]["origin"] == "server_initial"
         assert saved["review"]["unresolved_requests"] == []
         assert len(saved["fixture_to_database_ids"]) in (3, 4)
     with pytest.raises(FileExistsError):
@@ -126,7 +127,8 @@ def test_unknown_proposals_survive_without_tool_journal_entries(tmp_path):
     )
     assert result["reserved_attempts"] == 10 and result["all_cases_attempted"]
     saved = json.loads((tmp_path / "ledger/stage-01.json").read_text())
-    assert saved["error"] == "unknown_tool" and saved["review"]["captured_requests"] == 0
+    assert saved["error"] == "unknown_tool" and saved["review"]["captured_requests"] == 1
+    assert saved["events"][0]["payload"]["origin"] == "server_initial"
     witness = json.loads((tmp_path / "ledger/request-001.response.json").read_text())
     assert (
         witness["response"]["choices"][0]["message"]["tool_calls"][0]["function"]["name"]
@@ -199,7 +201,8 @@ def test_write_failure_prevents_later_execution(tmp_path, monkeypatch, suffix, s
     result = run_mock(p, tmp_path / "ledger", provider)
     assert len(calls) == sent and result["fatal"]
     saved = json.loads((tmp_path / "ledger/stage-01.json").read_text())
-    assert saved["review"]["captured_requests"] == 0
+    assert saved["review"]["captured_requests"] == 1
+    assert saved["events"][0]["payload"]["origin"] == "server_initial"
 
 
 def test_changed_candidate_and_invalid_key_do_not_claim_ledger(tmp_path):
@@ -227,6 +230,48 @@ def test_dirty_live_runner_refuses_before_claim(tmp_path, monkeypatch):
             )
         )
     assert not (tmp_path / "ledger").exists()
+
+
+def test_scripted_batch_does_not_need_historical_git_object(tmp_path, monkeypatch):
+    p = pilot()
+    original = p.subprocess.run
+
+    def shallow(command, *args, **kwargs):
+        if command[:2] == ["git", "diff"]:
+            raise p.subprocess.CalledProcessError(128, command)
+        return original(command, *args, **kwargs)
+
+    monkeypatch.setattr(p.subprocess, "run", shallow)
+    result = run_mock(
+        p,
+        tmp_path / "ledger",
+        lambda request: httpx.Response(200, json=response(json.loads(request.content))),
+    )
+    assert result["all_cases_attempted"] and result["fatal"] is None
+
+
+def test_live_still_requires_historical_base_before_claim(tmp_path, monkeypatch):
+    p = pilot()
+    directory = tmp_path / "ledger"
+    original = p.subprocess.run
+
+    def shallow(command, *args, **kwargs):
+        if command[:2] == ["git", "diff"]:
+            raise p.subprocess.CalledProcessError(128, command)
+        return original(command, *args, **kwargs)
+
+    def forbidden_transport(**kwargs):
+        raise AssertionError("live gate must stop before network setup")
+
+    monkeypatch.setattr(p, "clean_worktree", lambda: True)
+    monkeypatch.setattr(p, "shared_ledger", lambda: directory)
+    monkeypatch.setattr(p.subprocess, "run", shallow)
+    monkeypatch.setattr(p.httpx, "AsyncHTTPTransport", forbidden_transport)
+    with pytest.raises(p.subprocess.CalledProcessError):
+        asyncio.run(
+            p.run_batch(directory, p.candidate()[1], key="scripted-placeholder", allow_live=True)
+        )
+    assert not directory.exists()
 
 
 def test_reservation_limits(tmp_path):
@@ -316,7 +361,8 @@ def test_candidate_drift_stops_before_second_send(tmp_path, monkeypatch):
     assert len(calls) == result["reserved_attempts"] == 1
     assert result["fatal"] and result["cases"]["stage-02"] == "not_run"
     saved = json.loads((tmp_path / "ledger/stage-01.json").read_text())
-    assert saved["review"]["captured_requests"] == 0
+    assert saved["review"]["captured_requests"] == 1
+    assert saved["events"][0]["payload"]["origin"] == "server_initial"
 
 
 def test_body_and_money_ceiling_before_reservation(tmp_path):

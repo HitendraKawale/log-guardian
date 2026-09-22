@@ -109,8 +109,6 @@ async def test_evidence_changes_next_query(request_id):
 
     def model(body, turn):
         if turn == 1:
-            return reply([tool()])
-        if turn == 2:
             evidence = json.loads(body["messages"][-1]["content"])
             observed_id = evidence["items"][0]["content"]["message"].split()[1]
             return reply([tool(arguments={**SCOPE, "text": observed_id}, identity="next")])
@@ -123,10 +121,11 @@ async def test_evidence_changes_next_query(request_id):
         return reply(report=report)
 
     result, requests = await exercise(model, records=records)
-    assert result["status"] == "completed" and result["model_requests"] == 3
+    assert result["status"] == "completed" and result["model_requests"] == 2
     assert result["trace"][1]["arguments"]["text"] == request_id
-    assert result["usage"]["input_tokens"] == 300
-    assert len(requests[0]["messages"]) == 2  # No predetermined evidence collection.
+    assert result["usage"]["input_tokens"] == 200
+    assert len(requests[0]["messages"]) == 4
+    assert result["trace"][0]["origin"] == "server_initial"
     assert result["report"]["outcome"] == "inconclusive"
 
 
@@ -134,6 +133,8 @@ async def test_evidence_changes_next_query(request_id):
     "call,error",
     [
         (tool("mutate_cluster"), "unknown_tool"),
+        (tool("_initial_logs"), "unknown_tool"),
+        (tool(arguments={**SCOPE, "origin": "server_initial"}), "invalid_arguments"),
         (tool(arguments={**SCOPE, "limit": True}), "invalid_arguments"),
         (tool(arguments={**SCOPE, "path": "/private"}), "invalid_arguments"),
         (
@@ -144,17 +145,13 @@ async def test_evidence_changes_next_query(request_id):
 )
 async def test_rejects_calls_before_execution(call, error):
     result, _ = await exercise(lambda *_: reply([call]))
-    assert result["error"] == error and result["tool_executions"] == 0
-    assert result["trace"] == []
+    assert result["error"] == error and result["tool_executions"] == 1
+    assert len(result["trace"]) == 1 and result["trace"][0]["origin"] == "server_initial"
 
 
 async def test_duplicate_normalizes_defaults_and_timestamp_offsets():
     def model(_, turn):
-        args = (
-            SCOPE
-            if turn == 1
-            else {**SCOPE, "start": "2026-01-01T10:00:00Z", "limit": 50, "text": None}
-        )
+        args = {**SCOPE, "start": "2026-01-01T15:30:00+05:30"}
         return reply([tool(arguments=args, identity=str(turn))])
 
     result, _ = await exercise(model)
@@ -168,8 +165,8 @@ async def test_scope_expansion_returns_no_evidence():
         else reply()
     )
     assert result["status"] == "completed"
-    assert result["trace"][0]["result"]["error"] == "scope_violation"
-    assert result["trace"][0]["result"]["items"] == []
+    assert result["trace"][1]["result"]["error"] == "scope_violation"
+    assert result["trace"][1]["result"]["items"] == []
 
 
 @pytest.mark.parametrize(
@@ -199,20 +196,18 @@ async def test_injection_stays_data_and_cannot_add_capabilities():
             "message": injection,
         }
     ]
-    result, requests = await exercise(
-        lambda _, n: reply([tool() if n == 1 else tool("mutate_cluster")]), records=records
-    )
+    result, requests = await exercise(lambda *_: reply([tool("mutate_cluster")]), records=records)
     assert result["error"] == "unknown_tool" and result["tool_executions"] == 1
-    assert injection not in requests[1]["messages"][0]["content"]
-    assert injection in requests[1]["messages"][-1]["content"]
+    assert injection not in requests[0]["messages"][0]["content"]
+    assert injection in requests[0]["messages"][-1]["content"]
 
 
 async def test_provider_failure_preserves_partial_evidence_and_unknown_total():
     result, requests = await exercise(
-        lambda _, n: reply([tool()]) if n == 1 else httpx.Response(503)
+        lambda _, n: reply([tool("summarize_logs")]) if n == 1 else httpx.Response(503)
     )
     assert result["error"] == "provider_error" and len(requests) == 2
-    assert len(result["trace"]) == 1
+    assert len(result["trace"]) == 2
     assert result["usage"] is None and result["estimated_cost_usd"] is None
     assert result["model_calls"][0]["usage"]["input_tokens"] == 100
 
@@ -268,12 +263,12 @@ async def test_unavailable_runbooks_and_missing_evidence(tmp_path):
         tools=tools,
     )
     assert result["status"] == "completed" and result["report"]["outcome"] == "inconclusive"
-    assert result["trace"][0]["result"]["error"] == "source_unavailable"
+    assert result["trace"][1]["result"]["error"] == "source_unavailable"
 
 
 async def test_duplicate_call_ids_rejected_before_execution():
     result, _ = await exercise(lambda *_: reply([tool(), tool("summarize_logs")]))
-    assert result["error"] == "invalid_response" and result["tool_executions"] == 0
+    assert result["error"] == "invalid_response" and result["tool_executions"] == 1
 
 
 async def test_late_synchronous_response_cannot_complete_successfully():
@@ -303,7 +298,7 @@ async def test_real_total_evidence_ceiling_retains_earlier_snapshots():
         records=records,
     )
     assert result["error"] == "evidence_budget" and len(result["trace"]) == 4
-    assert result["model_requests"] == 5
+    assert result["model_requests"] == 4
     assert all(e["result"]["items"][0]["evidence_id"] == "large:1" for e in result["trace"])
 
 
@@ -341,6 +336,6 @@ async def test_contradictory_observations_are_preserved_not_resolved_by_runner()
         }
         for n, text in enumerate(["request r1 completed", "request r1 timed out"])
     ]
-    result, _ = await exercise(lambda _, n: reply([tool()]) if n == 1 else reply(), records=records)
+    result, _ = await exercise(lambda *_: reply(), records=records)
     assert result["status"] == "completed" and result["report"]["outcome"] == "inconclusive"
     assert len(result["trace"][0]["result"]["items"]) == 2

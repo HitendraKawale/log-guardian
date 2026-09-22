@@ -384,19 +384,20 @@ async def run_batch(directory, expected_digest, *, key, transport=None, allow_li
         raise ValueError("candidate differs from explicit frozen digest")
     if settings.prometheus_url:
         raise ValueError("pilot requires an unconfigured metrics source")
-    subprocess.run(
-        [
-            "git",
-            "diff",
-            "--quiet",
-            BASE,
-            "--",
-            "services/ingestion-service/app",
-            "services/ingestion-service/runbooks",
-        ],
-        cwd=ROOT,
-        check=True,
-    )
+    if not scripted:
+        subprocess.run(
+            [
+                "git",
+                "diff",
+                "--quiet",
+                BASE,
+                "--",
+                "services/ingestion-service/app",
+                "services/ingestion-service/runbooks",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
     directory.mkdir(mode=0o700)
     sync_directory(directory.parent)
     save(

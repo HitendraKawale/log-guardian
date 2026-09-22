@@ -139,6 +139,10 @@ class EvidenceTools:
             if row.service in query.services and query.start <= row.timestamp <= query.end
         ]
 
+    async def _initial_logs(self, arguments) -> EvidenceBatch:
+        """Owner-only dispatch hook; never advertised as a model tool."""
+        return await self.query_logs(**arguments)
+
     async def query_logs(self, **arguments) -> EvidenceBatch:
         query = self._request(LogQuery, arguments, self.source)
         if isinstance(query, EvidenceBatch):

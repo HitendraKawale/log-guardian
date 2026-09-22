@@ -49,8 +49,8 @@ TOOLS = [
     for name, description in (
         (
             "query_logs",
-            "Read scoped logs, at most 50 rows. Start with no text filter to see all"
-            " evidence; text matches the message field only, as a literal case-sensitive"
+            "Read scoped logs, at most 50 rows. Text matches the message field only,"
+            " as a literal case-sensitive"
             " substring, and never matches level or service names.",
         ),
         ("summarize_logs", "Count all scoped logs by service and level, not only a query page."),
@@ -66,7 +66,9 @@ AGENT_PROMPT = PROMPT.replace(
     "Do not execute actions or request further tools.",
     "Use only the supplied read-only tools. Choose queries from observed evidence; "
     "never expand the authorized scope. Stop when evidence supports a narrow conclusion "
-    "or is insufficient. Never repeat an identical tool query.",
+    "or is insufficient. Never repeat an identical tool query. "
+    "An initial bounded, unfiltered log sample is already supplied. It may be truncated; "
+    "use further tools only to resolve remaining evidence gaps.",
 )
 
 
@@ -136,8 +138,66 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
     batches, seen = [], set()
     evidence_bytes = 0
     known_usage = dict(result["usage"])
+
+    def retain(name, arguments, batch, tool_start, *, origin=None):
+        nonlocal evidence_bytes
+        batch = EvidenceBatch.model_validate(redact(batch.model_dump(mode="json")))
+        size = len(batch.model_dump_json().encode())
+        if size > MAX_RESULT_BYTES or evidence_bytes + size > MAX_EVIDENCE_BYTES:
+            result["error"] = "evidence_budget"
+            return None
+        evidence_bytes += size
+        batches.append(batch)
+        event = {
+            "tool": name,
+            "arguments": redact(arguments),
+            "result": batch.model_dump(mode="json"),
+            "elapsed_ms": (time.monotonic() - tool_start) * 1000,
+        }
+        if origin is not None:
+            event["origin"] = origin
+        result["trace"].append(event)
+        return batch
+
     try:
         async with asyncio.timeout(config.deadline_seconds):
+            if client is None and not dry_run:
+                result["error"] = "provider_not_configured"
+                return result
+            if MAX_TOOL_EXECUTIONS < 1:
+                result["error"] = "tool_budget"
+                return result
+            arguments = LogQuery.model_validate(tools.scope.model_dump()).model_dump(mode="json")
+            arguments["services"] = sorted(arguments["services"])
+            tool_start = time.monotonic()
+            result["tool_executions"] += 1
+            initial = await tools._initial_logs(arguments)
+            initial = retain("query_logs", arguments, initial, tool_start, origin="server_initial")
+            if initial is None:
+                return result
+            seen.add(("query_logs", canonical(arguments)))
+            messages.extend(
+                [
+                    {
+                        "role": "assistant",
+                        "tool_calls": [
+                            {
+                                "id": "server-initial-logs",
+                                "type": "function",
+                                "function": {
+                                    "name": "query_logs",
+                                    "arguments": canonical(arguments),
+                                },
+                            }
+                        ],
+                    },
+                    {
+                        "role": "tool",
+                        "tool_call_id": "server-initial-logs",
+                        "content": initial.model_dump_json(),
+                    },
+                ]
+            )
             for _ in range(MAX_MODEL_REQUESTS):
                 input_bound = (
                     len(canonical(messages).encode())
@@ -163,9 +223,6 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                     return result
                 if dry_run:
                     result.update(status="dry_run", mode="dry_run")
-                    return result
-                if client is None:
-                    result["error"] = "provider_not_configured"
                     return result
                 remaining = config.deadline_seconds - (time.monotonic() - started)
                 if remaining <= 0:
@@ -275,21 +332,9 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                     tool_start = time.monotonic()
                     result["tool_executions"] += 1
                     batch = await getattr(tools, name)(**arguments)
-                    batch = EvidenceBatch.model_validate(redact(batch.model_dump(mode="json")))
-                    size = len(batch.model_dump_json().encode())
-                    if size > MAX_RESULT_BYTES or evidence_bytes + size > MAX_EVIDENCE_BYTES:
-                        result["error"] = "evidence_budget"
+                    batch = retain(name, arguments, batch, tool_start)
+                    if batch is None:
                         return result
-                    evidence_bytes += size
-                    batches.append(batch)
-                    result["trace"].append(
-                        {
-                            "tool": name,
-                            "arguments": redact(arguments),
-                            "result": batch.model_dump(mode="json"),
-                            "elapsed_ms": (time.monotonic() - tool_start) * 1000,
-                        }
-                    )
                     messages.append(
                         {
                             "role": "tool",

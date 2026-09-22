@@ -87,5 +87,7 @@ def test_dry_run_does_not_read_reviewer_notes_or_call_model(index, monkeypatch):
         )
     )
     assert result["status"] == "dry_run" and result["model_requests"] == 0
-    assert result["report"] is None and result["trace"] == []
+    assert result["report"] is None and len(result["trace"]) == 1
+    assert result["trace"][0]["origin"] == "server_initial"
+    assert len(result["trace"][0]["result"]["items"]) == len(case["logs"])
     assert "review_status" not in json.dumps(result)
