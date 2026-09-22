@@ -274,6 +274,18 @@ def test_live_still_requires_historical_base_before_claim(tmp_path, monkeypatch)
     assert not directory.exists()
 
 
+def test_initial_evidence_batch_has_separate_authorization_and_ledger():
+    p = pilot()
+    manifest, _ = p.candidate()
+    assert manifest["authorization"] == "investigator-initial-evidence-2026-09-22"
+    assert manifest["production_base"] == "7ea3ef2e5087a778ba49c91b3d0573850cfc111a"
+    assert p.shared_ledger().name == manifest["authorization"]
+    assert "docs/plans/initial-evidence-live-authorization.md" in manifest["files"]
+    assert manifest["max_requests"] == 60 and manifest["retries"] == 0
+    assert manifest["per_case_usd"] == "0.10" and manifest["total_usd"] == "2.00"
+    assert manifest["worker_budget_usd"] == "0.025"
+
+
 def test_reservation_limits(tmp_path):
     p = pilot()
     transport = p.RecordingTransport(

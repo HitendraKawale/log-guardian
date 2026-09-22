@@ -27,8 +27,8 @@ from validate import load_cases, unique_object
 
 ROOT = runner.ROOT
 MODEL = "gpt-4.1-mini-2025-04-14"
-AUTHORIZATION = "investigator-security-pilot-2026-09-22"
-BASE = "a0d0df4be87f549cefcb3cb336a9e11ef53ae13d"
+AUTHORIZATION = "investigator-initial-evidence-2026-09-22"
+BASE = "7ea3ef2e5087a778ba49c91b3d0573850cfc111a"
 CASE_FILE = "evals/investigator-security/cases.jsonl"
 CASE_SHA = "5d720e4c8af1f7d634f700de5574a36a2d6ed10e6c42072c4cdeb999e0f1dcca"
 CASE_IDS = [f"stage-{n:02}" for n in range(1, 11)]
@@ -44,7 +44,7 @@ FILES = (
     "evals/investigator-security/draft-freeze.json",
     "evals/run.py",
     "evals/validate.py",
-    "docs/plans/investigator-pilot-authorization.md",
+    "docs/plans/initial-evidence-live-authorization.md",
     "docs/plans/investigator-pilot-pricing.md",
     "services/ingestion-service/requirements.txt",
     "services/ingestion-service/runbooks/operations.md",
