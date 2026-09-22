@@ -14,6 +14,9 @@ from .models import DetectorState, InvestigationCandidate
 from .templates import normalize_message
 from .trigger import advance_detector
 
+TRANSACTION_TIMEOUT_SECONDS = 0.25
+SQL_TIMEOUT_MS = 200
+
 
 def evidence_scope(service, timestamp):
     at = timestamp.replace(tzinfo=timestamp.tzinfo or UTC)
@@ -43,7 +46,7 @@ async def observe_log(session, record, *, received_at=None):
     if preliminary.excluded:
         return preliminary
     async with (
-        asyncio.timeout(0.25),
+        asyncio.timeout(TRANSACTION_TIMEOUT_SECONDS),
         session.bind.connect() as connection,
         AsyncSession(bind=connection, expire_on_commit=False) as detector,
     ):
@@ -55,12 +58,14 @@ async def observe_log(session, record, *, received_at=None):
             async with detector.begin():
                 if dialect == "sqlite":
                     previous_timeout = await detector.scalar(text("PRAGMA busy_timeout"))
-                    await detector.execute(text("PRAGMA busy_timeout=200"))
+                    await detector.execute(text(f"PRAGMA busy_timeout={SQL_TIMEOUT_MS}"))
                     # ponytail: SQLite serializes all services; use PostgreSQL row locks for throughput.
                     await detector.execute(text("BEGIN IMMEDIATE"))
                 else:
-                    await detector.execute(text("SET LOCAL lock_timeout = '200ms'"))
-                    await detector.execute(text("SET LOCAL statement_timeout = '200ms'"))
+                    await detector.execute(text(f"SET LOCAL lock_timeout = '{SQL_TIMEOUT_MS}ms'"))
+                    await detector.execute(
+                        text(f"SET LOCAL statement_timeout = '{SQL_TIMEOUT_MS}ms'")
+                    )
                 insert = sqlite_insert if dialect == "sqlite" else pg_insert
                 await detector.execute(
                     insert(DetectorState)

@@ -46,9 +46,18 @@ async def observe(db, log, at=AT):
         return await module.observe_log(session, log, received_at=at)
 
 
-async def test_concurrent_observations_group_and_survive_new_sessions(db):
-    logs = [await stored(db) for _ in range(10)]
-    await asyncio.gather(*(observe(db, log) for log in logs))
+async def test_concurrent_observations_group_and_survive_new_sessions(db, monkeypatch):
+    module = importlib.import_module("app.incident_detection")
+    # Check serialization, not whether a shared runner can finish ten writes in 250 ms.
+    # Deadline behavior is covered separately with the unchanged production budgets.
+    with monkeypatch.context() as budget:
+        budget.setattr(module, "TRANSACTION_TIMEOUT_SECONDS", 10)
+        budget.setattr(module, "SQL_TIMEOUT_MS", 5000)
+        logs = [await stored(db) for _ in range(10)]
+        outcomes = await asyncio.gather(*(observe(db, log) for log in logs), return_exceptions=True)
+    assert not [result for result in outcomes if isinstance(result, BaseException)]
+    assert module.TRANSACTION_TIMEOUT_SECONDS == 0.25
+    assert module.SQL_TIMEOUT_MS == 200
     from app.models import DetectorState
 
     async with db() as session:
@@ -129,6 +138,8 @@ async def test_failed_candidate_insert_rolls_back_learning_not_log(db):
 async def test_lock_deadline_leaves_session_and_stored_log_usable(db):
     log = await stored(db)
     module = importlib.import_module("app.incident_detection")
+    assert module.TRANSACTION_TIMEOUT_SECONDS == 0.25
+    assert module.SQL_TIMEOUT_MS == 200
     async with db() as blocker, db() as caller:
         await blocker.execute(text("BEGIN IMMEDIATE"))
         started = asyncio.get_running_loop().time()
