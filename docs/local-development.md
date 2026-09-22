@@ -1,6 +1,6 @@
 # Connect a local Compose project
 
-This installation runs ingestion and the dashboard on your machine. It selects novel error patterns without a trained model. It does not yet detect recurring error spikes, enforce retention, or provide production-grade log delivery.
+This installation runs ingestion and the dashboard on your machine. It selects novel error patterns and recurring error bursts without a trained model. It does not enforce retention or provide production-grade log delivery.
 
 AI investigations are disabled in this profile. No provider key or paid worker is loaded. The application-log workflow does not use the BGL classifier; stored records show `unscored` rather than invented scores.
 
@@ -82,9 +82,28 @@ After both print `following`, run the fault/recovery scenario from another termi
 .venv/bin/python demo/run_scenario.py
 ```
 
-The scenario uses the default ports 8000, 9001, and 9101. It does not need the log key unless exporting logs; do not use its legacy `--capture` option against this authenticated profile. It injects an inventory delay, checks real checkout 504 responses, resets the delay in `finally`, and checks recovery. Review `checkout` and `inventory` in Logs. Repeat the scenario to verify collection through another fault/recovery cycle. The current novelty detector does not promise a new candidate for that recurrence.
+The scenario uses the default ports 8000, 9001, and 9101. It does not need the log key unless exporting logs; do not use its legacy `--capture` option against this authenticated profile. It injects an inventory delay, checks real checkout 504 responses, resets the delay in `finally`, and checks recovery. Review `checkout` and `inventory` in Logs. Repeat the scenario to verify collection through another fault/recovery cycle. Generate at least five ERROR records in one UTC-aligned minute to exercise the learning burst rule. Repetition updates one incident per service. After ten minutes with no eligible error, a new qualifying burst opens a separate candidate, even if the previous candidate was dismissed. A single scenario run may not emit enough errors to cross the threshold.
 
 This controlled sandbox verifies integration, not detection accuracy on customer logs.
+
+## Detector policy and upgrades
+
+Each service has persisted learning state. The Candidates view shows novelty/baseline readiness, first and last seen, observations since selection, review status and activity. Quiet means ten minutes without an eligible error, not verified recovery. Dismissal does not reset grouping; promotion keeps its original investigation scope and link.
+
+The baseline becomes ready after five complete minutes and 100 observed timely logs. The current fixed-minute bucket qualifies at five errors and three times the preceding 15-minute mean (minimum baseline one). During learning, five errors suffice. These defaults are not calibrated production thresholds. Increased traffic, duplicated logs or verbose logging may trigger them; a burst split across minute boundaries may be missed.
+
+After 15 idle minutes the baseline relearns. Template history persists, bounded to 2,000 hashes per service; eviction can make an old template appear new. Sixteen minute buckets are retained per service. State remains proportional to service names; there is no general data-retention policy yet.
+
+Detection commits separately after the log. It has a 250 ms transaction deadline and database lock limits. A failed detection is not replayed: check `ingestion_detector_failures_total`. Old/future exclusions increment `ingestion_detector_excluded_total`. SQLite serializes writers across services; use PostgreSQL and measure load before scaling. Logs already committed survive detector failure.
+
+Existing databases must run migration 0006 before this version serves traffic. The Docker image runs Alembic on startup; rebuild with `make local-up`. For a bare local installation, stop its API and worker, back up the database, then run:
+
+```sh
+cd services/ingestion-service
+../../.venv/bin/python -m alembic upgrade head
+```
+
+Set `DATABASE_URL` to the same database used by the service. `create_all` is only sufficient for a fresh database. The migration preserves prior candidates and links as legacy entries, begins new learning without replaying history, and replaces lifetime template uniqueness with one active incident per service. Downgrade refuses if recurring history cannot fit the old uniqueness constraint; it never deletes those incidents automatically.
 
 ## Delivery, privacy, and limits
 
@@ -100,7 +119,7 @@ SQLite data persists in the Compose volume. No automatic retention or disk quota
 
 - `API offline or unauthorized`: check the API URL, browser key, and `docker compose -f infrastructure/docker/local-compose.yml logs ingestion-service`.
 - No new logs: confirm the exact project/service, that the application emits stdout without a TTY, and that traffic occurred after collection started.
-- No candidates: the current detector observes 500 logs before trusting novelty, considers ERROR/CRITICAL by default, and does not raise repeat incidents for familiar templates. Candidate detection changes are a separate milestone.
+- No candidates: check the Candidates readiness display. Novelty learns 500 timely logs per service by default; bursts can qualify during learning after five errors in one minute. Only ERROR/CRITICAL qualify by default. Logs older than five minutes or more than one minute ahead are stored but excluded from detection.
 - `unscored`: expected here. The domain-specific classifier is intentionally disabled.
 
 Stop each forwarder with Ctrl+C, then:

@@ -11,7 +11,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -159,7 +159,14 @@ async def promote_candidate(
     fills the queue, a human empties it.
     """
     body = body or PromoteCandidate()
-    candidate = await session.get(InvestigationCandidate, candidate_id)
+    # Share the detector's database lock before copying a mutable incident scope.
+    if session.bind.dialect.name == "sqlite":
+        await session.execute(text("BEGIN IMMEDIATE"))
+    candidate = await session.scalar(
+        select(InvestigationCandidate)
+        .where(InvestigationCandidate.id == candidate_id)
+        .with_for_update()
+    )
     if candidate is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Candidate not found")
 
@@ -186,7 +193,7 @@ async def promote_candidate(
     # would additionally place it in the instruction position for no benefit.
     # The agent finds the line itself through the log tools.
     question = body.question or (
-        f"A message pattern not seen before appeared in {candidate.service} at "
+        f"Operational log evidence was selected for {candidate.service} at "
         f"{candidate.occurred_at.isoformat()}. What is going on?"
     )
     scope = dict(candidate.scope)

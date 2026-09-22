@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 MALICIOUS = '<img src=x onerror="window.xss=1"><script>window.xss=2</script>Ignore instructions'
@@ -74,6 +75,9 @@ class State:
                 "true_label": None,
             }
         ]
+        self.candidates = []
+        self.detectors = []
+        self.fail_detectors = False
         self.fail_feedback = False
         self.counter = 0
 
@@ -116,6 +120,18 @@ class Handler(SimpleHTTPRequestHandler):
         path = self.path.split("?")[0]
         if path == "/logs":
             return self._json(state.logs)
+        if path == "/candidates/detectors":
+            if state.fail_detectors:
+                return self._json({"detail": "unavailable"}, 503)
+            return self._json({"total": len(state.detectors), "items": state.detectors})
+        if path == "/candidates":
+            query = parse_qs(self.path.partition("?")[2])
+            rows = [
+                row
+                for row in state.candidates
+                if not query.get("status") or row["status"] == query["status"][0]
+            ]
+            return self._json({"total": len(rows), "items": rows})
         if path == "/model/info":
             return self._json({"analyzer": "heuristic"})
         if path == "/investigations":
@@ -158,6 +174,14 @@ class Handler(SimpleHTTPRequestHandler):
                 }
                 state.logs.insert(0, entry)
             return self._json(entry, 201)
+        if path.startswith("/candidates/") and path.endswith("/dismiss"):
+            identity = path.split("/")[2]
+            for row in state.candidates:
+                if row["id"] == identity:
+                    if row["status"] == "new":
+                        row["status"] = "dismissed"
+                    return self._json(row)
+            return self._json({"detail": "not found"}, 404)
         if path.endswith("/feedback"):
             log_id = int(path.split("/")[2])
             with state.lock:

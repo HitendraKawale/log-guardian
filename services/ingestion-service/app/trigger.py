@@ -1,4 +1,8 @@
-"""Label-free selection of logs worth investigating.
+"""Historical novelty baseline and pure transitions for the durable runtime detector.
+
+InvestigationTrigger retains the measured novelty-only baseline below.
+advance_detector adds per-service burst decisions; incident_detection persists
+its state. Historical BGL results do not measure this newer runtime policy.
 
 The anomaly scorer answers "is this line anomalous?" and answers it well on
 BGL -- F1 0.973 -- but it cannot be deployed to select candidates, for a reason
@@ -37,6 +41,7 @@ Two deliberate limits:
 
 from __future__ import annotations
 
+import hashlib
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -57,8 +62,8 @@ DEFAULT_WARMUP_LOGS = 500
 
 # (service, template) pairs retained. Bounded so a pathological stream cannot
 # grow this without limit; the oldest pair is evicted first, so a long-quiet
-# family can go novel again. That is a memory bound, not a claim that re-firing
-# is desirable -- the queue's unique index absorbs the repeat.
+# family can go novel again. This bound belongs to the historical in-memory
+# baseline; the durable runtime below keeps its own per-service hash limit.
 DEFAULT_MAX_TEMPLATES = 20_000
 
 # How much context an investigation of a candidate should carry. The scope
@@ -155,3 +160,107 @@ class InvestigationTrigger:
         self._seen[key] = None
         if len(self._seen) > self._max_templates:
             self._seen.popitem(last=False)
+
+
+@dataclass(frozen=True)
+class DetectorTransition:
+    """JSON-ready state and the current decision, with no database side effects."""
+
+    state: dict
+    signal: dict | None
+    eligible: bool
+    excluded: bool
+    quiet: bool
+
+
+def detector_readiness(state: dict, now: datetime, warmup_logs: int = DEFAULT_WARMUP_LOGS):
+    at = now.replace(tzinfo=now.tzinfo or UTC).timestamp()
+    minute = int(at // 60) * 60
+    first = state.get("first_bucket", minute)
+    observed = state.get("observed", 0)
+    return {
+        "novelty_ready": observed >= warmup_logs,
+        "baseline_ready": (
+            minute - first >= 300 and observed >= 100 and at - state.get("last_received", at) < 900
+        ),
+        "observed": observed,
+        "last_received": state.get("last_received"),
+    }
+
+
+def advance_detector(
+    state: dict,
+    *,
+    level: str,
+    message: str,
+    timestamp: datetime,
+    received_at: datetime,
+    levels: tuple[str, ...] = DEFAULT_CANDIDATE_LEVELS,
+    warmup_logs: int = DEFAULT_WARMUP_LOGS,
+    max_templates: int = 2000,
+) -> DetectorTransition:
+    """Apply one timely receipt without mutating the caller's persisted state.
+
+    The legacy InvestigationTrigger above remains the historical novelty-only
+    baseline. These per-service transitions add burst and quiet-gap decisions.
+    """
+    received = received_at.replace(tzinfo=received_at.tzinfo or UTC).timestamp()
+    event = timestamp.replace(tzinfo=timestamp.tzinfo or UTC).timestamp()
+    previous_error = state.get("last_eligible")
+    quiet = previous_error is not None and received - previous_error >= 600
+    if not -60 <= received - event <= 300:
+        return DetectorTransition(state, None, False, True, quiet)
+
+    # Concurrent callers can acquire the database lock out of receipt order.
+    at = max(received, state.get("last_received", received))
+    minute = int(at // 60) * 60
+    reset = at - state.get("last_received", at) >= 900
+    buckets = {
+        key: list(value)
+        for key, value in state.get("buckets", {}).items()
+        if not reset and minute - 900 <= int(key) <= minute
+    }
+    eligible = not levels or level.upper() in {value.upper() for value in levels}
+    bucket = buckets.setdefault(str(minute), [0, 0])
+    bucket[0] += 1
+    bucket[1] += int(eligible)
+
+    fingerprint = hashlib.sha256(normalize_message(message).encode()).hexdigest()
+    templates = list(state.get("templates", []))
+    novel = fingerprint not in templates
+    if not novel:
+        templates.remove(fingerprint)
+    templates.append(fingerprint)
+    updated = {
+        **state,
+        "observed": state.get("observed", 0) + 1,
+        "first_bucket": minute if reset else state.get("first_bucket", minute),
+        "last_received": at,
+        "buckets": buckets,
+        "templates": templates[-max_templates:],
+    }
+    if eligible:
+        updated["last_eligible"] = at
+    readiness = detector_readiness(updated, received_at, warmup_logs)
+    completed = min(15, max(0, (minute - updated["first_bucket"]) // 60))
+    baseline = sum(
+        buckets.get(str(minute - offset * 60), [0, 0])[1] for offset in range(1, completed + 1)
+    ) / max(1, completed)
+    threshold = max(5, 3 * max(1, baseline)) if readiness["baseline_ready"] else 5
+    reasons = []
+    if eligible and novel and readiness["novelty_ready"]:
+        reasons.append("unseen-template")
+    if eligible and bucket[1] >= threshold:
+        reasons.append("error-burst")
+    signal = None
+    if reasons:
+        signal = {
+            "reasons": reasons,
+            "count": bucket[1],
+            "baseline_mean": baseline,
+            "threshold": threshold,
+            "learning": not readiness["baseline_ready"],
+            "bucket_start": datetime.fromtimestamp(minute, UTC).isoformat(),
+            "bucket_end": datetime.fromtimestamp(minute + 60, UTC).isoformat(),
+        }
+    return DetectorTransition(updated, signal, eligible, False, quiet)

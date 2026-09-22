@@ -5,6 +5,7 @@ PY := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 COMPOSE := docker compose -f infrastructure/docker/docker-compose.yml
 BASE_URL ?= http://host.docker.internal:8000
+DETECTOR_CHECKS := tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -62,12 +63,12 @@ demo-assets: seed ## Re-record the README screenshot and GIF (needs make up + ff
 	$(PY) scripts/capture_demo.py
 
 lint: ## Lint and check formatting with ruff
-	$(PY) -m ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
-	$(PY) -m ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
+	$(PY) -m ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
+	$(PY) -m ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
 
 format: ## Auto-fix lint issues and format with ruff
-	$(PY) -m ruff check --fix services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
-	$(PY) -m ruff format services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
+	$(PY) -m ruff check --fix services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
+	$(PY) -m ruff format services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py $(DETECTOR_CHECKS)
 
 loadtest: ## Run the k6 load test (override BASE_URL to target a host)
 	docker run --rm -i -e BASE_URL=$(BASE_URL) grafana/k6 run - < loadtest/k6.js

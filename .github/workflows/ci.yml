@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.8.4
-      - run: ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
-      - run: ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py
+      - run: ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
+      - run: ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
 
   manifests:
     name: validate k8s manifests
@@ -76,7 +76,7 @@ jobs:
           cache: pip
 
       - name: Install test dependencies
-        run: pip install -r tests/requirements-dev.txt
+        run: pip install -r tests/requirements-dev.txt -r services/ingestion-service/requirements.txt
 
       - name: Start the stack
         run: docker compose -f infrastructure/docker/docker-compose.yml up --build -d
@@ -94,6 +94,8 @@ jobs:
 
       - name: Run end-to-end tests
         working-directory: tests
+        env:
+          LG_TEST_POSTGRES_URL: postgresql://logguardian:logguardian@localhost:5432/logguardian
         run: python -m pytest integration -q
 
       - name: Install Chromium
