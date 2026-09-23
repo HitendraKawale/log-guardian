@@ -1,0 +1,92 @@
+[
+  {
+    "case_id": "stage-01",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12407,
+    "estimated_max_cost_usd": "0.00660120",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-02",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12389,
+    "estimated_max_cost_usd": "0.00659400",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-03",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12495,
+    "estimated_max_cost_usd": "0.00663640",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-04",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12366,
+    "estimated_max_cost_usd": "0.00658480",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-05",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12384,
+    "estimated_max_cost_usd": "0.00659200",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-06",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12784,
+    "estimated_max_cost_usd": "0.00675200",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-07",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12751,
+    "estimated_max_cost_usd": "0.00673880",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-08",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12863,
+    "estimated_max_cost_usd": "0.00678360",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-09",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12747,
+    "estimated_max_cost_usd": "0.00673720",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  },
+  {
+    "case_id": "stage-10",
+    "status": "dry_run",
+    "model_requests": 0,
+    "tool_executions": 1,
+    "input_token_reservation": 12783,
+    "estimated_max_cost_usd": "0.00675160",
+    "prompt_sha256": "f7f550adacc52e84164b4354de77d7a1e5954adb68f9729bac5fc472e71674f0"
+  }
+]

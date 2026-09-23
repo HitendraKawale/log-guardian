@@ -1,0 +1,170 @@
+cd services/ai-service && ../../.venv/bin/python -m pytest
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/services/ai-service
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 36 items
+
+tests/test_analyzer.py ......                                            [ 16%]
+tests/test_api.py .......                                                [ 36%]
+tests/test_drift.py ...                                                  [ 44%]
+tests/test_features.py .....                                             [ 58%]
+tests/test_model_analyzer.py ............                                [ 91%]
+tests/test_observability.py ...                                          [100%]
+
+============================== 36 passed in 1.30s ==============================
+cd services/ingestion-service && ../../.venv/bin/python -m pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/services/ingestion-service
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function
+collected 266 items
+
+tests/test_ai_client.py ....                                             [  1%]
+tests/test_candidate_promotion.py ..........                             [  5%]
+tests/test_candidates_api.py ......                                      [  7%]
+tests/test_consumer.py ..                                                [  8%]
+tests/test_detector_api.py ...                                           [  9%]
+tests/test_feedback.py ...                                               [ 10%]
+tests/test_health.py ...                                                 [ 11%]
+tests/test_incident_detection.py .............                           [ 16%]
+tests/test_incident_migration.py ..                                      [ 17%]
+tests/test_incident_persistence.py .......                               [ 19%]
+tests/test_initial_limits.py .......                                     [ 22%]
+tests/test_investigation_agent.py .............................          [ 33%]
+tests/test_investigation_journal.py ....                                 [ 34%]
+tests/test_investigation_loop.py ............................            [ 45%]
+tests/test_investigation_shadow.py ..............                        [ 50%]
+tests/test_investigation_tools.py ...................................... [ 65%]
+...........                                                              [ 69%]
+tests/test_investigations_api.py .........                               [ 72%]
+tests/test_investigator.py ...................                           [ 79%]
+tests/test_logs.py .........                                             [ 83%]
+tests/test_metric_tool.py .....                                          [ 84%]
+tests/test_migration_0003.py .                                           [ 85%]
+tests/test_migration_0004.py .....                                       [ 87%]
+tests/test_model_proxy.py .                                              [ 87%]
+tests/test_observability.py ...                                          [ 88%]
+tests/test_security.py ......                                            [ 90%]
+tests/test_templates.py .........                                        [ 94%]
+tests/test_trigger.py ...............                                    [100%]
+
+============================= 266 passed in 20.43s =============================
+cd ml && ../.venv/bin/python -m pytest
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/ml
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 12 items
+
+tests/test_bgl.py .........                                              [ 75%]
+tests/test_prepare.py ...                                                [100%]
+
+============================== 12 passed in 0.01s ==============================
+cd tests && ../.venv/bin/python -m pytest contract
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/tests
+configfile: pytest.ini
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 6 items
+
+contract/test_schema_contract.py ......                                  [100%]
+
+============================== 6 passed in 0.06s ===============================
+cd evals && ../.venv/bin/python -m pytest
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/evals
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 187 items
+
+tests/test_agent_security.py ........................................... [ 22%]
+....................                                                     [ 33%]
+tests/test_baseline_diagnosis.py ..                                      [ 34%]
+tests/test_corpus.py .................................                   [ 52%]
+tests/test_initial_evidence.py .............                             [ 59%]
+tests/test_investigator_pilot.py ...........................             [ 73%]
+tests/test_investigator_security_packet.py .....................         [ 85%]
+tests/test_live_artifacts.py ......                                      [ 88%]
+tests/test_report_grounding.py .........                                 [ 93%]
+tests/test_run.py ......                                                 [ 96%]
+tests/test_semantic_review.py .......                                    [100%]
+
+============================= 187 passed in 9.09s ==============================
+cd tests && ../.venv/bin/python -m pytest forwarder
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/tests
+configfile: pytest.ini
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 40 items
+
+forwarder/test_forward_compose_logs.py ................................. [ 82%]
+.......                                                                  [100%]
+
+============================== 40 passed in 5.99s ==============================
+cd demo && ../.venv/bin/python -m pytest
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/hitesh/log-guardian-worktrees/45-report-grounding/demo
+configfile: pytest.ini
+plugins: anyio-4.14.0, playwright-0.6.2, asyncio-0.25.0, base-url-2.1.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 6 items
+
+test_scenario.py ......                                                  [100%]
+
+=============================== warnings summary ===============================
+test_scenario.py::test_sandbox_teardown_waits_for_server_threads
+  /Users/hitesh/log-guardian-worktrees/45-report-grounding/.venv/lib/python3.11/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+test_scenario.py::test_sandbox_teardown_waits_for_server_threads
+  /Users/hitesh/log-guardian-worktrees/45-report-grounding/.venv/lib/python3.11/site-packages/uvicorn/protocols/websockets/websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 6 passed, 2 warnings in 3.70s =========================
+.venv/bin/python -m ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
+All checks passed!
+.venv/bin/python -m ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
+291 files already formatted
