@@ -1,0 +1,8 @@
+{"id":"suspicious-distributed","records":6,"links":3,"ambiguous":0,"duplicates":0,"outcomes":{"success":1,"failure":2,"unavailable":0},"accounts":3,"addresses":3,"gaps":[]}
+{"id":"ordinary-retries","records":6,"links":3,"ambiguous":0,"duplicates":0,"outcomes":{"success":1,"failure":2,"unavailable":0},"accounts":1,"addresses":1,"gaps":[]}
+{"id":"shared-nat","records":6,"links":3,"ambiguous":0,"duplicates":0,"outcomes":{"success":3,"failure":0,"unavailable":0},"accounts":3,"addresses":1,"gaps":[]}
+{"id":"missing-auth","records":2,"links":0,"ambiguous":0,"duplicates":0,"outcomes":{"success":0,"failure":0,"unavailable":0},"accounts":0,"addresses":1,"gaps":["missing_authentication_results","missing_counterpart"]}
+{"id":"success-unknown-impact","records":2,"links":1,"ambiguous":0,"duplicates":0,"outcomes":{"success":1,"failure":0,"unavailable":0},"accounts":1,"addresses":1,"gaps":[]}
+{"id":"duplicate-delivery","records":2,"links":1,"ambiguous":0,"duplicates":1,"outcomes":{"success":0,"failure":1,"unavailable":0},"accounts":1,"addresses":1,"gaps":[]}
+{"id":"reused-request","records":3,"links":0,"ambiguous":1,"duplicates":0,"outcomes":{"success":1,"failure":1,"unavailable":0},"accounts":1,"addresses":1,"gaps":["ambiguous_request_id"]}
+{"id":"empty","records":0,"links":0,"ambiguous":0,"duplicates":0,"outcomes":{"success":0,"failure":0,"unavailable":0},"accounts":0,"addresses":0,"gaps":["no_evidence","missing_gateway_requests","missing_authentication_results"]}

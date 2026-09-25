@@ -79,8 +79,10 @@ The owner specifies adapter/source configuration. The event must not declare its
 trusted. A trusted collector can faithfully record attacker-controlled values without
 making those values authoritative. The import keeps provenance separate from content.
 
-Only join requests on source-qualified identifiers whose generation and propagation
-are known. Missing IDs stay unlinked. Conflicting outcomes stay conflicts. Do not pair
+Only join requests on an owner-configured request-ID namespace whose generation and
+propagation are known. Gateway and authentication sources may share that namespace;
+independent applications must not. Evidence identity remains source-qualified.
+Neither namespace nor source identity comes from event content. Missing IDs stay unlinked. Conflicting outcomes stay conflicts. Do not pair
 rows on temporal proximity alone. Shared NAT, proxies, address rotation, delayed logs
 and overlapping requests must not become invented actor identities.
 
@@ -93,16 +95,23 @@ counting them twice or overwriting earlier evidence.
 
 ### 1. Deterministic evidence and correlation slice
 
-- [ ] Read source adapters and define the strict event and source-configuration models.
-- [ ] Add fail-first checks for invalid fields, duplicate/conflicting evidence, missing
+Implementation decisions and review gate: [security evidence correlation](security-evidence-correlation.md).
+
+- [x] Read source adapters and define the strict event and source-configuration models.
+- [x] Add fail-first checks for invalid fields, duplicate/conflicting evidence, missing
   request IDs, forged forwarding headers, cross-source ID collisions and scope limits.
-- [ ] Implement bounded offline normalization and request/auth correlation. Output
+- [x] Implement bounded offline normalization and request/auth correlation. Output
   a timeline, source counts, linked outcomes, unresolved events and named gaps.
-- [ ] Build authored development cases for a suspicious distributed login pattern,
+- [x] Build authored development cases for a suspicious distributed login pattern,
   ordinary retries, a shared-NAT traffic spike, missing auth logs, successful auth
   without compromise evidence, duplicate delivery and inconsistent clock/order data.
-- [ ] Keep expected judgments outside runtime inputs. Run with networking forbidden.
-- [ ] Commit the verified slice without advertising automated attack attribution.
+- [x] Keep expected judgments outside runtime inputs. Run with networking forbidden.
+- [x] Prepare the verified slice for its milestone commit without advertising automated attack attribution.
+
+The offline command and eight authored cases are implemented. Local verification
+passed 705 offline checks plus six demo checks. See
+[verification evidence](../verification/security-evidence/README.md).
+Production adapters, persistent ingestion and the review UI remain unimplemented.
 
 This milestone computes observations, not a confidence score. Threshold-based
 selection and a model narrative are separate decisions requiring their own checks.
