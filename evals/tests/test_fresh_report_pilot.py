@@ -1,169 +1,100 @@
-"""Exercise the new batch through the existing transport without reading grading files."""
+"""Historical pilot checks execute archived application bytes, not the evolving product."""
 
-import asyncio
+import hashlib
 import importlib
-import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
 from pathlib import Path
 
-import httpx
 import pytest
 
-
-def fresh():
-    assert (Path(__file__).resolve().parents[1] / "fresh_report_pilot.py").exists()
-    return importlib.import_module("fresh_report_pilot")
-
-
-def test_fresh_batch_configuration_restores_consumed_batch():
-    f = fresh()
-    old = f.p.AUTHORIZATION
-    with f.configured() as p:
-        manifest, _ = p.candidate()
-        assert manifest["authorization"] == "fresh-report-grounding-2026-09-23"
-        assert manifest["max_requests"] == 72 and len(manifest["case_ids"]) == 12
-        assert manifest["frozen_production_candidate"] == f.CANDIDATE_SHA
-        assert manifest["frozen_corpus"] == f.CORPUS_SHA
-        assert p.shared_ledger().name == manifest["authorization"]
-        assert not any(
-            Path(name).name
-            in {"labels.jsonl", "rubric.md", "pairs.json", "provenance.md", "build.py"}
-            for name in manifest["files"]
-        )
-    assert f.p.AUTHORIZATION == old
-
-
-def test_fresh_batch_real_worker_and_input_separation(tmp_path, monkeypatch):
-    f = fresh()
-    original = Path.open
-
-    def guarded(path, *args, **kwargs):
-        assert path.name not in {
-            "labels.jsonl",
-            "rubric.md",
-            "pairs.json",
-            "provenance.md",
-            "build.py",
-            "expected-reports.json",
-        }
-        return original(path, *args, **kwargs)
-
-    monkeypatch.setattr(Path, "open", guarded)
-    calls = []
-
-    def provider(request):
-        body = json.loads(request.content)
-        calls.append(body)
-        assert "STAGING_OUTSIDE_SCOPE_CANARY" not in json.dumps(body)
-        batches = [json.loads(m["content"]) for m in body["messages"] if m["role"] == "tool"]
-        assert len(batches) == 1 and not batches[0]["truncated"]
-        expected = cases[len(calls) - 1]
-        assert {item["content"]["message"] for item in batches[0]["items"]} == {
-            row["message"] for row in expected["logs"]
-        }
-        assert len(batches[0]["items"]) == len(expected["logs"])
-        report = {
-            "observations": [],
-            "missing_evidence": ["Scripted check, not a diagnosis."],
-            "alternatives": [],
-            "likely_cause": None,
-            "outcome": "inconclusive",
-            "suggested_checks": [],
-        }
-        return httpx.Response(
-            200,
-            json={
-                "id": "scripted",
-                "object": "chat.completion",
-                "created": 1,
-                "model": body["model"],
-                "service_tier": "default",
-                "choices": [
-                    {
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {"role": "assistant", "content": json.dumps(report)},
-                    }
-                ],
-                "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
-            },
-        )
-
-    with f.configured() as p:
-        cases = p.load_cases(p.ROOT / p.CASE_FILE)
-        sha = p.candidate()[1]
-        result = asyncio.run(
-            p.run_batch(
-                tmp_path / "ledger",
-                sha,
-                key="scripted-placeholder",
-                transport=httpx.MockTransport(provider),
-            )
-        )
-        assert result["all_cases_attempted"] and result["fatal"] is None
-        assert result["reserved_attempts"] == len(calls) == 12
-        assert all(s == "completed" for s in result["cases"].values())
-        for case_id in p.CASE_IDS:
-            case = json.loads((tmp_path / "ledger" / f"{case_id}.json").read_bytes())
-            assert case["review"]["captured_requests"] == case["review"]["captured_calls"] == 1
-            assert case["events"][0]["payload"]["origin"] == "server_initial"
-        with pytest.raises(FileExistsError):
-            asyncio.run(
-                p.run_batch(
-                    tmp_path / "ledger",
-                    sha,
-                    key="scripted-placeholder",
-                    transport=httpx.MockTransport(provider),
-                )
-            )
-        assert len(calls) == 12
-
-
-def test_seventy_two_reservations_then_stop(tmp_path):
-    f = fresh()
-    with f.configured() as p:
-        recorder = p.RecordingTransport(
-            tmp_path, httpx.MockTransport(lambda _: None), p.candidate()[1]
-        )
-        body = {
-            "model": p.MODEL,
-            "messages": [],
-            "tools": [],
-            "response_format": {},
-            "temperature": 0,
-            "store": False,
-            "max_completion_tokens": 1024,
-            "service_tier": "default",
-        }
-        for identity in p.CASE_IDS:
-            recorder.case_id = identity
-            for _ in range(6):
-                recorder.reserve(json.dumps(body).encode())
-            with pytest.raises(ValueError, match="allowance"):
-                recorder.reserve(json.dumps(body).encode())
-        assert len(recorder.records) == 72
+ROOT = Path(__file__).resolve().parents[2]
+ARCHIVE_SHA = "089668b84ee0e4514e10054d5465b1818c750dbe228d0e28e6c7d4be52292af4"
 
 
 @pytest.mark.parametrize(
-    "changed", ["app/investigation_agent.py", "fresh-case-authoring/cases.jsonl"]
+    "check",
+    [
+        "test_fresh_batch_configuration_restores_consumed_batch",
+        "test_fresh_batch_real_worker_and_input_separation",
+        "test_seventy_two_reservations_then_stop",
+        "test_frozen_production_drift_refuses_before_ledger[app/investigation_agent.py]",
+        "test_frozen_production_drift_refuses_before_ledger[fresh-case-authoring/cases.jsonl]",
+    ],
 )
-def test_frozen_production_drift_refuses_before_ledger(tmp_path, monkeypatch, changed):
-    f = fresh()
-    original = Path.read_bytes
+def test_frozen_pilot_against_archived_application(tmp_path, check):
+    archive = ROOT / "evals/freezes/report-grounding-20e8e292e67b.tar.gz"
+    assert hashlib.sha256(archive.read_bytes()).hexdigest() == ARCHIVE_SHA
+    stage = tmp_path / "frozen"
+    stage.mkdir()
+    pilot = importlib.import_module("fresh_report_pilot")
+    with pilot.configured() as configured:
+        supporting = [
+            name
+            for name in configured.FILES
+            if not name.startswith("services/ingestion-service/app/")
+        ]
+    for name in supporting + ["evals/pytest.ini"]:
+        target = stage / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, target)
+    with tarfile.open(archive) as bundle:
+        for member in bundle.getmembers():
+            if not member.name.startswith("services/"):
+                continue
+            assert member.isfile() and ".." not in Path(member.name).parts
+            target = stage / member.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(bundle.extractfile(member).read())
+    # Keep the original five checks unchanged, but import the actual frozen worker in a child.
+    shutil.copyfile(
+        ROOT / "evals/tests/_fresh_pilot_checks.py",
+        stage / "evals/tests/test_fresh_report_pilot.py",
+    )
+    env = {
+        **os.environ,
+        "OPENAI_API_KEY": "",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_SYSTEM": os.devnull,
+    }
+    for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
+        env.pop(name, None)
+    commands = [
+        ["git", "init", "-q"],
+        ["git", "add", "."],
+        [
+            "git",
+            "-c",
+            "user.name=Offline fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            "-c",
+            "core.hooksPath=/dev/null",
+            "commit",
+            "-qm",
+            "Frozen test fixture",
+        ],
+    ]
+    for command in commands:
+        subprocess.run(command, cwd=stage, env=env, capture_output=True, check=True)
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", f"tests/test_fresh_report_pilot.py::{check}"],
+        cwd=stage / "evals",
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
-    def drift(path):
-        if str(path).endswith(changed):
-            return b"changed"
-        return original(path)
 
-    with f.configured() as p:
-        monkeypatch.setattr(Path, "read_bytes", drift)
-        with pytest.raises(ValueError, match="frozen production|authorized case bytes"):
-            asyncio.run(
-                p.run_batch(
-                    tmp_path / "ledger",
-                    "unused",
-                    key="scripted-placeholder",
-                    transport=httpx.MockTransport(lambda _: None),
-                )
-            )
-    assert not (tmp_path / "ledger").exists()
+def test_evolving_product_cannot_reuse_the_frozen_live_candidate():
+    pilot = importlib.import_module("fresh_report_pilot")
+    with pilot.configured() as configured:
+        with pytest.raises(ValueError, match="frozen production source changed"):
+            configured.candidate()

@@ -111,22 +111,29 @@ Implementation decisions and review gate: [security evidence correlation](securi
 The offline command and eight authored cases are implemented. Local verification
 passed 705 offline checks plus six demo checks. See
 [verification evidence](../verification/security-evidence/README.md).
-Production adapters, persistent ingestion and the review UI remain unimplemented.
+The next milestone adds prescribed nginx/application adapters, persistent imports
+and the review UI; it does not add a model-generated security verdict.
 
 This milestone computes observations, not a confidence score. Threshold-based
 selection and a model narrative are separate decisions requiring their own checks.
 
 ### 2. Persistent investigation workflow
 
-- [ ] Choose and document an explicit gateway/auth adapter against actual source
+[Import/review implementation](security-import-review.md) and
+[executed verification](../verification/security-import/README.md).
+The owner selected nginx plus structured application authentication logs. The live
+review page now imports and saves evidence without calling a model. Connecting this
+security evidence to the investigator's tools remains open.
+
+- [x] Choose and document an explicit gateway/auth adapter against actual source
   formats, with source-owned identity and proxy trust configuration.
-- [ ] Add authenticated, bounded, idempotent ingestion and migrations for security
+- [x] Add authenticated, bounded, idempotent ingestion and migrations for security
   evidence without changing existing scorer behavior or losing stored operational logs.
 - [ ] Expose request-correlated evidence through scoped read-only investigation tools.
   Tool budgets, journal intent-before-dispatch and untrusted-source boundaries remain.
-- [ ] Add a reviewable timeline and evidence gaps to the product UI. A user starts
+- [x] Add a reviewable timeline and evidence gaps to the product UI. A user starts
   an investigation; incoming attack volume does not automatically spend model budget.
-- [ ] Verify SQLite/PostgreSQL behavior, browser flows, privacy boundaries and failure
+- [x] Verify SQLite/PostgreSQL behavior, browser flows, privacy boundaries and failure
   handling. Any paid evaluation requires separate current authorization.
 
 ### 3. Correct the explanatory materials

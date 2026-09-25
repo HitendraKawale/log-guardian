@@ -4,6 +4,8 @@ const API_BASE =
   new URLSearchParams(location.search).get("api") || "http://localhost:8000";
 
 const $ = (id) => document.getElementById(id);
+const securityLink = document.querySelector('a[href="security.html"]');
+if (securityLink) securityLink.search = location.search;
 
 let refreshTimer = null;
 let paused = false;

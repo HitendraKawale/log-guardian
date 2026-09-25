@@ -1,0 +1,28 @@
+/* Reuse the operational dashboard palette; evidence rows carry the visual hierarchy. */
+.security-page main { max-width: 1280px; }
+.security-page a { color: var(--accent); }
+.security-page label { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 13px; }
+.security-connection { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.security-connection label:first-child { flex: 1; min-width: 180px; }
+.security-page input { width: 100%; min-width: 0; padding: 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.security-page button { cursor: pointer; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; background: var(--panel-2); color: var(--text); }
+.security-page button[type="submit"] { background: var(--accent); color: #04122b; font-weight: 600; }
+.security-page button:disabled { cursor: not-allowed; opacity: 0.55; }
+.security-page :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.security-note { color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 80ch; }
+.security-page #security-source-files label { margin-bottom: 14px; }
+.security-page small { display: block; color: var(--muted); overflow-wrap: anywhere; }
+.security-page details { border-bottom: 1px solid var(--border); padding: 12px 0; }
+.security-page summary { cursor: pointer; overflow-wrap: anywhere; line-height: 1.6; }
+.security-page .citation { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: 4px; }
+.security-page article, .security-page li, #security-message { overflow-wrap: anywhere; }
+.security-pages { display: flex; justify-content: space-between; margin-top: 12px; }
+.security-page #security-title { font-size: 22px; }
+.security-page #security-outcomes { font-size: 17px; }
+.security-page #security-message { min-height: 1.5em; }
+.security-page .inv-list { margin-top: 12px; }
+.security-page [hidden] { display: none !important; }
+@media (max-width: 600px) {
+  .security-page .security-connection { align-items: stretch; flex-direction: column; }
+  .security-page .panel { padding: 16px; }
+}

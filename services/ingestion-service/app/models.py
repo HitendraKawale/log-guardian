@@ -131,6 +131,31 @@ class InvestigationCandidate(Base):
     signal_details: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
 
 
+class SecurityCase(Base):
+    """A frozen deterministic review, separate from paid investigation execution."""
+
+    __tablename__ = "security_cases"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_id)
+    idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
+    request_sha256: Mapped[str] = mapped_column(String(64))
+    source_snapshot: Mapped[dict] = mapped_column(JSON)
+    input_hashes: Mapped[dict] = mapped_column(JSON)
+    report: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class SecurityEvidence(Base):
+    """Global source/event identity prevents overlapping imports rewriting evidence."""
+
+    __tablename__ = "security_evidence"
+
+    source_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    evidence_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    content_sha256: Mapped[str] = mapped_column(String(64))
+    content: Mapped[dict] = mapped_column(JSON)
+
+
 class DetectorState(Base):
     """Bounded per-service learning committed atomically with its active incident."""
 

@@ -68,6 +68,8 @@ def test_live_execution_is_disabled_and_nothing_secret_ships(demo: Page, static_
     for control in demo.locator("#inv-form input, #inv-form button").all():
         assert control.is_disabled()
     expect(demo.locator("#inv-form-msg")).to_contain_text("disabled in the recorded demo")
+    expect(demo.get_by_role("link", name="Security review", exact=True)).to_have_count(0)
+    assert not list((ROOT / "site").glob("security.*"))
     import urllib.request
 
     blob = urllib.request.urlopen(f"{static_site}/recorded-runs.json").read().decode()

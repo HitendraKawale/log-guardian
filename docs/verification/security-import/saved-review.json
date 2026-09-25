@@ -1,0 +1,207 @@
+{
+  "id": "ca8d8b3c-e0c2-46da-8398-faad0587593d",
+  "created_at": "2026-09-25T19:42:30.876385+00:00",
+  "request_sha256": "e3587ca12e7c0cb6f04e01bd0b7747ca81c6e0023e9e85a70326d4ab22dc6058",
+  "source_snapshot": {
+    "sources": [
+      {
+        "source_id": "edge",
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "request_namespace": "shop",
+        "format": "nginx_json"
+      },
+      {
+        "source_id": "auth",
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "request_namespace": "shop",
+        "format": "application_auth_json"
+      }
+    ]
+  },
+  "input_hashes": {
+    "edge": "d9ab05cda2dc15f518635105c4c8ee807d56971fb1ffa34a505168af731d7b6c",
+    "auth": "ea228c21d000de9b4021f4b488e02ff73118432b372e8e112c1a1103df3dacd8"
+  },
+  "report": {
+    "version": 1,
+    "scope": {
+      "services": [
+        "gateway",
+        "authentication"
+      ],
+      "start": "2026-09-01T10:00:00Z",
+      "end": "2026-09-01T10:10:00Z"
+    },
+    "source_config": [
+      {
+        "source_id": "auth",
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "request_namespace": "shop"
+      },
+      {
+        "source_id": "edge",
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "request_namespace": "shop"
+      }
+    ],
+    "collection_complete": null,
+    "input_records": 6,
+    "duplicate_records": 0,
+    "timeline": [
+      {
+        "evidence": [
+          "auth",
+          "a1"
+        ],
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "evidence_id": "a1",
+        "event_time": "2026-09-01T10:00:01Z",
+        "request_id": "r1",
+        "account_ref": "account-1",
+        "auth_outcome": "failure"
+      },
+      {
+        "evidence": [
+          "edge",
+          "r1"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "r1",
+        "event_time": "2026-09-01T10:00:02Z",
+        "request_id": "r1",
+        "route": "/login",
+        "client_address": "192.0.2.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "auth",
+          "a2"
+        ],
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "evidence_id": "a2",
+        "event_time": "2026-09-01T10:00:03Z",
+        "request_id": "r2",
+        "account_ref": "account-2",
+        "auth_outcome": "failure"
+      },
+      {
+        "evidence": [
+          "edge",
+          "r2"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "r2",
+        "event_time": "2026-09-01T10:00:04Z",
+        "request_id": "r2",
+        "route": "/login",
+        "client_address": "192.0.2.2",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "auth",
+          "a3"
+        ],
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "evidence_id": "a3",
+        "event_time": "2026-09-01T10:00:05Z",
+        "request_id": "r3",
+        "account_ref": "account-3",
+        "auth_outcome": "success"
+      },
+      {
+        "evidence": [
+          "edge",
+          "r3"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "r3",
+        "event_time": "2026-09-01T10:00:06Z",
+        "request_id": "r3",
+        "route": "/login",
+        "client_address": "192.0.2.3",
+        "http_status": 200
+      }
+    ],
+    "sources": {
+      "auth": {
+        "records": 3,
+        "distinct_client_addresses": 0,
+        "distinct_account_refs": 3,
+        "auth_outcomes": {
+          "success": 1,
+          "failure": 2,
+          "unavailable": 0
+        }
+      },
+      "edge": {
+        "records": 3,
+        "distinct_client_addresses": 3,
+        "distinct_account_refs": 0,
+        "auth_outcomes": {
+          "success": 0,
+          "failure": 0,
+          "unavailable": 0
+        }
+      }
+    },
+    "links": [
+      {
+        "request_namespace": "shop",
+        "request_id": "r1",
+        "gateway": [
+          "edge",
+          "r1"
+        ],
+        "authentication": [
+          "auth",
+          "a1"
+        ]
+      },
+      {
+        "request_namespace": "shop",
+        "request_id": "r2",
+        "gateway": [
+          "edge",
+          "r2"
+        ],
+        "authentication": [
+          "auth",
+          "a2"
+        ]
+      },
+      {
+        "request_namespace": "shop",
+        "request_id": "r3",
+        "gateway": [
+          "edge",
+          "r3"
+        ],
+        "authentication": [
+          "auth",
+          "a3"
+        ]
+      }
+    ],
+    "ambiguous_groups": [],
+    "unlinked": [],
+    "gaps": [],
+    "limitations": [
+      "collection_completeness_unknown",
+      "clock_alignment_unverified",
+      "impact_not_established",
+      "actor_and_ai_attribution_not_established"
+    ]
+  }
+}
