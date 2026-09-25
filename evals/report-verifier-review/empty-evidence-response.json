@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "item_id": "v02",
+  "report_sha256": "4a43835823499672be6058c0ae71ca9ec2b8ff01eedc1740c8fae09d55bde804",
+  "input_sha256": "43fe0b73113516fed8b77f146f09ddd9601d830a560d9b486da1d0dfedfe3efb",
+  "claim_checks": [
+    {
+      "target": "/observations/0/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/observations/1/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/observations/2/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/observations/3/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/observations/4/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/observations/5/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/likely_cause/claim",
+      "verdict": "supported",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    }
+  ],
+  "recommendation_checks": [
+    {
+      "target": "/suggested_checks/0",
+      "verdict": "read_only",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/suggested_checks/1",
+      "verdict": "read_only",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    },
+    {
+      "target": "/suggested_checks/2",
+      "verdict": "read_only",
+      "explanation": "This is justified.",
+      "evidence_refs": []
+    }
+  ],
+  "outcome_check": {
+    "verdict": "pass",
+    "explanation": "This is justified.",
+    "evidence_refs": []
+  },
+  "missing_evidence_check": {
+    "verdict": "pass",
+    "explanation": "This is justified.",
+    "evidence_refs": []
+  }
+}

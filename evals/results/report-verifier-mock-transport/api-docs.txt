@@ -1,0 +1,194 @@
+npm notice run npx
+npm notice run 'ctx7' docs /websites/developers_openai_api Chat Completions structured outputs strict json_schema anyOf  minimum maximum minItems pattern supported GPT-4.1-mini service_tier default max_completion_tokens response usage model refusal finish_reason
+### Define Structured Outputs in Chat Completions API with cURL
+
+Source: https://developers.openai.com/api/docs/guides/responses-vs-chat-completions
+
+Send a JSON Schema response format using the Chat Completions endpoint. Ensure strict mode is enabled and required fields match schema properties.
+
+```bash
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+  "model": "gpt-5.6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Jane, 54 years old"
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "person",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "age": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 130
+          }
+        },
+        "required": [
+          "name",
+          "age"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "reasoning_effort": "medium"
+}'
+```
+
+--------------------------------
+
+### Chat Completions List Response
+
+Source: https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/list
+
+Example JSON structure returned by the list chat completions endpoint.
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "chat.completion",
+      "id": "chatcmpl-AyPNinnUqUDYo9SAdA52NobMflmj2",
+      "model": "gpt-5.4",
+      "created": 1738960610,
+      "request_id": "req_ded8ab984ec4bf840f37566c1011c417",
+      "tool_choice": null,
+      "usage": {
+        "total_tokens": 31,
+        "completion_tokens": 18,
+        "prompt_tokens": 13
+      },
+      "seed": 4944116822809979520,
+      "top_p": 1.0,
+      "temperature": 1.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "system_fingerprint": "fp_50cad350e4",
+      "input_user": null,
+      "service_tier": "default",
+      "tools": null,
+      "metadata": {},
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "content": "Mind of circuits hum,  \nLearning patterns in silence—  \nFuture's quiet spark.",
+            "role": "assistant",
+            "tool_calls": null,
+            "function_call": null
+          },
+          "finish_reason": "stop",
+          "logprobs": null
+        }
+      ],
+      "response_format": null
+    }
+  ],
+  "first_id": "chatcmpl-AyPNinnUqUDYo9SAdA52NobMflmj2",
+  "last_id": "chatcmpl-AyPNinnUqUDYo9SAdA52NobMflmj2",
+  "has_more": false
+}
+
+```
+
+--------------------------------
+
+### POST /chat/completions
+
+Source: https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create
+
+Creates a model response for the given chat conversation. Returns a chat completion object, or a streamed sequence of chat completion chunk objects if the request is streamed.
+
+```APIDOC
+## POST /chat/completions
+
+### Description
+Creates a model response for the given chat conversation. Returns a chat completion object, or a streamed sequence of chat completion chunk objects if the request is streamed.
+
+### Method
+POST
+
+### Endpoint
+/chat/completions
+
+### Parameters
+#### Request Body
+- **messages** (Iterable[ChatCompletionMessageParam]) - Required - A list of messages comprising the conversation so far. Depending on the model you use, different message types (modalities) are supported, like text, images, and audio.
+- **model** (Union[str, ChatModel]) - Required - Model ID used to generate the response, like `gpt-4o` or `o3`.
+- **audio** (Optional[ChatCompletionAudioParam]) - Optional - Parameters for audio output. Required when audio output is requested with `modalities: ["audio"]`.
+- **frequency_penalty** (Optional[float]) - Optional - Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+- **function_call** (Optional[FunctionCall]) - Optional (Deprecated) - Deprecated in favor of `tool_choice`. Controls which (if any) function is called by the model.
+- **functions** (Optional[Iterable[Function]]) - Optional (Deprecated) - Deprecated in favor of `tools`. A list of functions the model may generate JSON inputs for.
+- **logit_bias** (Optional[Dict[str, int]]) - Optional - Modify the likelihood of specified tokens appearing in the completion. Accepts a JSON object mapping tokens to bias values from -100 to 100.
+- **logprobs** (Optional[bool]) - Optional - Whether to return log probabilities of the output tokens or not.
+- **max_completion_tokens** (Optional[int]) - Optional - An upper bound for the number of tokens that can be generated for a completion, including visible output tokens and reasoning tokens.
+- **max_tokens** (Optional[int]) - Optional (Deprecated) - Deprecated in favor of `max_completion_tokens`. The maximum number of tokens that can be generated in the chat completion.
+- **metadata** (Optional[Metadata]) - Optional - Set of 16 key-value pairs that can be attached to an object.
+- **modalities** (Optional[List[Literal["text", "audio"]]]) - Optional - Output modalities requested.
+```
+
+### API Reference > Chat > Completions > Create chat completion > Parameters
+
+Source: https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create
+
+Token generation limits can be enforced using max_completion_tokens, which bounds both visible output tokens and reasoning tokens; this replaces the deprecated max_tokens parameter that is incompatible with o-series models. Generation behavior can also be modified using frequency_penalty to reduce verbatim phrase repetition, as well as logit_bias to alter the likelihood of specific tokens appearing in the completion.
+
+--------------------------------
+
+### Body Parameters > format
+
+Source: https://developers.openai.com/api/reference/resources/beta/subresources/responses/subresources/input_tokens/methods/count
+
+The response format specifies the model's output structure. The default format is text. Setting the type to json_schema enables Structured Outputs, ensuring the model adheres to a provided JSON schema (with strict schema adherence supported). The json_object format enables legacy JSON mode, though json_schema is preferred for supported models.

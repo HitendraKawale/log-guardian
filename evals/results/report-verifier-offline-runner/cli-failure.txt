@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_cli_prepare_replay_score_completes ____________________
+
+tmp_path = PosixPath('/private/var/folders/qz/ycfy4hxs01321rg_7tdl5kqr0000gn/T/pytest-of-hitesh/pytest-260/test_cli_prepare_replay_score_0')
+
+    def test_cli_prepare_replay_score_completes(tmp_path):
+        runner()
+        script = str(EVALS / "report_verifier_eval.py")
+        (tmp_path / "responses").mkdir()
+        commands = [
+            ["prepare", "--output", str(tmp_path / "prepared")],
+            ["replay", "--prepared", str(tmp_path / "prepared"), "--responses", str(tmp_path / "responses"), "--output", str(tmp_path / "replayed")],
+            ["score", "--replayed", str(tmp_path / "replayed"), "--output", str(tmp_path / "score")],
+        ]
+        for args, count in zip(commands, [17, 18, 18], strict=True):
+            result = subprocess.run([sys.executable, script, *args], capture_output=True, text=True, timeout=15)
+>           assert result.returncode == 0, result.stderr
+E           AssertionError: Traceback (most recent call last):
+E               File "/Users/hitesh/log-guardian-worktrees/46-report-verifier/evals/report_verifier_eval.py", line 339, in <module>
+E                 main()
+E               File "/Users/hitesh/log-guardian-worktrees/46-report-verifier/evals/report_verifier_eval.py", line 331, in main
+E                 "total", len(result.get("rows", [])) or len(result.get("eligible", []))
+E                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             TypeError: object of type 'int' has no len()
+E             
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['/Users/hitesh/log-guardian-worktrees/46-report-verifier/evals/../.venv/bin/python', '/Users/hi...                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: object of type \'int\' has no len()\n').returncode
+
+tests/test_report_verifier_eval.py:168: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_report_verifier_eval.py::test_cli_prepare_replay_score_completes
+1 failed in 1.57s

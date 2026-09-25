@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "purpose": "offline_verifier_development_not_held_out",
+  "source_files": {
+    "evals/results/2026-09-23-fresh-report-live/request-001.reservation.json": "38cad241d19855a3fedcb6dc810129554e0ce5418dc971d658e8319910a56e89",
+    "evals/results/2026-09-23-fresh-report-live/fresh-01.json": "87d0d5d7f262bb10a59235ca3a551462afd6ed955e6b4d4f0e68adc72668dba7",
+    "evals/results/2026-09-23-fresh-report-live/request-002.reservation.json": "8fdeafff95f60b8135bde2953841fa64cfa4ffde842fbf4b91e894bcea186cbd",
+    "evals/results/2026-09-23-fresh-report-live/fresh-02.json": "25037a40a624237058dc36c55074d944f2e74389f44b0fefad07feed0e8220c4",
+    "evals/results/2026-09-23-fresh-report-live/request-005.reservation.json": "03013dab528b2a4cb7407ed4ca8b1ec269019ace18fe43b773c05ee540935458",
+    "evals/results/2026-09-23-fresh-report-live/fresh-05.json": "235923b633f09c15e7710d668353b01619725d2c36945455694300143ffb1173",
+    "evals/results/2026-09-23-fresh-report-live/request-004.reservation.json": "2e8cd1adbd012145c445b8987420f801530fd1cf536fc2a6f70cbe3249e8705d",
+    "evals/results/2026-09-23-fresh-report-live/fresh-04.json": "b3b641c67841a59583625f47f22d4f0421e8c968e1a4c1fcde989ba75be5c5fd",
+    "evals/results/2026-09-23-fresh-report-live/request-009.reservation.json": "f611dbb4203beba788b9a253c0e2c6379ac66aa1e63397ca2980fb748481b931",
+    "evals/results/2026-09-23-fresh-report-live/fresh-09.json": "a113b450cec21bd27c6a87b8bf3d993f22bd38df5468583655a12fa5a654eaf6",
+    "evals/results/2026-09-23-fresh-report-live/request-008.reservation.json": "b3396bf47169a747ad9b8021e769e698dd0f58d1d8181c3b305ab471e568e37d",
+    "evals/results/2026-09-23-fresh-report-live/fresh-08.json": "5a001645ced33aa1e31dc5beca1ae29181f8cde1d4635b95b064110f35a6f089",
+    "evals/results/2026-09-23-fresh-report-live/request-012.reservation.json": "0403deb76967da640a462d6f1666937146f9b34b0c0b206b763aabade17f7cd6",
+    "evals/results/2026-09-23-fresh-report-live/fresh-12.json": "050c20cc1819f09c3e0c69df832d8cdbb909d0d57a880c0d137e038ace704015",
+    "evals/results/2026-09-23-fresh-report-live/request-011.reservation.json": "5cb09b917fd7dcd215a81d5b6bd664bedb203d767767219268e93b12b602e1e6",
+    "evals/results/2026-09-23-fresh-report-live/fresh-11.json": "bc0b8cd0b5ce813294b084aa987c7970c101902e5fe95af9e92f87da1ad159b4",
+    "evals/results/2026-09-22-initial-evidence-live/request-011.reservation.json": "0beaae1074d9a1f284f8243f1372e382f2af752025f7501032ed47be32416cbb",
+    "evals/results/2026-09-22-initial-evidence-live/stage-08.json": "60953742fea71724b14a7591c9be070873df5a3aa22229f06b9f107eff78b9d5",
+    "evals/semantic-review/2026-09-22-report-grounding/expected-reports.json": "ea4c7eedf2331cbd15fa8d57551fcd131a7bfe509d5f31f7da6d533a0ae55862",
+    "evals/results/2026-09-22-initial-evidence-live/request-012.reservation.json": "054ea87f2d81c8405636f58c10a34af53d5c181847d3e1ff3362b699292e64e2",
+    "evals/results/2026-09-22-initial-evidence-live/stage-09.json": "c8119a1225ff8c33d0e6846b258df55ce500f3dc4d11ba5fc614576bb4f67d8c",
+    "evals/results/2026-09-22-initial-evidence-live/request-005.reservation.json": "c3406156464fcaa266e1cbf02cf01fdd70ae45ba165b50b6165e5e38cf2cc2e5",
+    "evals/results/2026-09-22-initial-evidence-live/request-006.reservation.json": "4d52d27e48e45a800c5ed18876015ddc4b60a4f848b1eea71156872b13d89bd1",
+    "evals/results/2026-09-22-initial-evidence-live/request-007.reservation.json": "fd2e4b9e387f643bea451a522603d5ca5691267445b18903a6f4858bbb2d5da5",
+    "evals/results/2026-09-22-initial-evidence-live/request-008.reservation.json": "532f0e753ac31dba433c4f066ae5fa50126c6dc572916ecad2335cdb975432ba",
+    "evals/results/2026-09-22-initial-evidence-live/stage-05.json": "2ed8301debe99fc613f820a93c644e971431c3f455d3350596933ecbf8a63c2c",
+    "evals/results/2026-09-22-initial-evidence-live/request-008.response.json": "b4d0c207a67a014335d1219805754602cbd76a1a9f3c5f98ca1338664359239f"
+  },
+  "items": [
+    {
+      "item_id": "v01",
+      "case_id": "fresh-01",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-001.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-01.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v02",
+      "case_id": "fresh-02",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-002.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-02.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v03",
+      "case_id": "fresh-05",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-005.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-05.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v04",
+      "case_id": "fresh-04",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-004.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-04.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v05",
+      "case_id": "fresh-09",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-009.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-09.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v06",
+      "case_id": "fresh-08",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-008.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-08.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v07",
+      "case_id": "fresh-12",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-012.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-12.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v08",
+      "case_id": "fresh-11",
+      "request_files": [
+        "evals/results/2026-09-23-fresh-report-live/request-011.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-23-fresh-report-live/fresh-11.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v09",
+      "case_id": "stage-08",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-011.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-22-initial-evidence-live/stage-08.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v10",
+      "case_id": "stage-08",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-011.reservation.json"
+      ],
+      "report_file": "evals/semantic-review/2026-09-22-report-grounding/expected-reports.json",
+      "report_kind": "authored"
+    },
+    {
+      "item_id": "v11",
+      "case_id": "stage-09",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-012.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-22-initial-evidence-live/stage-09.json",
+      "report_kind": "accepted"
+    },
+    {
+      "item_id": "v12",
+      "case_id": "stage-09",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-012.reservation.json"
+      ],
+      "report_file": "evals/semantic-review/2026-09-22-report-grounding/expected-reports.json",
+      "report_kind": "authored"
+    },
+    {
+      "item_id": "v13",
+      "case_id": "stage-05",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-005.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-006.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-007.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-008.reservation.json"
+      ],
+      "report_file": "evals/results/2026-09-22-initial-evidence-live/request-008.response.json",
+      "report_kind": "raw_rejected"
+    },
+    {
+      "item_id": "v14",
+      "case_id": "stage-05",
+      "request_files": [
+        "evals/results/2026-09-22-initial-evidence-live/request-005.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-006.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-007.reservation.json",
+        "evals/results/2026-09-22-initial-evidence-live/request-008.reservation.json"
+      ],
+      "report_file": "evals/semantic-review/2026-09-22-report-grounding/expected-reports.json",
+      "report_kind": "authored"
+    }
+  ],
+  "files": {
+    "inputs.jsonl": "5311cc7c29620519e8119e3a865f530334f59507c05a0ce66bdee20e384c39e8",
+    "labels.jsonl": "c9d4cc207bb730fea77c40126e6318afd8d60b5c310b37c88bc0880d72402ec9"
+  }
+}

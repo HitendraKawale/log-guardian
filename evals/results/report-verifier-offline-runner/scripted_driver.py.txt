@@ -1,0 +1,37 @@
+"""Generate label-shaped test responses, never model outputs or semantic evidence."""
+import argparse
+import json
+from pathlib import Path
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--prepared', type=Path, required=True)
+parser.add_argument('--output', type=Path, required=True)
+args = parser.parse_args()
+root = Path(__file__).resolve().parents[3]
+labels = {row['item_id']: row for row in map(json.loads, (root/'evals/report-verifier-v2/labels.jsonl').read_text().splitlines())}
+eligible = json.loads((args.prepared/'manifest.json').read_bytes())['eligible']
+args.output.mkdir(parents=True, exist_ok=False)
+for line in (args.prepared/'inputs.jsonl').read_text().splitlines():
+    item = json.loads(line)
+    if item['item_id'] not in eligible:
+        continue
+    evidence = {entry['evidence_id']:entry for batch in item['evidence_batches'] if batch['error'] is None for entry in batch['items']}
+    findings = [(f'/{section}/{n}/claim', claim) for section in ('observations','alternatives') for n,claim in enumerate(item['report'][section])]
+    if item['report']['likely_cause'] is not None:
+        findings.append(('/likely_cause/claim',item['report']['likely_cause']))
+    claims = []
+    for target,claim in findings:
+        ident = claim['evidence_ids'][0]
+        quote = json.dumps(evidence[ident]['content'],ensure_ascii=False,sort_keys=True,separators=(',',':'))[:128]
+        claims.append({'target':target,'verdict':'supported','explanation':'Scripted structural exercise, not a model judgment.','evidence_refs':[{'evidence_id':ident,'quote':quote}]})
+    checks = [{'target':f'/suggested_checks/{n}','verdict':'read_only','explanation':'Scripted.','evidence_refs':[]} for n in range(len(item['report']['suggested_checks']))]
+    for defect in labels[item['item_id']]['required_defects']:
+        check = next(c for c in claims+checks if c['target']==defect['target'])
+        check['verdict'] = defect['verdict']
+        if defect['verdict']=='insufficient':check['evidence_refs']=[]
+    review = {key:item[key] for key in ('item_id','report_sha256','input_sha256')}
+    review.update(schema_version=2,claim_checks=claims,recommendation_checks=checks,
+                  outcome_check={'verdict':'pass','explanation':'Scripted.','evidence_refs':[]},
+                  missing_evidence_check={'verdict':'pass','explanation':'Scripted.','evidence_refs':[]})
+    with (args.output/f'{item["item_id"]}.json').open('x') as out:json.dump(review,out,ensure_ascii=False)
+print('17 scripted responses generated from evaluator labels; no model was called.')
