@@ -1,0 +1,2 @@
+# The package has no runtime dependencies; its repository example uses the investigator.
+-r ../../services/ingestion-service/requirements-dev.txt

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "log-guardian-agent"
+version = "0.1.0a1"
+description = "Local shadow monitoring for owner-wrapped Python agent tools"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dependencies = []
+
+[tool.setuptools]
+packages = ["log_guardian_agent"]
+
+[tool.ruff]
+extend = "../../pyproject.toml"

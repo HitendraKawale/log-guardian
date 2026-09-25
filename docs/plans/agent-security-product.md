@@ -32,24 +32,30 @@ an audit-write failure before dispatch does prevent an unrecorded call.
 
 ### 1. Generic Python capture and a working investigator example
 
-- [ ] Create a dependency-free Python package under integrations/python/log_guardian_agent.
-- [ ] Add immutable owner Policy and Monitor.wrap for ordinary and async callables.
-- [ ] Journal a request durably before calling the wrapped function; link completion
+- [x] Create a Python package with no runtime dependencies under integrations/python/log_guardian_agent.
+- [x] Add immutable owner Policy and Monitor.wrap for ordinary and async callables.
+- [x] Journal a request durably before calling the wrapped function; link completion
   afterward. Store identifiers, tool names, origin, outcome and elapsed time only.
   Never store arguments, return values, exception messages, prompts or model keys.
-- [ ] Support explicit owner-selected agent versus host origin. Host bootstrap reads
+- [x] Support explicit owner-selected agent versus host origin. Host bootstrap reads
   are not model tool proposals. The callable receives its original arguments unchanged.
-- [ ] Use exclusive per-run journals, serialized writes, bounded event count, 0600 file
+- [x] Use exclusive per-run journals, serialized writes, bounded event count, 0600 file
   permissions and no resume/retry. Poison a recorder after an audit-write failure.
-- [ ] Implement strict bounded journal inspection against a separately supplied owner
+- [x] Implement strict bounded journal inspection against a separately supplied owner
   policy. Reject unknown fields, malformed records, duplicate IDs, invalid sequence,
   orphan/repeated completions and mismatched policy fingerprints.
-- [ ] Start with exact tool allowlists. Report disallowed agent-origin requests and
+- [x] Start with exact tool allowlists. Report disallowed agent-origin requests and
   observed returned/raised/unknown outcomes. Do not call this a universal injection detector.
-- [ ] Wrap the repository's actual EvidenceTools methods in a no-provider example.
+- [x] Wrap the repository's actual EvidenceTools methods in a no-provider example.
   Exercise host bootstrap, an allowed query and a deliberately out-of-policy read.
-- [ ] Add tests, packaging, a Make target and a CI matrix entry. Verify installation
+- [x] Add tests, packaging, a Make target and a CI matrix entry. Verify installation
   in an isolated temporary environment and run the full affected suites before committing.
+
+Milestone 1 evidence is in docs/verification/agent-capture/. Twenty-two SDK checks
+passed, including process exit, concurrent calls, write failures and a network-forbidden
+investigator example. Full verification passed 661 offline tests plus six demo tests.
+The package installed and ran with isolated Python and no runtime dependencies.
+Security ingestion/UI and the root README animation remain unimplemented milestones.
 
 Public interface:
 

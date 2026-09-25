@@ -1,0 +1,4 @@
+Processing /tmp/lg47-sdk-wheel/log_guardian_agent-0.1.0a1-py3-none-any.whl
+Installing collected packages: log-guardian-agent
+Successfully installed log-guardian-agent-0.1.0a1
+Installed wheel exercised with isolated Python; zero runtime dependencies; private data absent.

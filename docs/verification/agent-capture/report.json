@@ -1,0 +1,58 @@
+{
+  "mode": "scripted_tool_capture",
+  "provider_requests": 0,
+  "schema_version": 1,
+  "run_id": "74d84cf43a294c29957469ecd75f20c2",
+  "agent": "investigator",
+  "policy_sha256": "5c0f1d48532ae45a6761a28df0e808bad0659d0a7d77ab3ceea3794aff0571f1",
+  "calls": [
+    {
+      "call_id": "71b51a542c3c4d8da6b1f4fbc721aac9",
+      "tool": "initial_logs",
+      "origin": "host",
+      "outcome": "returned",
+      "elapsed_ms": 0,
+      "evidence_ids": [
+        "74d84cf43a294c29957469ecd75f20c2:1",
+        "74d84cf43a294c29957469ecd75f20c2:2"
+      ]
+    },
+    {
+      "call_id": "65d21af24735437588dc162eb7bb32e0",
+      "tool": "query_logs",
+      "origin": "agent",
+      "outcome": "returned",
+      "elapsed_ms": 0,
+      "evidence_ids": [
+        "74d84cf43a294c29957469ecd75f20c2:3",
+        "74d84cf43a294c29957469ecd75f20c2:4"
+      ]
+    },
+    {
+      "call_id": "aa3da43e70f246ae994001ea0a223035",
+      "tool": "summarize_logs",
+      "origin": "agent",
+      "outcome": "returned",
+      "elapsed_ms": 0,
+      "evidence_ids": [
+        "74d84cf43a294c29957469ecd75f20c2:5",
+        "74d84cf43a294c29957469ecd75f20c2:6"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "disallowed_tool",
+      "call_id": "aa3da43e70f246ae994001ea0a223035",
+      "tool": "summarize_logs",
+      "origin": "agent",
+      "outcome": "returned",
+      "elapsed_ms": 0,
+      "evidence_ids": [
+        "74d84cf43a294c29957469ecd75f20c2:5",
+        "74d84cf43a294c29957469ecd75f20c2:6"
+      ]
+    }
+  ],
+  "capture_complete": null
+}
