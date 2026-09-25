@@ -1,0 +1,68 @@
+"""Exercise the standalone SVG walkthrough in Chromium, including reduced motion."""
+import argparse
+from pathlib import Path
+
+from playwright.sync_api import expect, sync_playwright
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--url', default=(Path(__file__).resolve().parents[3] / 'frontend/security-prototype.html').as_uri())
+parser.add_argument('--screenshots', type=Path, required=True)
+args = parser.parse_args()
+args.screenshots.mkdir(parents=True, exist_ok=True)
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+    errors = []
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.goto(args.url)
+    page.wait_for_load_state('networkidle')
+    expect(page.get_by_role('heading', name='An email tool the owner did not allow')).to_be_visible()
+    page.clock.install()
+    page.get_by_role('button', name='Play walkthrough', exact=True).click()
+    page.clock.run_for(1810)
+    assert page.locator('#packet').evaluate('(e)=>e.getAnimations().some(a=>a.playState==="running")')
+    page.get_by_role('button', name='Pause walkthrough', exact=True).click()
+    step = page.locator('#motion-step').inner_text()
+    page.clock.run_for(6000)
+    assert page.locator('#motion-step').inner_text() == step
+    assert page.locator('#packet').evaluate('(e)=>e.getAnimations().length') == 0
+    page.get_by_role('button', name='Play walkthrough', exact=True).click()
+    page.clock.run_for(5000)
+    expect(page.locator('#verdict')).to_have_text('Tool-policy violation')
+    expect(page.locator('#observed-tool')).to_have_text('send_email')
+    expect(page.locator('#allowed-tool')).to_have_text('search_docs')
+    expect(page.locator('#outcome')).to_have_text('Returned')
+    expect(page.get_by_role('button', name='Run complete')).to_be_disabled()
+    page.screenshot(path=str(args.screenshots/'email-desktop.png'), full_page=True)
+    for name, verdict, outcome in [
+        ('Allowed tool call An agent reads scoped logs', 'Within tool allowlist', 'Returned'),
+        ('Missing completion A request has no recorded result', 'Tool-policy violation', 'Unknown'),
+        ('Tool outside policy A summary read was not allowed', 'Tool-policy violation', 'Returned'),
+    ]:
+        page.get_by_role('button', name=name).click()
+        page.get_by_role('button', name='Play walkthrough', exact=True).click()
+        page.clock.run_for(7000)
+        expect(page.locator('#verdict')).to_have_text(verdict)
+        expect(page.locator('#outcome')).to_have_text(outcome)
+        if outcome == 'Unknown':
+            expect(page.locator('#evidence')).not_to_contain_text('tool_completion')
+    page.get_by_role('button', name='Replay walkthrough', exact=True).click()
+    page.get_by_role('button', name='Explore the email example').click()
+    page.clock.run_for(6000)
+    expect(page.locator('#motion-step')).to_have_text('1 / 4')
+    expect(page.locator('#play')).to_have_attribute('aria-pressed', 'false')
+    page.emulate_media(reduced_motion='reduce')
+    page.get_by_role('button', name='Show static walkthrough').click()
+    expect(page.locator('#motion-step')).to_have_text('4 / 4')
+    assert page.locator('#packet').evaluate('(e)=>e.getAnimations().length') == 0
+    page.get_by_role('button', name='Restart', exact=True).click()
+    expect(page.locator('#motion-step')).to_have_text('1 / 4')
+    page.set_viewport_size({'width': 390, 'height': 844})
+    page.get_by_role('button', name='Show static walkthrough').focus()
+    page.keyboard.press('Enter')
+    expect(page.locator('#motion-step')).to_have_text('4 / 4')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.screenshot(path=str(args.screenshots/'email-mobile.png'), full_page=True)
+    assert not errors, errors
+    browser.close()
+print('PASS: SVG moves, pause/resume, scenario changes, four outcomes, reset, keyboard, reduced motion, mobile layout; no page errors.')
