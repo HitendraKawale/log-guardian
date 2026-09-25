@@ -4,7 +4,20 @@ Issue #47. The owner selected security monitoring for AI agents, approved generi
 Python first, and requested a commit for every verified step. Push relevant branches;
 do not merge or start paid model execution. OpenAI Agents SDK and LangGraph follow later.
 
-## Goal
+## Direction correction
+
+The owner clarified the primary use case after milestone 1: investigate attacks
+against a business or product using its logs, including suspected coordinated
+activity. Monitoring agents owned by the business is optional, not the core product.
+See [business-security investigation](business-security-investigation.md), issue #48.
+
+Milestone 1 remains implemented and useful. Milestones 2 and 3 below are paused as
+an agent-monitoring roadmap, not approved descriptions of the core product. Preserve
+the recorder and experimental findings; do not build a separate agent-policy backend
+merely to complete the original checklist. The preview on feat/47-security-preview
+illustrates that optional integration and is not the revised product specification.
+
+## Original goal
 
 The repository has security experiments and an investigator journal, but no reusable
 agent integration or dedicated security review product. Build a local, single-owner,
