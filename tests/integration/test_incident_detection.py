@@ -54,6 +54,7 @@ def test_postgres_upgrade_concurrency_recurrence_and_deadline(monkeypatch):
             'dismissed',now(),now())""")
         await conn.close()
         migrate("upgrade", "0006")
+        migrate("upgrade", "head")
         sys.path.insert(0, str(SERVICE))
         from app import incident_detection
         from app.config import settings
