@@ -1,0 +1,332 @@
+{
+  "runtime_revision": "020ee00e18ccc051259e4cf1be849848c4f20ead",
+  "real_model_requests": 0,
+  "provider": "httpx.MockTransport in security_stack test fixture",
+  "steps": [
+    "Connect to the owner's evidence store. Only test credentials are used here.",
+    "The server selects source identity and request namespaces, not the uploaded log text.",
+    "Six authored records produce three links. Saving evidence has not queued any model work.",
+    "Inspect the saved gateway record. HTTP 200 does not establish successful authentication.",
+    "Its linked authentication record explicitly reports failure. Timing alone is not a link.",
+    "A separate key and explicit consent are required. This recording uses only a scripted provider.",
+    "The worker produces an unverified draft. Displayed usage is simulated, not money spent.",
+    "The citation opens evidence delivered to the worker. Membership does not prove the claim.",
+    "One success is visible. Compromise, data access, actor identity and AI involvement remain unestablished."
+  ],
+  "run": {
+    "id": "97653efc-5092-4621-9e5b-208d550774f2",
+    "question": "Review the saved gateway and authentication evidence for suspected abuse. Describe observed requests and outcomes, their correlations, and missing evidence. Do not assume successful authentication establishes account compromise.",
+    "system": "C",
+    "security_case_id": "f463d930-651b-4f12-b192-2e86d3edc6f6",
+    "scope": {
+      "services": [
+        "gateway",
+        "authentication"
+      ],
+      "start": "2026-09-01T10:00:00Z",
+      "end": "2026-09-01T10:10:00Z"
+    },
+    "status": "completed",
+    "error": null,
+    "report": {
+      "observations": [
+        {
+          "claim": "Scripted check: one recorded authentication failure.",
+          "evidence_ids": [
+            "security-event:bdac17bfd04982df6cced816c04c218500f12fa6e9abe744061dc746e02b7652"
+          ]
+        }
+      ],
+      "missing_evidence": [
+        "Account compromise is not established."
+      ],
+      "alternatives": [],
+      "likely_cause": null,
+      "outcome": "inconclusive",
+      "suggested_checks": []
+    },
+    "model_requested": "gpt-4.1-mini-2025-04-14",
+    "prompt_sha256": "ad456db15d1de27df891a81fe921d8dc45f19dcc56d2c2fe10f875983b371447",
+    "code_revision": "020ee00e18ccc051259e4cf1be849848c4f20ead",
+    "usage": {
+      "input_tokens": 100,
+      "output_tokens": 100,
+      "cached_input_tokens": 0
+    },
+    "estimated_cost_usd": "0.00020000",
+    "elapsed_ms": 177.33695800416172,
+    "created_at": "2026-09-26T08:36:54.296853",
+    "started_at": "2026-09-26T08:36:54.307390",
+    "finished_at": "2026-09-26T08:36:54.545806"
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "kind": "tool_request",
+      "payload": {
+        "tool": "read_security_evidence",
+        "arguments": {
+          "offset": 0,
+          "limit": 25
+        },
+        "origin": "server_initial"
+      },
+      "created_at": "2026-09-26T08:36:54.336830"
+    },
+    {
+      "sequence": 2,
+      "kind": "tool_call",
+      "payload": {
+        "tool": "read_security_evidence",
+        "arguments": {
+          "offset": 0,
+          "limit": 25
+        },
+        "origin": "server_initial",
+        "request_sequence": 1,
+        "result": {
+          "source": "security_case",
+          "version": "4cab2296d22bc6be48b3fba67b0a4867b1276d3de990eb72b867be6e6efd79a8",
+          "start": "2026-09-01T10:00:00Z",
+          "end": "2026-09-01T10:10:00Z",
+          "items": [
+            {
+              "evidence_id": "security-summary:4cab2296d22bc6be48b3fba67b0a4867b1276d3de990eb72b867be6e6efd79a8",
+              "kind": "summary",
+              "content": {
+                "case_id": "f463d930-651b-4f12-b192-2e86d3edc6f6",
+                "count_scope": "whole_saved_case",
+                "scope": {
+                  "services": [
+                    "gateway",
+                    "authentication"
+                  ],
+                  "start": "2026-09-01T10:00:00Z",
+                  "end": "2026-09-01T10:10:00Z"
+                },
+                "source_config": [
+                  {
+                    "source_id": "auth",
+                    "service": "authentication",
+                    "event_kind": "authentication_result",
+                    "request_namespace": "shop"
+                  },
+                  {
+                    "source_id": "edge",
+                    "service": "gateway",
+                    "event_kind": "gateway_request",
+                    "request_namespace": "shop"
+                  }
+                ],
+                "total": 6,
+                "sources": {
+                  "auth": {
+                    "records": 3,
+                    "distinct_client_addresses": 0,
+                    "distinct_account_refs": 3,
+                    "auth_outcomes": {
+                      "success": 1,
+                      "failure": 2,
+                      "unavailable": 0
+                    }
+                  },
+                  "edge": {
+                    "records": 3,
+                    "distinct_client_addresses": 3,
+                    "distinct_account_refs": 0,
+                    "auth_outcomes": {
+                      "success": 0,
+                      "failure": 0,
+                      "unavailable": 0
+                    }
+                  }
+                },
+                "confirmed_pairs": 3,
+                "ambiguous_groups": 0,
+                "unlinked_records": 0,
+                "collection_complete": null,
+                "gaps": [],
+                "limitations": [
+                  "collection_completeness_unknown",
+                  "clock_alignment_unverified",
+                  "impact_not_established",
+                  "actor_and_ai_attribution_not_established"
+                ]
+              }
+            },
+            {
+              "evidence_id": "security-page:0fbe32b9ff2273550ebbe022eafaef85398f09d392f26893114a24b8d20cef10",
+              "kind": "summary",
+              "content": {
+                "offset": 0,
+                "returned_records": 6,
+                "next_offset": null
+              }
+            },
+            {
+              "evidence_id": "security-event:bdac17bfd04982df6cced816c04c218500f12fa6e9abe744061dc746e02b7652",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "auth",
+                  "a1"
+                ],
+                "service": "authentication",
+                "event_kind": "authentication_result",
+                "evidence_id": "a1",
+                "event_time": "2026-09-01T10:00:01Z",
+                "request_id": "r1",
+                "account_ref": "account-1",
+                "auth_outcome": "failure",
+                "request_namespace": "shop",
+                "partner": [
+                  "edge",
+                  "r1"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            },
+            {
+              "evidence_id": "security-event:72cba86647293baa537bd283175584be9fb07fd859792c5e5716bd4ff6bcc2c8",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "edge",
+                  "r1"
+                ],
+                "service": "gateway",
+                "event_kind": "gateway_request",
+                "evidence_id": "r1",
+                "event_time": "2026-09-01T10:00:02Z",
+                "request_id": "r1",
+                "route": "/login",
+                "client_address": "192.0.2.1",
+                "http_status": 200,
+                "request_namespace": "shop",
+                "partner": [
+                  "auth",
+                  "a1"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            },
+            {
+              "evidence_id": "security-event:a7e06ffb948a41a3f27e04ac4c581e4d660a171fd74c6808d71192cb9bfb4fb6",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "auth",
+                  "a2"
+                ],
+                "service": "authentication",
+                "event_kind": "authentication_result",
+                "evidence_id": "a2",
+                "event_time": "2026-09-01T10:00:03Z",
+                "request_id": "r2",
+                "account_ref": "account-2",
+                "auth_outcome": "failure",
+                "request_namespace": "shop",
+                "partner": [
+                  "edge",
+                  "r2"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            },
+            {
+              "evidence_id": "security-event:e5576d2bcbec4c24592ab2a1d17656f0c9ffaa60c55d55b83fd0048a8cbb4184",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "edge",
+                  "r2"
+                ],
+                "service": "gateway",
+                "event_kind": "gateway_request",
+                "evidence_id": "r2",
+                "event_time": "2026-09-01T10:00:04Z",
+                "request_id": "r2",
+                "route": "/login",
+                "client_address": "192.0.2.2",
+                "http_status": 200,
+                "request_namespace": "shop",
+                "partner": [
+                  "auth",
+                  "a2"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            },
+            {
+              "evidence_id": "security-event:12eb6c8e624b77180de923c6391eafbbd6af577dce40202c3b2b92aa534c7bd1",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "auth",
+                  "a3"
+                ],
+                "service": "authentication",
+                "event_kind": "authentication_result",
+                "evidence_id": "a3",
+                "event_time": "2026-09-01T10:00:05Z",
+                "request_id": "r3",
+                "account_ref": "account-3",
+                "auth_outcome": "success",
+                "request_namespace": "shop",
+                "partner": [
+                  "edge",
+                  "r3"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            },
+            {
+              "evidence_id": "security-event:36780c1949aac7f2c4cbfbbeff34a5e8e8d1fd7081932c9129b0e92d8fd426e7",
+              "kind": "security_event",
+              "content": {
+                "evidence": [
+                  "edge",
+                  "r3"
+                ],
+                "service": "gateway",
+                "event_kind": "gateway_request",
+                "evidence_id": "r3",
+                "event_time": "2026-09-01T10:00:06Z",
+                "request_id": "r3",
+                "route": "/login",
+                "client_address": "192.0.2.3",
+                "http_status": 200,
+                "request_namespace": "shop",
+                "partner": [
+                  "auth",
+                  "a3"
+                ],
+                "correlation": "confirmed_pair"
+              }
+            }
+          ],
+          "truncated": false,
+          "error": null
+        }
+      },
+      "created_at": "2026-09-26T08:36:54.342846"
+    },
+    {
+      "sequence": 1000000,
+      "kind": "status",
+      "payload": {
+        "status": "completed",
+        "error": null
+      },
+      "created_at": "2026-09-26T08:36:54.548587"
+    }
+  ],
+  "sha256": {
+    "frontend/security.html": "6c5119f5f0bc748c31dce330d03b6183eaba60d98c093182dd77d3063a021c3e",
+    "frontend/security.js": "c860a88e4af71469f99cd7e7dec44b9701767ca609732c6fc8044000e610001e",
+    "frontend/security.css": "f744f713b628fcdc5253e10e475de6111eb8e4421192cbbbcf10d396a6d3a0dc",
+    "examples/security-review/nginx.jsonl": "d9ab05cda2dc15f518635105c4c8ee807d56971fb1ffa34a505168af731d7b6c",
+    "examples/security-review/auth.jsonl": "ea228c21d000de9b4021f4b488e02ff73118432b372e8e112c1a1103df3dacd8",
+    "examples/security-review/sources.json": "37d66d066be725172ce08a66e94d7c8c1cbc577f3a90d176d45024e6c411cd78"
+  }
+}

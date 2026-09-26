@@ -1,5 +1,7 @@
 """Drive the real security import API and static page without provider or Docker services."""
 
+import hashlib
+import json
 import os
 import socket
 import subprocess
@@ -287,6 +289,141 @@ def test_explicit_security_investigation_with_scripted_worker(page, security_sta
     page.get_by_label("API endpoint", exact=True).fill("http://localhost:1")
     expect(page.get_by_label("Investigation API key", exact=True)).to_have_value("")
     expect(page.locator("#security-run-report")).to_be_empty()
+
+
+def test_security_walkthrough(browser, security_stack, tmp_path):
+    """Record real browser actions; pauses only pace an explicitly requested recording."""
+    recording = os.environ.get("LG_RECORD_DEMO") == "1"
+    context = browser.new_context(
+        viewport={"width": 1280, "height": 900},
+        **(
+            {"record_video_dir": str(tmp_path), "record_video_size": {"width": 1280, "height": 900}}
+            if recording
+            else {}
+        ),
+    )
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    steps = []
+
+    def hold(caption):
+        if recording:
+            page.evaluate(
+                "text => document.getElementById('recording-caption').textContent = text", caption
+            )
+            # Presentation timing, never a substitute for an assertion or readiness wait.
+            page.wait_for_timeout(4000)
+        steps.append(caption)
+
+    try:
+        page.goto(f"{security_stack}/ui/security.html?api={security_stack}")
+        if recording:
+            page.evaluate("""() => {
+                const banner = document.createElement('aside');
+                banner.style = 'position:fixed;top:0;left:0;right:0;z-index:100;background:#10263c;color:white;padding:12px 24px;font:16px system-ui;border-bottom:2px solid #4f9dff';
+                const label = document.createElement('strong');
+                label.textContent = 'SYNTHETIC LOGS / SCRIPTED PROVIDER / NO PAID CALLS';
+                const caption = document.createElement('div'); caption.id = 'recording-caption';
+                banner.append(label, caption); document.body.prepend(banner);
+                document.body.style.paddingTop = '82px';
+            }""")
+            page.add_style_tag(content="* { scroll-margin-top: 105px; }")
+        hold("Connect to the owner's evidence store. Only test credentials are used here.")
+        page.get_by_label("Security API key", exact=True).fill("security-test")
+        page.get_by_role("button", name="Connect", exact=True).click()
+        expect(page.get_by_label("edge log file")).to_be_visible()
+        hold(
+            "The server selects source identity and request namespaces, not the uploaded log text."
+        )
+        upload_example(page)
+        expect(page.locator("#security-outcomes")).to_have_text(
+            "2 failures, 1 success, 0 unavailable."
+        )
+        execution = {"X-API-Key": "execution-test"}
+        assert page.request.get(f"{security_stack}/investigations", headers=execution).json() == []
+        page.locator("#security-title").scroll_into_view_if_needed()
+        hold(
+            "Six authored records produce three links. Saving evidence has not queued any model work."
+        )
+        page.screenshot(path=str(tmp_path / "security-review-poster.png"))
+        page.get_by_role("button", name='["edge","r1"]', exact=True).click()
+        expect(page.locator("#security-timeline details[open] pre")).to_contain_text(
+            '"http_status": 200'
+        )
+        hold(
+            "Inspect the saved gateway record. HTTP 200 does not establish successful authentication."
+        )
+        page.get_by_role("button", name='["auth","a1"]', exact=True).click()
+        expect(
+            page.locator("#security-timeline details[open]").filter(has_text="auth / a1")
+        ).to_contain_text('"auth_outcome": "failure"')
+        hold(
+            "Its linked authentication record explicitly reports failure. Timing alone is not a link."
+        )
+        page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+        page.get_by_label(
+            "I authorize sharing this case with the model provider.", exact=True
+        ).check()
+        hold(
+            "A separate key and explicit consent are required. This recording uses only a scripted provider."
+        )
+        page.get_by_role("button", name="Start or open investigation", exact=True).click()
+        expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
+        expect(page.locator("#security-run-report")).to_contain_text("Scripted check")
+        page.locator("#security-run-report").scroll_into_view_if_needed()
+        hold(
+            "The worker produces an unverified draft. Displayed usage is simulated, not money spent."
+        )
+        page.locator("#security-run-report .citation").first.click()
+        expect(page.locator("#security-run-evidence details[open] pre")).to_contain_text(
+            '"auth_outcome": "failure"'
+        )
+        hold(
+            "The citation opens evidence delivered to the worker. Membership does not prove the claim."
+        )
+        page.locator("#security-limits").scroll_into_view_if_needed()
+        hold(
+            "One success is visible. Compromise, data access, actor identity and AI involvement remain unestablished."
+        )
+        runs = page.request.get(f"{security_stack}/investigations", headers=execution).json()
+        assert len(runs) == 1 and runs[0]["status"] == "completed"
+        events = page.request.get(
+            f"{security_stack}/investigations/{runs[0]['id']}/events", headers=execution
+        ).json()
+        assert any(event["kind"] == "tool_request" for event in events)
+        assert not errors
+        (tmp_path / "walkthrough.json").write_text(
+            json.dumps(
+                {
+                    "runtime_revision": subprocess.check_output(
+                        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+                    ).strip(),
+                    "real_model_requests": 0,
+                    "provider": "httpx.MockTransport in security_stack test fixture",
+                    "steps": steps,
+                    "run": runs[0],
+                    "events": events,
+                    "sha256": {
+                        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+                        for name in [
+                            "frontend/security.html",
+                            "frontend/security.js",
+                            "frontend/security.css",
+                            "examples/security-review/nginx.jsonl",
+                            "examples/security-review/auth.jsonl",
+                            "examples/security-review/sources.json",
+                        ]
+                    },
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+    finally:
+        context.close()
+    if recording:
+        page.video.save_as(str(tmp_path / "security-review.webm"))
 
 
 @pytest.mark.parametrize("security_stack", ["idle"], indirect=True)

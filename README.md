@@ -1,22 +1,103 @@
 # Log Guardian
 
-An AI incident investigator over a real log platform. An agent collects
-evidence with bounded read-only tools (logs, summaries, runbooks, fixed metric
-templates), then produces a structured report where **every claim cites
-evidence** and missing evidence yields an honest *inconclusive* instead of a
-guessed root cause.
+Investigate suspicious activity against a business or product using gateway and
+application authentication logs. Import a bounded log window, inspect linked requests
+and explicit auth outcomes, then optionally ask an AI investigator to review that saved
+evidence. The result is a draft with citations and gaps, not an automated attack verdict.
 
-**[90-second recorded demo](docs/media/demo-90s.webm)** · **[evaluation method
-and full scorecard](docs/evaluation.md)** ·
-[Public recorded demo](https://hitendrakawale.github.io/log-guardian/).
-No provider key needed. For a local preview, run
-`python scripts/export_static_demo.py` then `python -m http.server 8080 --directory site`
-and open <http://localhost:8080/>.
+[![Recorded security-review workflow. Synthetic logs and a scripted provider, not a real model evaluation.](frontend/media/security-review-poster.png)](frontend/media/security-review.webm)
 
-Headline results, measured (see the scorecard for everything, including
-failures): on the held-out split, fixed retrieval **B scored 13/16** core
+[Watch the recording](frontend/media/security-review.webm) ·
+[Setup and trust boundaries](docs/security-log-review.md) ·
+[Verification and recording provenance](docs/verification/security-story/README.md)
+
+The recording uses the working browser UI, real import API, SQLite and queue worker.
+Six authored records produce three request links, two authentication failures and one
+success. The provider response is scripted. No customer traffic or paid model calls
+are involved, and displayed model usage is simulated.
+
+## What the workflow answers
+
+- Which supplied gateway requests match authentication results on an owner-configured
+  request-ID namespace?
+- Which accounts and ingress-observed addresses occur in the supplied records?
+- What failed, what succeeded, and which records remain ambiguous or unlinked?
+- What evidence is missing before claiming compromise, data access or a shared actor?
+
+HTTP 200 does not prove authentication success. A successful login does not prove
+compromise. Addresses are not people, and similar timing does not establish coordination
+or AI involvement. Collection completeness and clock alignment remain unknown.
+
+```text
+[Owner source registry] -> [Gateway + auth import] -> [Saved timeline and gaps]
+                                                            |
+                                                  explicit execution key
+                                                            v
+[Human review] <--------- [Cited, unverified draft] <- [Case-only read tool]
+```
+
+## Try it without a model key
+
+For a read-only video preview, export static files and serve them on a free local port:
+
+```bash
+python scripts/export_static_demo.py
+python -m http.server 8483 --bind 127.0.0.1 --directory site
+```
+
+Open <http://127.0.0.1:8483/security-preview.html>. It has a video, native playback
+controls and a text transcript. It cannot upload files or execute investigations.
+The export's index retains the older operational-investigator recordings.
+
+To use the real importer, follow [local security-review setup](docs/security-log-review.md#local-setup).
+It needs SECURITY_SOURCES_PATH, SECURITY_API_KEY and a database migrated to head.
+The guide includes prescribed nginx JSON and application-auth JSONL formats and the
+six-record example. Arbitrary nginx combined logs are not supported.
+
+Import and review use SECURITY_API_KEY. AI execution needs a distinct
+INVESTIGATION_API_KEY, provider-sharing consent in the UI and a separately configured
+worker. Importing never queues model work. One saved case gets one run, including after
+failure or cancellation. Review keys cannot inspect or cancel paid runs.
+
+The worker checks the saved source binding and exposes only read_security_evidence.
+It does not search operational logs, other cases, metrics or runbooks for a security
+case. Existing limits include six provider requests, eight tool executions, 64 KiB of
+evidence and a $0.025 per-run allowance. That estimate is not an account-wide billing cap.
+Do not start a live worker against queued cases without current spending authorization.
+
+## Implemented and unproven
+
+The repository has authenticated imports, duplicate/conflict handling, SQLite/PostgreSQL
+migrations, deterministic correlation, browser review and explicit case-bound execution.
+The connection has scripted-provider verification, not a live security-diagnosis result.
+There is no validated credential-stuffing classifier or automatic blocking/remediation.
+This is development software, not a deployed customer security service.
+
+Reports must cite delivered evidence, but membership does not establish semantic support.
+Earlier investigator experiments produced unsupported claims and unsafe advice despite
+valid citations. The [experimental verifier](evals/report-verifier-v2/README.md) is not a
+production gate. Human review, consent, retention policy, independent labels and workload
+measurement remain necessary before a customer pilot.
+
+## Optional integration and historical research
+
+The dependency-free [Python agent recorder](integrations/python/README.md) and its
+[investigator example](integrations/python/examples/investigator.py) remain available
+for businesses that operate agents. The recorder observes wrapped calls and compares
+tool names with an owner allowlist. It neither detects external attackers nor proves
+complete capture. Its [illustrative agent preview](https://github.com/HitendraKawale/log-guardian/blob/eda0427/frontend/security-prototype.html)
+is a separate historical prototype, not the main security workflow.
+
+Operational investigations, the scorer and their preserved experiments remain part of
+the project. [Evaluation method and full scorecard](docs/evaluation.md),
+[older 90-second operational recording](docs/media/demo-90s.webm) and the
+[public operational demo](https://hitendrakawale.github.io/log-guardian/) describe that
+work. The public site has not been redeployed with this security recording.
+
+The following results are from the older operational corpus, not security-case accuracy
+or the project's current total spend. On that held-out split, fixed retrieval **B scored 13/16** core
 review passes at $0.024 total, the adaptive agent **C scored 11/16** at
-$0.029 — the adaptive hypothesis was **not supported** on this corpus. All 92
+$0.029. The adaptive hypothesis was **not supported** on this corpus. All 92
 live runs (152 requests, est. $0.128 total) are preserved byte-for-byte with
 provenance under `evals/results/`.
 
@@ -26,21 +107,13 @@ inventory latency exceeding checkout's deadline. The archive records the
 scenario-label leakage and missing worker revision; this is not another held-out
 benchmark. Total estimated spend including this run is $0.13033360.
 
-## What is shipped, what is an experiment, what is deferred
+The adaptive loop did not beat fixed retrieval on that corpus. The synthetic-trained
+anomaly scorer reproduced F1 0.588 / ROC-AUC 0.407 on BGL; the later BGL-trained model
+is described below. The schema-order abstention fix coincided with improvement on one
+case and is not a proven cause. Consumed held-out splits cannot support a new independent
+claim after tuning.
 
-- **Shipped**: ingestion platform (below), evidence tools, A/B/C runners,
-  investigations API + worker + UI, fault-injection demo sandbox, evaluation
-  corpus and archives, static recorded demo.
-- **Experiments (honestly negative where they are)**: the adaptive loop did
-  not beat fixed retrieval; the synthetic-trained anomaly scorer reproduced
-  F1 0.588 / ROC-AUC 0.407 on BGL and is a display signal only
-  ([ml/README.md](ml/README.md)); the schema-order abstention fix coincided
-  with improvement on one case and is not a proven cause.
-- **Deferred**: public hosted execution (needs spend-control review), held-out
-  re-evaluation after any further tuning (split is consumed), independent
-  review, live-origin evaluation set beyond one captured bundle.
-
-## Connect your own local logs
+## Optional operational log collection
 
 [Local Compose onboarding](docs/local-development.md) runs ingestion and the dashboard
 without a model worker. An owner-run Python command forwards one Compose service's
@@ -56,7 +129,7 @@ See [detector policy and upgrades](docs/local-development.md#detector-policy-and
 for thresholds, timestamp exclusions and failure limits. AI execution stays disabled
 in the local profile.
 
-## Investigation quick start
+## Operational investigation sandbox
 
 ```bash
 make demo-up                 # minimal stack: no Kafka/Grafana/Kubernetes
@@ -153,6 +226,9 @@ curl -X POST http://localhost:8000/logs \
 
 Kill the AI service and repeat the request: it still returns 201, with `status:
 "unscored"` and null scores. Ingestion never blocks on the model.
+
+<details>
+<summary>Historical scoring study: what real BGL data changed</summary>
 
 ## What the real data changed
 
@@ -277,6 +353,8 @@ Selecting is not spending. A candidate is a suggestion for a human or an
 explicitly-budgeted worker; wiring it straight into the investigation worker
 would make log volume drive paid execution.
 
+</details>
+
 ## Design decisions
 
 **AI calls are best effort.** A timeout or error from the AI service is logged
@@ -304,7 +382,20 @@ has to run on a laptop with no broker.
 
 ## API
 
-Ingestion service:
+Security evidence, protected by the review key:
+
+- `GET /security/sources`: owner-registered source formats and limits
+- `POST /security/cases`: bounded import with an Idempotency-Key
+- `GET /security/cases`: saved review summaries
+- `GET /security/cases/{id}`: normalized timeline, counts, gaps and source snapshot
+
+Explicit execution, protected by the investigation key:
+
+- `POST /investigations/from-security-case/{id}`: create or reopen the single bound run
+- `GET /investigations/{id}` and `/events`: draft, status and delivered evidence
+- `POST /investigations/{id}/cancel`: request cancellation, not a billing reversal
+
+Operational ingestion service:
 
 - `POST /logs` — ingest and score a log (synchronous)
 - `POST /logs/stream` — publish a log to Kafka for async scoring (202)
@@ -378,11 +469,11 @@ cd services/ingestion-service && ../../.venv/bin/python -m alembic upgrade head
 
 ## Tests
 
-284 tests in two tiers. The first needs nothing:
+Offline checks and the sandbox require no external infrastructure:
 
 ```bash
-make test              # 242 tests: ai-service, ingestion, ml, contract, evals
-make test-demo         # 3 more: the in-process fault/recovery sandbox
+make test              # service, ML, contract, offline eval, forwarder and recorder suites
+make test-demo         # in-process fault/recovery sandbox
 ```
 
 The second needs the stack running, because it is specifically about the seams
@@ -390,8 +481,8 @@ the first tier replaces with fakes:
 
 ```bash
 make up
-make test-integration  # 16 tests against real containers
-make test-e2e          # 23 chromium tests against the dashboard
+make test-integration  # real service, Kafka, tracing and PostgreSQL checks
+make test-e2e          # Chromium checks, including isolated security-review API/worker fixtures
 make smoke             # probe a deployment from outside
 ```
 
@@ -411,10 +502,12 @@ What the integration tier buys, given the unit suites mock every boundary:
 A contract test compares the two services' JSON schemas, since they duplicate
 the wire format deliberately and nothing else stops them drifting.
 
-CI defines five jobs: a matrix over the five infra-free suites, lint,
-`kubectl kustomize`, the integration and browser tests against a Compose stack,
-and a training smoke test. Dashboard screenshots are uploaded as a build
-artifact. The demo sandbox suite is not in CI.
+CI includes eight test-matrix entries, including the demo and recorder suites, plus
+lint, Kubernetes manifest validation, Compose integration/browser tests and a training
+smoke test. Screenshots are uploaded as an artifact. The security connection checkpoint
+passed 758 offline checks, six demo checks and 40 browser checks; those counts describe
+that checkpoint, not a permanent suite size. See [connection verification](docs/verification/security-investigator/README.md)
+and [the passing follow-up CI run](https://github.com/HitendraKawale/log-guardian/actions/runs/36229166454).
 
 ### Load
 
@@ -447,7 +540,7 @@ are in [`infrastructure/kubernetes/README.md`](infrastructure/kubernetes/README.
 
 Things that are wrong or missing, in roughly the order they'd bite:
 
-- **The deployed model only scores CRITICAL logs.** It is fitted on BGL's
+- **The committed scorer only scores CRITICAL logs.** It is fitted on BGL's
   CRITICAL subset, where every operator-labelled alert lives, and the registry
   records that pool so the service returns 0.0 for other severities rather than
   extrapolating. That is the honest behaviour, but it means the model
@@ -459,9 +552,10 @@ Things that are wrong or missing, in roughly the order they'd bite:
 - **The rate limiter is per process.** `RateLimiter` keeps hits in a local dict,
   but the deployment runs 2 replicas and scales to 6, so the effective limit is
   up to 6× what's configured. Needs Redis to be real.
-- **Auth is off by default.** `API_KEY` empty disables the `X-API-Key` check and
-  `CORS_ALLOW_ORIGINS` defaults to `*`. Deployed as-is, `POST /logs` is an open
-  write endpoint.
+- Operational log auth is off by default. An empty `API_KEY` disables its check,
+  and `CORS_ALLOW_ORIGINS` defaults to `*`. In contrast, empty SECURITY_API_KEY or
+  INVESTIGATION_API_KEY disables the corresponding security-review or execution API.
+  Configure distinct keys, explicit CORS origins and TLS before exposing services.
 - **No image pipeline.** The manifests reference `log-guardian/*:latest` with
   `imagePullPolicy: IfNotPresent`, so they only work against a local daemon.
   There's no path from push to cluster.
@@ -479,9 +573,12 @@ Things that are wrong or missing, in roughly the order they'd bite:
 
 ## Next
 
-- [ ] A labelled application-log corpus, so the scorer is useful to the demo it ships with
-- [ ] Build and push images from CI so the k8s manifests point at a registry
-- [ ] Deploy it somewhere real, with the API key actually set
-- [ ] Move the rate limiter to Redis, or document it as per-pod and move on
+- [ ] Prepare a fresh business-security evaluation corpus with benign counterexamples
+  and independently reviewed expected judgments.
+- [ ] Freeze the candidate and obtain explicit per-batch approval before a real-model pilot.
+- [ ] Define consent, retention, collection coverage and deployment security for any
+  customer-data trial. There is no current deployment authorization.
+- [ ] Measure workload limits before adding collectors, distributed rate limits or
+  hosted execution. Existing laptop numbers are not production capacity evidence.
 
 See [`docs/architecture.md`](docs/architecture.md) for design details.

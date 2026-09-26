@@ -141,14 +141,21 @@ has scripted-provider verification only, not a live accuracy result. See
 
 ### 3. Correct the explanatory materials
 
-- [ ] Replace the main preview story with a business under suspicious login activity:
+- [x] Replace the main preview story with a business under suspicious login activity:
   gateway evidence, linked auth results, investigation timeline, observed impact and gaps.
-- [ ] Keep the agent-tool walkthrough as an optional integration example, not the hero.
-- [ ] Correct the external interview document's pitch and planned-product answers;
+- [x] Keep the agent-tool walkthrough as an optional integration example, not the hero.
+- [x] Correct the external interview document's pitch and planned-product answers;
   preserve historical facts about the recorder and model experiments.
-- [ ] Rewrite the root README around log-based incident/security investigation and
+- [x] Rewrite the root README around log-based incident/security investigation and
   add a recorded animation of the working workflow, clearly separating fixtures from
   real customer incidents. Keep setup, threat model and evidence limits easy to find.
+
+The primary README now links a 38-second recording of the working security workflow.
+`frontend/security-preview.html` provides native playback controls and a transcript.
+The recording uses six authored records and the existing scripted-provider test fixture,
+not a live model. The older agent SVG and operational recordings remain separate.
+The external 48-question interview document was corrected without adding it to the repo.
+See [recording and verification](../verification/security-story/README.md).
 
 ## File ownership
 
