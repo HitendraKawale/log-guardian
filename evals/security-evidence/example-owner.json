@@ -1,0 +1,24 @@
+{
+  "scope": {
+    "services": [
+      "edge",
+      "auth"
+    ],
+    "start": "2026-09-01T10:00:00Z",
+    "end": "2026-09-01T10:10:00Z"
+  },
+  "sources": [
+    {
+      "source_id": "gateway",
+      "service": "edge",
+      "event_kind": "gateway_request",
+      "request_namespace": "shop"
+    },
+    {
+      "source_id": "authentication",
+      "service": "auth",
+      "event_kind": "authentication_result",
+      "request_namespace": "shop"
+    }
+  ]
+}

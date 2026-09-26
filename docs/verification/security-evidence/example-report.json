@@ -1,0 +1,180 @@
+{
+  "ambiguous_groups": [],
+  "collection_complete": null,
+  "duplicate_records": 0,
+  "gaps": [],
+  "input_records": 6,
+  "limitations": [
+    "collection_completeness_unknown",
+    "clock_alignment_unverified",
+    "impact_not_established",
+    "actor_and_ai_attribution_not_established"
+  ],
+  "links": [
+    {
+      "authentication": [
+        "authentication",
+        "a1"
+      ],
+      "gateway": [
+        "gateway",
+        "g1"
+      ],
+      "request_id": "r1",
+      "request_namespace": "shop"
+    },
+    {
+      "authentication": [
+        "authentication",
+        "a2"
+      ],
+      "gateway": [
+        "gateway",
+        "g2"
+      ],
+      "request_id": "r2",
+      "request_namespace": "shop"
+    },
+    {
+      "authentication": [
+        "authentication",
+        "a3"
+      ],
+      "gateway": [
+        "gateway",
+        "g3"
+      ],
+      "request_id": "r3",
+      "request_namespace": "shop"
+    }
+  ],
+  "scope": {
+    "end": "2026-09-01T10:10:00Z",
+    "services": [
+      "edge",
+      "auth"
+    ],
+    "start": "2026-09-01T10:00:00Z"
+  },
+  "source_config": [
+    {
+      "event_kind": "authentication_result",
+      "request_namespace": "shop",
+      "service": "auth",
+      "source_id": "authentication"
+    },
+    {
+      "event_kind": "gateway_request",
+      "request_namespace": "shop",
+      "service": "edge",
+      "source_id": "gateway"
+    }
+  ],
+  "sources": {
+    "authentication": {
+      "auth_outcomes": {
+        "failure": 2,
+        "success": 1,
+        "unavailable": 0
+      },
+      "distinct_account_refs": 3,
+      "distinct_client_addresses": 0,
+      "records": 3
+    },
+    "gateway": {
+      "auth_outcomes": {
+        "failure": 0,
+        "success": 0,
+        "unavailable": 0
+      },
+      "distinct_account_refs": 0,
+      "distinct_client_addresses": 3,
+      "records": 3
+    }
+  },
+  "timeline": [
+    {
+      "account_ref": "account-1",
+      "auth_outcome": "failure",
+      "event_kind": "authentication_result",
+      "event_time": "2026-09-01T10:00:01Z",
+      "evidence": [
+        "authentication",
+        "a1"
+      ],
+      "evidence_id": "a1",
+      "request_id": "r1",
+      "service": "auth"
+    },
+    {
+      "client_address": "192.0.2.1",
+      "event_kind": "gateway_request",
+      "event_time": "2026-09-01T10:00:02Z",
+      "evidence": [
+        "gateway",
+        "g1"
+      ],
+      "evidence_id": "g1",
+      "http_status": 200,
+      "request_id": "r1",
+      "route": "/login",
+      "service": "edge"
+    },
+    {
+      "account_ref": "account-2",
+      "auth_outcome": "failure",
+      "event_kind": "authentication_result",
+      "event_time": "2026-09-01T10:00:03Z",
+      "evidence": [
+        "authentication",
+        "a2"
+      ],
+      "evidence_id": "a2",
+      "request_id": "r2",
+      "service": "auth"
+    },
+    {
+      "client_address": "192.0.2.2",
+      "event_kind": "gateway_request",
+      "event_time": "2026-09-01T10:00:04Z",
+      "evidence": [
+        "gateway",
+        "g2"
+      ],
+      "evidence_id": "g2",
+      "http_status": 200,
+      "request_id": "r2",
+      "route": "/login",
+      "service": "edge"
+    },
+    {
+      "account_ref": "account-3",
+      "auth_outcome": "success",
+      "event_kind": "authentication_result",
+      "event_time": "2026-09-01T10:00:05Z",
+      "evidence": [
+        "authentication",
+        "a3"
+      ],
+      "evidence_id": "a3",
+      "request_id": "r3",
+      "service": "auth"
+    },
+    {
+      "client_address": "192.0.2.3",
+      "event_kind": "gateway_request",
+      "event_time": "2026-09-01T10:00:06Z",
+      "evidence": [
+        "gateway",
+        "g3"
+      ],
+      "evidence_id": "g3",
+      "http_status": 200,
+      "request_id": "r3",
+      "route": "/login",
+      "service": "edge"
+    }
+  ],
+  "unlinked": [],
+  "version": 1
+}

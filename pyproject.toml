@@ -2,7 +2,8 @@
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = [".venv", "ml/datasets"]
+# Preserve the external author's frozen scripts without reformatting their evidence.
+extend-exclude = [".venv", "ml/datasets", "evals/semantic-review/fresh-case-authoring"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "C4"]

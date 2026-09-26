@@ -68,11 +68,49 @@ def test_live_execution_is_disabled_and_nothing_secret_ships(demo: Page, static_
     for control in demo.locator("#inv-form input, #inv-form button").all():
         assert control.is_disabled()
     expect(demo.locator("#inv-form-msg")).to_contain_text("disabled in the recorded demo")
+    expect(demo.get_by_role("link", name="Security review", exact=True)).to_have_count(0)
+    assert not list((ROOT / "site").glob("security.*"))
     import urllib.request
 
     blob = urllib.request.urlopen(f"{static_site}/recorded-runs.json").read().decode()
     for banned in ("sk-", "api_key", "OPENAI"):
         assert banned not in blob
+
+
+def test_security_preview_is_playable_read_only_and_mobile(static_site, page: Page, tmp_path):
+    errors, outside = [], []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "request",
+        lambda request: outside.append(request.url)
+        if not request.url.startswith(static_site + "/")
+        else None,
+    )
+    page.goto(f"{static_site}/security-preview.html?api=https://unused.example.invalid")
+    expect(
+        page.get_by_role("heading", name="Investigate suspicious login activity", exact=True)
+    ).to_be_visible()
+    expect(page.locator("main")).to_contain_text(
+        "Synthetic logs. Scripted provider. No paid model calls."
+    )
+    video = page.locator("video")
+    assert video.get_attribute("controls") is not None
+    assert video.get_attribute("autoplay") is None
+    assert video.get_attribute("loop") is None
+    page.wait_for_function("document.querySelector('video').readyState >= 1")
+    assert video.evaluate("v => Number.isFinite(v.duration) && v.duration > 15")
+    video.evaluate("v => v.play()")
+    page.wait_for_function("document.querySelector('video').currentTime > 0")
+    video.evaluate("v => v.pause()")
+    assert page.locator("input, form, script").count() == 0
+    expect(page.get_by_role("heading", name="Walkthrough transcript", exact=True)).to_be_visible()
+    page.screenshot(path=str(tmp_path / "security-preview-desktop.png"), full_page=True)
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.emulate_media(reduced_motion="reduce")
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    assert video.evaluate("v => v.paused")
+    page.screenshot(path=str(tmp_path / "security-preview-mobile.png"), full_page=True)
+    assert not errors and not outside
 
 
 def test_narrow_screen_layout_and_screenshot(demo: Page):

@@ -1,0 +1,58 @@
+"""Review probe for the exact keywords used in the proposed schema, not a general validator."""
+import json
+import re
+from pathlib import Path
+
+root = Path('/Users/hitesh/log-guardian-worktrees/46-report-verifier/evals/report-verifier')
+schema = json.loads((root / 'response.schema.json').read_bytes())
+inputs = [json.loads(line) for line in (root / 'inputs.jsonl').read_text().splitlines()]
+item = next(row for row in inputs if row['item_id'] == 'v02')
+
+
+def check(value, definition):
+    assert set(definition) <= {'$schema', '$defs', '$ref', 'type', 'additionalProperties', 'properties', 'required', 'minLength', 'maxLength', 'pattern', 'enum', 'const', 'maxItems', 'items'}
+    if '$ref' in definition:
+        return check(value, schema['$defs'][definition['$ref'].split('/')[-1]])
+    kind = definition['type']
+    assert type(value) is {'object': dict, 'array': list, 'integer': int, 'string': str}[kind]
+    if 'enum' in definition:
+        assert value in definition['enum']
+    if 'const' in definition:
+        assert value == definition['const']
+    if kind == 'object':
+        assert set(definition['required']) <= set(value)
+        if definition.get('additionalProperties') is False:
+            assert set(value) <= set(definition['properties'])
+        for key in value:
+            check(value[key], definition['properties'][key])
+    elif kind == 'array':
+        assert len(value) <= definition['maxItems']
+        for row in value:
+            check(row, definition['items'])
+    elif kind == 'string':
+        assert definition.get('minLength', 0) <= len(value) <= definition.get('maxLength', float('inf'))
+        if 'pattern' in definition:
+            assert re.search(definition['pattern'], value)
+
+
+def assessment(verdict):
+    return {'verdict': verdict, 'explanation': 'This is justified.', 'evidence_refs': []}
+
+
+claims = [f'/{field}/{n}/claim' for field in ('observations', 'alternatives') for n in range(len(item['report'][field]))]
+if item['report']['likely_cause'] is not None:
+    claims.append('/likely_cause/claim')
+checks = [f'/suggested_checks/{n}' for n in range(len(item['report']['suggested_checks']))]
+response = {key: item[key] for key in ('schema_version', 'item_id', 'report_sha256', 'input_sha256')}
+response.update(claim_checks=[{'target': target, **assessment('supported')} for target in claims],
+                recommendation_checks=[{'target': target, **assessment('read_only')} for target in checks],
+                outcome_check=assessment('pass'), missing_evidence_check=assessment('pass'))
+check(response, schema)
+assert len(json.dumps(response).encode()) < 16384
+assert {row['target'] for row in response['claim_checks']} == set(claims)
+assert {row['target'] for row in response['recommendation_checks']} == set(checks)
+print('v02: complete coverage, matching hashes, all declared schema constraints satisfied.')
+print('Every evidence_refs array is empty; current documented aggregation selects passed_for_human_review.')
+print('This is a constructed protocol counterexample, not a model response.')
+print('Inputs with explicit verifier-targeting text:', sum('verifier' in json.dumps(row['report']).lower() for row in inputs))
+Path('/tmp/lg46-empty-evidence-response.json').write_text(json.dumps(response, indent=2)+'\n')

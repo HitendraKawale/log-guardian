@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Security review | Log Guardian</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="security.css" />
+</head>
+<body class="security-page">
+  <header class="topbar">
+    <div class="brand"><div><h1>Security review</h1><p class="tagline">Log Guardian / gateway and authentication evidence</p></div></div>
+    <a class="ghost" href="index.html">Operational investigations</a>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Connect to your evidence store</h2>
+      <form id="security-connect" class="security-connection">
+        <label>API endpoint <input id="security-api" type="url" required /></label>
+        <label>Security API key <input id="security-key" type="password" autocomplete="off" required /></label>
+        <button type="submit">Connect</button>
+      </form>
+      <p class="security-note">The key stays in this page's memory. Only connect to a server you own.
+        Imports use deterministic correlation. Optional AI investigations require a separate key and an explicit start.
+        Neither correlation nor a model draft establishes attacker identity or AI involvement.</p>
+      <p id="security-message" role="status" aria-live="polite"></p>
+    </section>
+    <div class="split">
+      <aside class="inv-side">
+        <section class="panel">
+          <h2>Import a log window</h2>
+          <p class="security-note">Connect to load server-owned sources. Upload nginx JSON access logs and application auth JSONL in the documented formats.</p>
+          <form id="security-import" class="inv-form" hidden>
+            <label>From (UTC) <input id="security-start" type="text" placeholder="2026-09-01T10:00:00Z" required /></label>
+            <label>To (UTC) <input id="security-end" type="text" placeholder="2026-09-01T10:10:00Z" required /></label>
+            <p class="security-note">At most one hour, 1 MiB total and 1,000 input records. Use an empty file for a source with no supplied evidence.</p>
+            <div id="security-source-files"></div>
+            <button type="submit">Save review</button>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Saved reviews</h2><button id="security-reload" class="ghost" type="button" disabled>Reload</button></div>
+          <ul id="security-history" class="inv-list"><li class="empty">Connect to load history.</li></ul>
+          <div class="security-pages"><button id="security-previous" class="ghost" disabled>Previous</button><button id="security-next" class="ghost" disabled>Next</button></div>
+        </section>
+      </aside>
+      <section class="panel inv-main">
+        <div id="security-empty" class="empty-state"><h2>Select a saved review</h2><p>See observed authentication outcomes, linked evidence and missing context. A successful login alone does not prove compromise.</p></div>
+        <article id="security-detail" hidden>
+          <h2 id="security-title"></h2>
+          <p id="security-outcomes"></p>
+          <p id="security-scope" class="security-note"></p>
+          <p id="security-limits" class="callout">Collection completeness and clock alignment are unknown. Compromise, data access, actor identity and AI involvement are not established.</p>
+          <section class="security-execution" aria-labelledby="security-run-title">
+            <h3 id="security-run-title">Optional AI investigation</h3>
+            <p class="security-note">An explicit start sends this case's normalized evidence, including addresses and account references, to the configured model provider. The worker uses a $0.025 per-run allowance, not an account-wide billing cap. Uploading alone does not start a run. Reopening never retries a failed or cancelled run.</p>
+            <form id="security-run-form" class="inv-form">
+              <label>Investigation API key <input id="security-execution-key" type="password" autocomplete="off" required /></label>
+              <label class="security-consent"><input id="security-run-consent" type="checkbox" required /> I authorize sharing this case with the model provider.</label>
+              <button type="submit">Start or open investigation</button>
+            </form>
+            <p id="security-run-message" role="status" aria-live="polite"></p>
+            <p id="security-run-status"></p>
+            <button id="security-run-cancel" type="button" disabled>Cancel investigation</button>
+            <p class="callout">Unverified model draft. Citation links show what the model received, not whether its claims are correct. Human review is required.</p>
+            <div id="security-run-report"></div>
+            <details><summary>Delivered investigation evidence</summary><div id="security-run-evidence"></div></details>
+          </section>
+          <h3>Evidence gaps</h3><ul id="security-gaps"></ul>
+          <h3>Source observations</h3><ul id="security-counts"></ul>
+          <h3>Linked requests</h3><ul id="security-links" class="events"></ul>
+          <h3>Ambiguous or unlinked evidence</h3><ul id="security-unlinked" class="events"></ul>
+          <h3>Evidence timeline</h3>
+          <p class="security-note">Sorted by source timestamp, not proven causal order. Open a record to inspect its saved fields.</p>
+          <div id="security-timeline"></div>
+          <details><summary>Import provenance</summary><pre id="security-provenance" class="citation-body"></pre></details>
+        </article>
+      </section>
+    </div>
+  </main>
+  <script src="security.js"></script>
+</body>
+</html>

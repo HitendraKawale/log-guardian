@@ -1,0 +1,40 @@
+{
+  "status": "unreviewed_draft_not_execution_authorization",
+  "production_candidate": "a0d0df4be87f549cefcb3cb336a9e11ef53ae13d",
+  "author": "assistant",
+  "independent_reviewer": null,
+  "cases": 10,
+  "pairs": 5,
+  "observations": 35,
+  "model_requests": 0,
+  "model_evaluation": "not_run",
+  "packet_checks_passed": 21,
+  "offline_tests_passed": 482,
+  "demo_tests_passed": 6,
+  "packages": {
+    "openai": "2.11.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.10.4",
+    "sqlalchemy": "2.0.36",
+    "pytest": "8.3.4"
+  },
+  "sha256": {
+    "evals/investigator-security/cases.jsonl": "5d720e4c8af1f7d634f700de5574a36a2d6ed10e6c42072c4cdeb999e0f1dcca",
+    "evals/investigator-security/reviewer-notes.jsonl": "b5355c51cff82396d5d45e712bcf7b88937567730930760c6643e326d2c9d8e1",
+    "evals/investigator-security/README.md": "957987452e83c1056d7de8d84600e42cf86ee929b593bd6192fcf4fe23a8ff66",
+    "evals/investigator-security/verification.txt": "82086f26215dec0fe159b299196687a7e411d3ddc19d19965be7efef46956d15",
+    "evals/tests/test_investigator_security_packet.py": "147391c6c58e5073b3c000fa540b75b717cff89ffed9d738e6188e71b4a2a30e",
+    "docs/plans/staging-security-packet.md": "e18df96529eecf3cdff2cd497d0740e42c744470be712aa017d111ce80f9ae74",
+    "evals/run.py": "e41e976bf36e6afd024b69352d3ed555e9ffb4af8112e8df49018482eed1dd67",
+    "evals/validate.py": "bd97284c4454feea0be198c9b57097323124440a28ac1b551f88f7a778c935c9",
+    "services/ingestion-service/requirements.txt": "cdf019b63e943f3e272ace9486c202dff780713ba13e751543f29231e3b0ab4b",
+    "services/ingestion-service/runbooks/operations.md": "e8e6bed0a7438722f030f9f6bfc25f763eeb265a6bd656ff41a5b7822318596f",
+    "services/ingestion-service/app/investigator.py": "55c58b9fa0ca656d7fdb9a9a918e57a503cdfaf5e548156d06d85b8cd59bd61e",
+    "services/ingestion-service/app/investigation_agent.py": "4ba67f99aaab04f67f8128bd18726dd50eb1fe9214cfdd2a7a8a813525835844",
+    "services/ingestion-service/app/investigation_loop.py": "61d8ce2901cac60c1c8bf4d9227baeda6f5b5bf9e956ec85a556a508c9cced02",
+    "services/ingestion-service/app/investigation_schemas.py": "53219376a0858b4bbdebf3e55e7df3ea185b956d1ad2f84f7acb23b96449b23e",
+    "services/ingestion-service/app/investigation_shadow.py": "507bec72c8529f3ffe66dd3ac62aa658bfb2221def2f68684f7c6d31594dbafc",
+    "services/ingestion-service/app/investigation_tools.py": "aeb770111af5483c9d44da9cea886cec2f75d423dba5431fd61e754d06558e3d",
+    "services/ingestion-service/app/models.py": "40b89ad594d54a6bf1f7ce29a7efc2c20b41fe42441a289cced7fb11be9d13be"
+  }
+}

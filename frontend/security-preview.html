@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Security investigation walkthrough | Log Guardian</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    main { max-width: 1160px; line-height: 1.6; }
+    h1 { font-size: clamp(26px, 4vw, 42px); line-height: 1.15; }
+    h2 { font-size: 20px; }
+    a { color: var(--accent); }
+    a:focus-visible, video:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    video { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    figure { margin: 24px 0; }
+    figcaption { margin-top: 12px; }
+    li { margin-bottom: 12px; }
+    .recording-label { color: var(--yellow); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Log Guardian <span class="tagline">Recorded security-review workflow</span></div>
+    <a href="index.html">Older operational demo</a>
+  </header>
+  <main>
+    <h1>Investigate suspicious login activity</h1>
+    <p>Review gateway requests and authentication outcomes before drawing a conclusion.
+      This recording follows the working import, timeline and explicitly authorized investigator flow.</p>
+    <p class="recording-label">Synthetic logs. Scripted provider. No paid model calls.</p>
+    <figure>
+      <video controls playsinline preload="metadata" poster="media/security-review-poster.png" aria-label="Recorded security-review walkthrough" aria-describedby="recording-description">
+        <source src="media/security-review.webm" type="video/webm" />
+        <p><a href="media/security-review.webm">Download the recording</a> or read the transcript below.</p>
+      </video>
+      <figcaption id="recording-description">A silent recording with on-screen explanations, not an illustrative animation.
+        The UI, API, SQLite persistence and worker are real. Only the model response and token usage
+        are scripted. The estimated cost visible in the UI is not money spent.</figcaption>
+    </figure>
+    <section aria-labelledby="transcript-title">
+      <h2 id="transcript-title">Walkthrough transcript</h2>
+      <ol>
+        <li>Connect with a review key. The server supplies the registered gateway and authentication
+          sources. Uploaded text cannot choose a trusted identity or request namespace.</li>
+        <li>Import six authored records for a ten-minute window. The saved review shows three linked
+          requests, two authentication failures and one success. Importing queues no model work.</li>
+        <li>Open the first gateway citation, which records HTTP 200. Its linked authentication
+          record explicitly says failure. HTTP status and auth outcome are different evidence.</li>
+        <li>Enter a separate investigation key and acknowledge provider sharing. Explicitly start
+          the case-bound investigation. In this recording, a scripted provider supplies the draft.</li>
+        <li>Inspect the unverified draft and open its citation. The worker delivered that record;
+          the citation alone does not establish that the model's reasoning is correct.</li>
+        <li>Return to the case limits. One successful login does not prove compromise. Data access,
+          actor identity and AI involvement are unestablished. Collection completeness and clock
+          alignment remain unknown.</li>
+      </ol>
+    </section>
+    <section class="panel" aria-labelledby="limits-title">
+      <h2 id="limits-title">What this demonstrates</h2>
+      <p>A tested evidence-review workflow, not credential-stuffing detection accuracy or a real
+        customer incident. The application does not automatically block requests or disable accounts.
+        Model drafts require human review.</p>
+      <p>This page is read-only. It has no API client, upload controls or execution capability.
+        Playback starts only when you choose it; there is no autoplay or looping.</p>
+      <p><a href="https://github.com/HitendraKawale/log-guardian/blob/feat/48-business-security/docs/security-log-review.md">Run the importer locally and read its trust boundaries</a>.
+        The optional <a href="https://github.com/HitendraKawale/log-guardian/blob/feat/48-business-security/integrations/python/README.md">agent recorder</a>
+        remains a separate integration, not an external-attack detector.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -26,7 +26,9 @@ from .investigation_schemas import (
     LogQuery,
     MetricQuery,
     RunbookQuery,
+    SecurityEvidenceQuery,
 )
+from .investigation_security import SECURITY_GUIDANCE
 from .investigation_tools import MAX_RESULT_BYTES, redact
 
 MAX_MODEL_REQUESTS = 6
@@ -72,10 +74,34 @@ AGENT_PROMPT = PROMPT.replace(
 )
 
 
+SECURITY_TOOL_SCHEMAS = {"read_security_evidence": SecurityEvidenceQuery}
+SECURITY_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "read_security_evidence",
+            "description": "Read a page of the worker-bound saved security case. Follow next_offset for more records. Summary counts cover the whole saved case. Partner references are not delivered evidence IDs.",
+            "parameters": SecurityEvidenceQuery.model_json_schema(),
+        },
+    }
+]
+SECURITY_AGENT_PROMPT = (
+    AGENT_PROMPT.replace(
+        "An initial bounded, unfiltered log sample is already supplied.",
+        "An initial bounded security-evidence page is already supplied.",
+    )
+    + SECURITY_GUIDANCE
+)
+
+
 async def run_agent(question, tools, client, config, *, dry_run=False):
     if not isinstance(question, str) or not question.strip() or len(question) > 2048:
         raise ValueError("Invalid question")
     started = time.monotonic()
+    security = isinstance(getattr(tools, "security_case", None), dict)
+    schemas = SECURITY_TOOL_SCHEMAS if security else TOOL_SCHEMAS
+    declarations = SECURITY_TOOLS if security else TOOLS
+    prompt = SECURITY_AGENT_PROMPT if security else AGENT_PROMPT
     question = redact(question)
     response_format = {
         "type": "json_schema",
@@ -95,7 +121,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
         "model_returned": None,
         "sdk_version": openai.__version__,
         "prompt_sha256": hashlib.sha256(
-            (AGENT_PROMPT + canonical(response_format) + canonical(TOOLS)).encode()
+            (prompt + canonical(response_format) + canonical(declarations)).encode()
         ).hexdigest(),
         "parameters": {
             "temperature": 0,
@@ -124,7 +150,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
         },
     }
     messages = [
-        {"role": "system", "content": AGENT_PROMPT},
+        {"role": "system", "content": prompt},
         {
             "role": "user",
             "content": canonical(
@@ -167,15 +193,25 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
             if MAX_TOOL_EXECUTIONS < 1:
                 result["error"] = "tool_budget"
                 return result
-            arguments = LogQuery.model_validate(tools.scope.model_dump()).model_dump(mode="json")
-            arguments["services"] = sorted(arguments["services"])
+            initial_name = "read_security_evidence" if security else "query_logs"
+            if security:
+                arguments = SecurityEvidenceQuery().model_dump(mode="json")
+            else:
+                arguments = LogQuery.model_validate(tools.scope.model_dump()).model_dump(
+                    mode="json"
+                )
+                arguments["services"] = sorted(arguments["services"])
             tool_start = time.monotonic()
             result["tool_executions"] += 1
-            initial = await tools._initial_logs(arguments)
-            initial = retain("query_logs", arguments, initial, tool_start, origin="server_initial")
+            initial = (
+                await tools._initial_security_evidence(arguments)
+                if security
+                else await tools._initial_logs(arguments)
+            )
+            initial = retain(initial_name, arguments, initial, tool_start, origin="server_initial")
             if initial is None:
                 return result
-            seen.add(("query_logs", canonical(arguments)))
+            seen.add((initial_name, canonical(arguments)))
             messages.extend(
                 [
                     {
@@ -185,7 +221,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                                 "id": "server-initial-logs",
                                 "type": "function",
                                 "function": {
-                                    "name": "query_logs",
+                                    "name": initial_name,
                                     "arguments": canonical(arguments),
                                 },
                             }
@@ -202,7 +238,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                 input_bound = (
                     len(canonical(messages).encode())
                     + len(canonical(response_format).encode())
-                    + len(canonical(TOOLS).encode())
+                    + len(canonical(declarations).encode())
                     + 4096
                 )
                 reservation = estimated_cost(
@@ -240,7 +276,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                 ).chat.completions.create(
                     model=config.model,
                     messages=messages,
-                    tools=TOOLS,
+                    tools=declarations,
                     response_format=response_format,
                     temperature=0,
                     store=False,
@@ -309,13 +345,13 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                     if result["tool_executions"] >= MAX_TOOL_EXECUTIONS:
                         result["error"] = "tool_budget"
                         return result
-                    if call.type != "function" or call.function.name not in TOOL_SCHEMAS:
+                    if call.type != "function" or call.function.name not in schemas:
                         result["error"] = "unknown_tool"
                         return result
                     name = call.function.name
                     try:
                         arguments = (
-                            TOOL_SCHEMAS[name]
+                            schemas[name]
                             .model_validate_json(call.function.arguments)
                             .model_dump(mode="json")
                         )

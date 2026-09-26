@@ -18,10 +18,11 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from .investigation_agent import MODEL, BaselineConfig, run_investigation
-from .investigation_loop import TOOL_SCHEMAS
+from .investigation_loop import SECURITY_TOOL_SCHEMAS, TOOL_SCHEMAS
 from .investigation_schemas import InvestigationScope
+from .investigation_security import SECURITY_QUESTION, SECURITY_SYSTEM, binding, snapshot
 from .investigation_tools import EvidenceTools, redact
-from .models import Investigation, InvestigationEvent
+from .models import Investigation, InvestigationEvent, SecurityCase
 
 logger = logging.getLogger(__name__)
 POLL_SECONDS = 1.0
@@ -77,6 +78,9 @@ class RecordingTools(EvidenceTools):
     async def _initial_logs(self, arguments):
         return await self._wrap("query_logs", origin="server_initial")(**arguments)
 
+    async def _initial_security_evidence(self, arguments):
+        return await self._wrap("read_security_evidence", origin="server_initial")(**arguments)
+
     def _wrap(self, name, *, origin=None):
         async def call(**arguments):
             if await self._cancelling():
@@ -102,7 +106,7 @@ class RecordingTools(EvidenceTools):
         return call
 
     def __getattribute__(self, name):
-        if name in TOOL_SCHEMAS:
+        if name in TOOL_SCHEMAS or name in SECURITY_TOOL_SCHEMAS:
             return object.__getattribute__(self, "_wrap")(name)
         return object.__getattribute__(self, name)
 
@@ -146,6 +150,7 @@ async def execute_run(session_factory, run_id: str, client, model: str = MODEL) 
     async with session_factory() as session:
         run = await session.get(Investigation, run_id)
         question, system, scope = run.question, run.system, dict(run.scope)
+        case_id, request_sha256 = run.security_case_id, run.request_sha256
     error = None
     result = None
     try:
@@ -154,12 +159,26 @@ async def execute_run(session_factory, run_id: str, client, model: str = MODEL) 
         async with session_factory() as evidence_session:
             from .config import settings
 
+            security_case = None
+            if case_id is not None:
+                case = await evidence_session.get(SecurityCase, case_id)
+                if (
+                    case is None
+                    or system != SECURITY_SYSTEM
+                    or question != SECURITY_QUESTION
+                    or scope != case.report["scope"]
+                    or request_sha256 != binding(case)
+                ):
+                    raise ValueError("Security source binding mismatch")
+                security_case = snapshot(case)
+                system = "C"
             tools = RecordingTools(
                 InvestigationScope(**scope),
                 session_factory,
                 run_id,
                 session=evidence_session,
                 prometheus_url=settings.prometheus_url or None,
+                security_case=security_case,
             )
             config = BaselineConfig(model=model, max_cost_usd="0.025")
             result = await run_investigation(system, question, tools, client, config)

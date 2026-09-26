@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     # execution entirely; there is no unauthenticated investigation mode.
     investigation_api_key: str = ""
 
+    # Offline security evidence import/review. Neither key nor source settings
+    # come from uploaded logs. An empty key disables every security endpoint.
+    security_api_key: str = ""
+    security_sources_path: str = ""
+
     # Demo-only Prometheus base URL for the fixed-template metric tool. Empty
     # disables the tool (it reports source_unavailable).
     prometheus_url: str = ""

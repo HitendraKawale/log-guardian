@@ -9,7 +9,7 @@ import hashlib
 import json
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
@@ -18,7 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..database import get_session
 from ..investigation_schemas import InvestigationScope
-from ..models import Investigation, InvestigationCandidate, InvestigationEvent
+from ..investigation_security import SECURITY_QUESTION, SECURITY_SYSTEM, binding
+from ..models import Investigation, InvestigationCandidate, InvestigationEvent, SecurityCase
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
 
@@ -27,8 +28,11 @@ CANCELLABLE = {"queued", "running"}
 PENDING = {"queued", "running", "cancelling"}
 
 
-async def require_investigation_key(x_api_key: str | None = Header(default=None)) -> None:
-    """Unlike log ingestion, an empty key disables this API entirely."""
+async def require_investigation_key(
+    response: Response, x_api_key: str | None = Header(default=None)
+) -> None:
+    """An empty key disables execution; authorized evidence must not be cached."""
+    response.headers["Cache-Control"] = "no-store"
     if not settings.investigation_api_key:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -59,7 +63,8 @@ def _public(run: Investigation) -> dict:
     return {
         "id": run.id,
         "question": run.question,
-        "system": run.system,
+        "system": "C" if run.system == SECURITY_SYSTEM else run.system,
+        "security_case_id": run.security_case_id,
         "scope": run.scope,
         "status": run.status,
         "error": run.error,
@@ -213,6 +218,52 @@ async def promote_candidate(
     candidate.status = "promoted"
     await session.commit()
     await session.refresh(run)
+    return _public(run)
+
+
+class SecurityPromotion(BaseModel):
+    """The saved case owns scope and source; the caller cannot override either."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+@router.post("/from-security-case/{case_id}", dependencies=[Depends(require_investigation_key)])
+async def promote_security_case(
+    case_id: str,
+    response: Response,
+    body: SecurityPromotion | None = None,
+    session: AsyncSession = Depends(get_session),
+):
+    response.headers["Cache-Control"] = "no-store"
+    if session.bind.dialect.name == "sqlite":
+        await session.execute(text("BEGIN IMMEDIATE"))
+    case = await session.scalar(
+        select(SecurityCase).where(SecurityCase.id == case_id).with_for_update()
+    )
+    if case is None:
+        raise HTTPException(404, "Unknown security review")
+    existing = await session.scalar(
+        select(Investigation).where(Investigation.security_case_id == case_id)
+    )
+    if existing is not None:
+        return _public(existing)
+    pending = await session.scalar(
+        select(func.count()).select_from(Investigation).where(Investigation.status.in_(PENDING))
+    )
+    if pending >= MAX_PENDING:
+        raise HTTPException(429, "Investigation queue is full")
+    scope = InvestigationScope.model_validate(case.report["scope"])
+    run = Investigation(
+        question=SECURITY_QUESTION,
+        system=SECURITY_SYSTEM,
+        scope=scope.model_dump(mode="json"),
+        security_case_id=case.id,
+        request_sha256=binding(case),
+    )
+    session.add(run)
+    await session.commit()
+    await session.refresh(run)
+    response.status_code = 201
     return _public(run)
 
 

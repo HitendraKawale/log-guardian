@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "report_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "claim_checks": {
+      "type": "array",
+      "maxItems": 17,
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "recommendation_checks": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/recommendation"
+      }
+    },
+    "outcome_check": {
+      "$ref": "#/$defs/report_check"
+    },
+    "missing_evidence_check": {
+      "$ref": "#/$defs/report_check"
+    }
+  },
+  "required": [
+    "schema_version",
+    "item_id",
+    "report_sha256",
+    "input_sha256",
+    "claim_checks",
+    "recommendation_checks",
+    "outcome_check",
+    "missing_evidence_check"
+  ],
+  "$defs": {
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        }
+      },
+      "required": [
+        "evidence_id",
+        "quote"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "string",
+          "pattern": "^/(observations/[0-7]/claim|alternatives/[0-7]/claim|likely_cause/claim)$"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "supported",
+            "contradicted",
+            "insufficient"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/evidence_ref"
+          }
+        }
+      },
+      "required": [
+        "target",
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ]
+    },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "string",
+          "pattern": "^/suggested_checks/[0-7]$"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "read_only",
+            "state_changing",
+            "uncertain"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/evidence_ref"
+          }
+        }
+      },
+      "required": [
+        "target",
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ]
+    },
+    "report_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "uncertain"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/evidence_ref"
+          }
+        }
+      },
+      "required": [
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ]
+    }
+  }
+}

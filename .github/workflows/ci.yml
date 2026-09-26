@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.8.4
-      - run: ruff check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
-      - run: ruff format --check services ml evals demo scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py
+      - run: ruff check services ml evals demo integrations/python scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py tests/e2e/test_security_review_ui.py tests/integration/test_security_import.py tests/integration/test_security_nginx.py tests/e2e/test_static_demo.py scripts/export_static_demo.py
+      - run: ruff format --check services ml evals demo integrations/python scripts/forward_compose_logs.py tests/forwarder tests/e2e/test_local_onboarding_ui.py tests/e2e/test_detector_ui.py tests/e2e/test_candidates_ui.py tests/e2e/stub_server.py tests/integration/test_incident_detection.py tests/e2e/test_security_review_ui.py tests/integration/test_security_import.py tests/integration/test_security_nginx.py tests/e2e/test_static_demo.py scripts/export_static_demo.py
 
   manifests:
     name: validate k8s manifests
@@ -47,6 +47,8 @@ jobs:
             tests: forwarder
           - name: demo
             path: demo
+          - name: agent
+            path: integrations/python
     defaults:
       run:
         working-directory: ${{ matrix.path }}
@@ -60,6 +62,10 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
+
+      - name: Check agent package installation
+        if: matrix.name == 'agent'
+        run: pip install --no-deps .
 
       - name: Run tests
         run: python -m pytest -q ${{ matrix.tests }}
@@ -96,6 +102,7 @@ jobs:
         working-directory: tests
         env:
           LG_TEST_POSTGRES_URL: postgresql://logguardian:logguardian@localhost:5432/logguardian
+          LG_TEST_NGINX_IMAGE: nginx:alpine
         run: python -m pytest integration -q
 
       - name: Install Chromium

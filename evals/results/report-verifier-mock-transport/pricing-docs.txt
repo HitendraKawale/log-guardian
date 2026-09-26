@@ -1,0 +1,515 @@
+npm notice run npx
+npm notice run 'ctx7' docs /websites/developers_openai_api GPT-4.1 mini gpt-4.1-mini-2025-04-14 pricing input cached output per million tokens structured outputs chat completions
+### Answer questions based on context in Java
+
+Source: https://developers.openai.com/api/docs/guides/embeddings
+
+Constructs a question-answering prompt with context and executes a chat completion request using gpt-4.1-mini. Requires an initialized OpenAIClient instance.
+
+```java
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+
+String article =
+    "At the 2022 Winter Olympics, Great Britain won women's curling and Sweden won men's curling.";
+String question =
+    "Use the below article on the 2022 Winter Olympics to answer the subsequent question. "
+        + "If the answer cannot be found, write \"I don't know.\"\n\n"
+        + "Article:\n"
+        + article
+        + "\n\nQuestion: Which athletes won the gold medal in curling at the 2022 Winter Olympics?";
+
+ChatCompletionCreateParams params =
+    ChatCompletionCreateParams.builder()
+        .model("gpt-4.1-mini")
+        .addSystemMessage("You answer questions about the 2022 Winter Olympics.")
+        .addUserMessage(question)
+        .temperature(0)
+        .build();
+
+client.chat().completions().create(params).choices().stream()
+    .flatMap(choice -> choice.message().content().stream())
+    .forEach(System.out::println);
+```
+
+--------------------------------
+
+### Inspect token usage and prompt caching details in JSON response
+
+Source: https://developers.openai.com/api/docs/guides/prompt-caching
+
+Inspect `cached_tokens` and `cache_write_tokens` inside `input_tokens_details` to verify cache hits and writes. In the Chat Completions API, these fields appear under `usage.prompt_tokens_details`.
+
+```json
+{
+  "usage": {
+    "input_tokens": 2600,
+    "input_tokens_details": {
+      "cached_tokens": 2000,
+      "cache_write_tokens": 400
+    }
+  }
+}
+```
+
+--------------------------------
+
+### Define Structured Output Schema with Chat Completions
+
+Source: https://developers.openai.com/api/docs/guides/responses-vs-chat-completions
+
+Configures a strict JSON schema and medium reasoning effort for structured chat completions. Ensure all object properties are specified in the required array and additionalProperties is set to false.
+
+```python
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-5.6",
+    messages=[
+        {
+            "role": "user",
+            "content": "Jane, 54 years old",
+        }
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "person",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "minLength": 1},
+                    "age": {"type": "number", "minimum": 0, "maximum": 130},
+                },
+                "required": ["name", "age"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    reasoning_effort="medium",
+)
+```
+
+```go
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/shared"
+)
+
+func main() {
+	client := openai.NewClient()
+	schema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name": map[string]any{"type": "string", "minLength": 1},
+			"age":  map[string]any{"type": "number", "minimum": 0, "maximum": 130},
+		},
+		"required":             []string{"name", "age"},
+		"additionalProperties": false,
+	}
+
+	completion, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{仮想		Model:           "gpt-5.6",
+		ReasoningEffort: openai.ReasoningEffortMedium,
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("Jane, 54 years old"),
+		},
+		ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
+			OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name: "person", Strict: openai.Bool(true), Schema: schema,
+			}},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(completion.Choices[0].Message.Content)
+}
+```
+
+```java
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonValue;
+import com.openai.models.ReasoningEffort;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import java.util.List;
+import java.util.Map;
+
+ChatCompletionCreateParams params =
+    ChatCompletionCreateParams.builder()
+        .model("gpt-5.6")
+        .reasoningEffort(ReasoningEffort.MEDIUM)
+        .addUserMessage("Jane, 54 years old")
+        .putAdditionalBodyProperty(
+            "response_format",
+            JsonValue.from(
+                Map.of(
+                    "type",
+                    "json_schema",
+                    "json_schema",
+                    Map.of(
+                        "name",
+                        "person",
+                        "strict",
+                        true,
+                        "schema",
+                        Map.of(
+                            "type",
+                            "object",
+                            "properties",
+                            Map.of(
+                                "name",
+                                Map.of("type", "string", "minLength", 1),
+                                "age",
+                                Map.of("type", "number", "minimum", 0, "maximum", 130)),
+                            "required",
+                            List.of("name", "age"),
+                            "additionalProperties",
+                            false)))))
+        .build();
+
+client.chat().completions().create(params).choices().stream()
+    .flatMap(choice -> choice.message().content().stream())
+    .forEach(System.out::println);
+```
+
+```ruby
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24require "openai"
+
+client = OpenAI::Client.new
+schema = {
+  type: "object",
+  properties: {
+    name: {type: "string", minLength: 1},
+    age: {type: "number", minimum: 0, maximum: 130}
+  },
+  required: ["name", "age"],
+  additionalProperties: false
+}
+
+completion = client.chat.completions.create(
+  model: "gpt-5.6",
+  reasoning_effort: :medium,
+  messages: [{role: :user, content: "Jane, 54 years old"}],
+  response_format: {
+    type: :json_schema,
+    json_schema: {name: "person", strict: true, schema: schema}
+  }
+)
+
+puts(completion.choices.fetch(0).message.content)
+```
+
+--------------------------------
+
+### Define Structured Outputs in Chat Completions
+
+Source: https://developers.openai.com/api/docs/guides/migrate-to-responses
+
+Use `response_format` with a JSON schema definition to enforce structured JSON output in Chat Completions requests.
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/shared"
+)
+
+func main() {
+	client := openai.NewClient()
+	schema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name": map[string]any{"type": "string", "minLength": 1},
+			"age":  map[string]any{"type": "number", "minimum": 0, "maximum": 130},
+		},
+		"required":             []string{"name", "age"},
+		"additionalProperties": false,
+	}
+
+	completion, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+		Model:           "gpt-5.6",
+		ReasoningEffort: openai.ReasoningEffortMedium,
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("Jane, 54 years old"),
+		},
+		ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
+			OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name: "person", Strict: openai.Bool(true), Schema: schema,
+			}},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(completion.Choices[0].Message.Content)
+}
+```
+
+```java
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonValue;
+import com.openai.models.ReasoningEffort;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import java.util.List;
+import java.util.Map;
+
+ChatCompletionCreateParams params =
+    ChatCompletionCreateParams.builder()
+        .model("gpt-5.6")
+        .reasoningEffort(ReasoningEffort.MEDIUM)
+        .addUserMessage("Jane, 54 years old")
+        .putAdditionalBodyProperty(
+            "response_format",
+            JsonValue.from(
+                Map.of(
+                    "type",
+                    "json_schema",
+                    "json_schema",
+                    Map.of(
+                        "name",
+                        "person",
+                        "strict",
+                        true,
+                        "schema",
+                        Map.of(
+                            "type",
+                            "object",
+                            "properties",
+                            Map.of(
+                                "name",
+                                Map.of("type", "string", "minLength", 1),
+                                "age",
+                                Map.of("type", "number", "minimum", 0, "maximum", 130)),
+                            "required",
+                            List.of("name", "age"),
+                            "additionalProperties",
+                            false)))))
+        .build();
+
+client.chat().completions().create(params).choices().stream()
+    .flatMap(choice -> choice.message().content().stream())
+    .forEach(System.out::println);
+```
+
+```ruby
+require "openai"
+
+client = OpenAI::Client.new
+schema = {
+  type: "object",
+  properties: {
+    name: {type: "string", minLength: 1},
+    age: {type: "number", minimum: 0, maximum: 130}
+  },
+  required: ["name", "age"],
+  additionalProperties: false
+}
+
+completion = client.chat.completions.create(
+  model: "gpt-5.6",
+  reasoning_effort: :medium,
+  messages: [{role: :user, content: "Jane, 54 years old"}],
+  response_format: {
+    type: :json_schema,
+    json_schema: {name: "person", strict: true, schema: schema}
+  }
+)
+
+puts(completion.choices.fetch(0).message.content)
+```
+
+```bash
+curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+  "model": "gpt-5.6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Jane, 54 years old"
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "person",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "age": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 130
+          }
+        },
+        "required": [
+          "name",
+          "age"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "reasoning_effort": "medium"
+}'
+```
+
+### GPT-4.1 mini > Pricing
+
+Source: https://developers.openai.com/api/docs/models/gpt-4.1-mini
+
+Pricing for GPT-4.1 mini is token-based, set at $0.40 per 1M input tokens, $0.10 per 1M cached input tokens, and $1.60 per 1M output tokens. Modalities are restricted to text input/output and image input, with audio and video not supported.

@@ -1,0 +1,3 @@
+{"event_id":"a1","timestamp":"2026-09-01T10:00:01Z","request_id":"r1","account_ref":"account-1","outcome":"failure"}
+{"event_id":"a2","timestamp":"2026-09-01T10:00:03Z","request_id":"r2","account_ref":"account-2","outcome":"failure"}
+{"event_id":"a3","timestamp":"2026-09-01T10:00:05Z","request_id":"r3","account_ref":"account-3","outcome":"success"}

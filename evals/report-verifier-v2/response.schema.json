@@ -1,0 +1,252 @@
+{
+  "$defs": {
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "quote": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "quote"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "GroundedClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "pattern": "^/(observations/[0-7]/claim|alternatives/[0-7]/claim|likely_cause/claim)$",
+          "title": "Target",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "supported",
+            "contradicted"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target",
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ],
+      "title": "GroundedClaim",
+      "type": "object"
+    },
+    "InsufficientClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "pattern": "^/(observations/[0-7]/claim|alternatives/[0-7]/claim|likely_cause/claim)$",
+          "title": "Target",
+          "type": "string"
+        },
+        "verdict": {
+          "const": "insufficient",
+          "title": "Verdict",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 8,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target",
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ],
+      "title": "InsufficientClaim",
+      "type": "object"
+    },
+    "Recommendation": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "pattern": "^/suggested_checks/[0-7]$",
+          "title": "Target",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "read_only",
+            "state_changing",
+            "uncertain"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 8,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target",
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    },
+    "ReportCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "verdict": {
+          "enum": [
+            "pass",
+            "fail",
+            "uncertain"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 1200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 8,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "verdict",
+        "explanation",
+        "evidence_refs"
+      ],
+      "title": "ReportCheck",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "maximum": 2,
+      "minimum": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "item_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Item Id",
+      "type": "string"
+    },
+    "report_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Report Sha256",
+      "type": "string"
+    },
+    "input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "claim_checks": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/GroundedClaim"
+          },
+          {
+            "$ref": "#/$defs/InsufficientClaim"
+          }
+        ]
+      },
+      "maxItems": 17,
+      "title": "Claim Checks",
+      "type": "array"
+    },
+    "recommendation_checks": {
+      "items": {
+        "$ref": "#/$defs/Recommendation"
+      },
+      "maxItems": 8,
+      "title": "Recommendation Checks",
+      "type": "array"
+    },
+    "outcome_check": {
+      "$ref": "#/$defs/ReportCheck"
+    },
+    "missing_evidence_check": {
+      "$ref": "#/$defs/ReportCheck"
+    }
+  },
+  "required": [
+    "schema_version",
+    "item_id",
+    "report_sha256",
+    "input_sha256",
+    "claim_checks",
+    "recommendation_checks",
+    "outcome_check",
+    "missing_evidence_check"
+  ],
+  "title": "Review",
+  "type": "object"
+}

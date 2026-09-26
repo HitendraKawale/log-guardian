@@ -1,0 +1,3 @@
+{"time":"2026-09-01T10:00:02+00:00","request_id":"r1","remote_addr":"192.0.2.1","status":"200","route":"/login"}
+{"time":"2026-09-01T10:00:04+00:00","request_id":"r2","remote_addr":"192.0.2.2","status":"200","route":"/login"}
+{"time":"2026-09-01T10:00:06+00:00","request_id":"r3","remote_addr":"192.0.2.3","status":"200","route":"/login"}

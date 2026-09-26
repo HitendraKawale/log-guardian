@@ -1,0 +1,38 @@
+"""Wrap preserved scripted reviews in fake provider envelopes; prohibit real sockets."""
+import argparse
+import asyncio
+import json
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import httpx
+
+EVALS = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(EVALS))
+import report_verifier_transport as adapter
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--wire', type=Path, required=True)
+parser.add_argument('--output', type=Path, required=True)
+args = parser.parse_args()
+scripted = EVALS/'results/report-verifier-offline-runner-verified/scripted-responses'
+
+
+def respond(request):
+    item = json.loads(json.loads(request.content)['messages'][1]['content'])
+    return httpx.Response(200, json={
+        'model': adapter.MODEL, 'service_tier': 'default',
+        'choices': [{'index': 0, 'finish_reason': 'stop', 'message': {
+            'role': 'assistant', 'content': (scripted/f'{item["item_id"]}.json').read_text()}}],
+        'usage': {'prompt_tokens': 1000, 'completion_tokens': 800, 'total_tokens': 1800,
+                  'prompt_tokens_details': {'cached_tokens': 200}},
+    })
+
+
+async def main():
+    with patch('socket.socket', side_effect=AssertionError('real network forbidden')):
+        return await adapter.run_mock(args.wire, args.output, httpx.MockTransport(respond))
+
+
+print(json.dumps(asyncio.run(main()), indent=2))

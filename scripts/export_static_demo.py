@@ -79,7 +79,13 @@ def convert(artifact: dict, run_id: str, note: str) -> dict:
 def main() -> None:
     if SITE.exists():
         shutil.rmtree(SITE)
-    shutil.copytree(ROOT / "frontend", SITE, ignore=shutil.ignore_patterns("Dockerfile", "*.conf"))
+    shutil.copytree(
+        ROOT / "frontend",
+        SITE,
+        ignore=shutil.ignore_patterns(
+            "Dockerfile", "*.conf", "security.html", "security.js", "security.css"
+        ),
+    )
     runs = []
     for path, run_id, note in RUNS:
         artifact = json.loads((ROOT / path).read_text())
@@ -89,7 +95,11 @@ def main() -> None:
     for banned in ("api_key", "OPENAI", "sk-", "idempotency"):
         assert banned not in blob, banned
     (SITE / "recorded-runs.json").write_text(blob + "\n")
-    index = (SITE / "index.html").read_text()
+    index = (
+        (SITE / "index.html")
+        .read_text()
+        .replace('      <a class="ghost" href="security.html">Security review</a>\n', "")
+    )
     index = index.replace(
         '<script src="app.js"></script>',
         '<script>window.LG_RECORDED_URL = "recorded-runs.json";</script>\n'

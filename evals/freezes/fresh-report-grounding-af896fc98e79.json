@@ -1,0 +1,32 @@
+{
+  "corpus_freeze_sha256": "af896fc98e7929be8507de15a14a1387c1ead48bd4b0b3ddb19c71cd14da2ab5",
+  "dataset_version": "fresh-report-grounding-1",
+  "case_ids": [
+    "fresh-01",
+    "fresh-02",
+    "fresh-03",
+    "fresh-04",
+    "fresh-05",
+    "fresh-06",
+    "fresh-07",
+    "fresh-08",
+    "fresh-09",
+    "fresh-10",
+    "fresh-11",
+    "fresh-12"
+  ],
+  "files": {
+    "AUTHORING.md": "ac85eb3a4282b78514501bee28f5a314f1bcf248865155e7b6542faeaa9be483",
+    "SHA256SUMS": "c58c6248134863ebb3ee9b8c398021e1d35541efcd4d529a420e2ddf4bba03a8",
+    "build.py": "750939652cd5aeac9bffbdaa3ac2ee133880393f6f8beb59ba1d23489dc5a0f9",
+    "cases.jsonl": "74fcfffbd4e862ef56c45784da7813b1f22a03fff7610939b589d18d93f058ca",
+    "labels.jsonl": "eadf373072ab9c2cd07ba2d91fbb732fcebb76a9553b48601048e758e5bbe3db",
+    "pairs.json": "edeb404b5175656132d6aff2e148aa4dfc78f015b6b513ff19522086c8e1a5e0",
+    "provenance.md": "11c8d140b33d0ae954d1031309ef162fb8480599975a87044528264b6fbf0a0a",
+    "rubric.md": "0810e715de1e923d0499f05404a1d6b919627dac05fe4ca539fc941085d7ac69",
+    "validate.py": "175978f2d7447ba869ab89782c550d35d1315ce56bcfac3c97556edaaddc95c5"
+  },
+  "candidate_sha256": "20e8e292e67b2cd7cc9968668fb63968446c56b17a52f6df06a89168fb905168",
+  "status": "frozen_no_paid_authorization",
+  "provenance_limit": "Separate-model authoring with declared repository-instruction/path exposure; scenario summaries subsequently read by candidate author. No candidate run."
+}

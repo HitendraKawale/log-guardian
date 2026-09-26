@@ -1,0 +1,3 @@
+{"evidence_id": "a1", "event_time": "2026-09-01T10:00:01Z", "request_id": "r1", "account_ref": "account-1", "auth_outcome": "failure"}
+{"evidence_id": "a2", "event_time": "2026-09-01T10:00:03Z", "request_id": "r2", "account_ref": "account-2", "auth_outcome": "failure"}
+{"evidence_id": "a3", "event_time": "2026-09-01T10:00:05Z", "request_id": "r3", "account_ref": "account-3", "auth_outcome": "success"}

@@ -16,7 +16,7 @@ from .config import settings
 from .database import engine, init_db
 from .logging_config import setup_logging
 from .producer import start_producer, stop_producer
-from .routes import candidates, feedback, health, investigations, logs, model
+from .routes import candidates, feedback, health, investigations, logs, model, security_cases
 from .security import rate_limit_middleware
 from .telemetry import setup_telemetry
 
@@ -53,6 +53,7 @@ app.include_router(feedback.router)
 app.include_router(model.router)
 app.include_router(candidates.router)
 app.include_router(investigations.router)
+app.include_router(security_cases.router)
 
 
 @app.get("/metrics", tags=["Monitoring"])

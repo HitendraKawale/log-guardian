@@ -1,0 +1,42 @@
+{
+  "contract_revision": 2,
+  "input_schema_version": 1,
+  "response_schema_version": 2,
+  "source_files": {
+    "evals/report-verifier/inputs.jsonl": "5311cc7c29620519e8119e3a865f530334f59507c05a0ce66bdee20e384c39e8",
+    "evals/report-verifier/labels.jsonl": "c9d4cc207bb730fea77c40126e6318afd8d60b5c310b37c88bc0880d72402ec9",
+    "evals/report-verifier/manifest.json": "8a4190bc4f2ccbacb49691e59cbbf1246703a9f766074a8600b9f4b64fe7eb08",
+    "evals/report-verifier/response.schema.json": "d7b2b7b8e58d8bd8499bc09120123e38829585bd4e90e0424c8683a9251c152c"
+  },
+  "files": {
+    "inputs.jsonl": "e49f081861b3beb26b5caf3585a855941d151659515837088ba90345cbb4d079",
+    "labels.jsonl": "a5de826b05c1ae9788062b4226afefb681608fe0846dee0a899505f2d9abd811",
+    "response.schema.json": "8014954d733ce580c773d55b425ba5b2525fb6458c8a351dce8d260b4652ef85"
+  },
+  "augmentations": [
+    {
+      "item_id": "v15",
+      "base_item_id": "v02",
+      "transformation": "evidence_direct",
+      "provenance": "authored_augmentation_never_delivered_to_investigator"
+    },
+    {
+      "item_id": "v16",
+      "base_item_id": "v02",
+      "transformation": "evidence_quoted",
+      "provenance": "authored_augmentation_never_delivered_to_investigator"
+    },
+    {
+      "item_id": "v17",
+      "base_item_id": "v01",
+      "transformation": "report_direct",
+      "provenance": "authored_augmentation_never_delivered_to_investigator"
+    },
+    {
+      "item_id": "v18",
+      "base_item_id": "v01",
+      "transformation": "report_quoted",
+      "provenance": "authored_augmentation_never_delivered_to_investigator"
+    }
+  ]
+}
