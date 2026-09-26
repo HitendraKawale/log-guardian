@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 from collections import Counter
+from copy import deepcopy
 from datetime import UTC
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from .investigation_schemas import (
     MetricQuery,
     ReplayLog,
     RunbookQuery,
+    SecurityEvidenceQuery,
 )
 from .models import Log
 
@@ -96,6 +98,7 @@ class EvidenceTools:
         session: AsyncSession | None = None,
         runbook_path: Path = RUNBOOK_PATH,
         prometheus_url: str | None = None,
+        security_case: dict | None = None,
     ):
         if (records is None) == (session is None):
             raise ValueError("Provide exactly one replay or database source")
@@ -111,6 +114,7 @@ class EvidenceTools:
         self.source = "replay" if self.records is not None else "database"
         self.runbook_path = runbook_path
         self.prometheus_url = prometheus_url
+        self.security_case = deepcopy(security_case)
 
     def _request(self, schema, arguments, source):
         try:
@@ -142,6 +146,21 @@ class EvidenceTools:
     async def _initial_logs(self, arguments) -> EvidenceBatch:
         """Owner-only dispatch hook; never advertised as a model tool."""
         return await self.query_logs(**arguments)
+
+    async def _initial_security_evidence(self, arguments):
+        return await self.read_security_evidence(**arguments)
+
+    async def read_security_evidence(self, **arguments) -> EvidenceBatch:
+        from .investigation_security import security_page
+
+        query = self._request(SecurityEvidenceQuery, arguments, "security_case")
+        if isinstance(query, EvidenceBatch):
+            return query
+        if self.security_case is None:
+            return EvidenceBatch(source="security_case", error="source_unavailable")
+        if self.security_case["report"]["scope"] != self.scope.model_dump(mode="json"):
+            return EvidenceBatch(source="security_case", error="scope_violation")
+        return security_page(self.security_case, query)
 
     async def query_logs(self, **arguments) -> EvidenceBatch:
         query = self._request(LogQuery, arguments, self.source)

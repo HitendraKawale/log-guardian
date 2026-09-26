@@ -47,7 +47,13 @@ class Investigation(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_id)
     question: Mapped[str] = mapped_column(String(2048))
-    system: Mapped[str] = mapped_column(String(1))  # A, B or C
+    system: Mapped[str] = mapped_column(String(1))  # A/B/C; S marks case-bound C
+    security_case_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("security_cases.id", ondelete="RESTRICT"),
+        nullable=True,
+        unique=True,
+    )
     scope: Mapped[dict] = mapped_column(JSON)  # validated InvestigationScope dump
     # queued -> running -> completed | failed | cancelled (terminal states are final)
     status: Mapped[str] = mapped_column(String(16), default="queued", index=True)

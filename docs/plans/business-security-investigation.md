@@ -122,14 +122,17 @@ selection and a model narrative are separate decisions requiring their own check
 [Import/review implementation](security-import-review.md) and
 [executed verification](../verification/security-import/README.md).
 The owner selected nginx plus structured application authentication logs. The live
-review page now imports and saves evidence without calling a model. Connecting this
-security evidence to the investigator's tools remains open.
+review page imports and saves evidence without calling a model. An explicit, separately
+keyed action now connects a saved case to the existing investigator. The connection
+has scripted-provider verification only, not a live accuracy result. See
+[connection implementation](security-investigator-connection.md) and its
+[verification](../verification/security-investigator/README.md).
 
 - [x] Choose and document an explicit gateway/auth adapter against actual source
   formats, with source-owned identity and proxy trust configuration.
 - [x] Add authenticated, bounded, idempotent ingestion and migrations for security
   evidence without changing existing scorer behavior or losing stored operational logs.
-- [ ] Expose request-correlated evidence through scoped read-only investigation tools.
+- [x] Expose request-correlated evidence through scoped read-only investigation tools.
   Tool budgets, journal intent-before-dispatch and untrusted-source boundaries remain.
 - [x] Add a reviewable timeline and evidence gaps to the product UI. A user starts
   an investigation; incoming attack volume does not automatically spend model budget.

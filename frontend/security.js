@@ -8,6 +8,8 @@
   };
   let sources = [], maxBytes = 0, offset = 0, generation = 0, detailVersion = 0;
   let pending = null;
+  let activeCase = null, runId = null, runVersion = 0, runTimer = null, eventCursor = 0;
+  const runEvidence = new Map();
   const controllers = new Set();
   const message = (value) => { $("security-message").textContent = value; };
   $("security-api").value = new URLSearchParams(location.search).get("api") || "http://localhost:8000";
@@ -33,8 +35,8 @@
         signal: controller.signal,
         headers: { "X-API-Key": $("security-key").value, ...options.headers },
       });
-      if (epoch !== generation) throw new Error("Connection changed; reconnect to review this server.");
       const data = await response.json();
+      if (epoch !== generation) throw new Error("Connection changed; reconnect to review this server.");
       if (!response.ok) throw new Error(`HTTP ${response.status}: ${typeof data.detail === "string" ? data.detail : "Invalid request"}`);
       return { data, status: response.status };
     } finally {
@@ -45,6 +47,8 @@
 
   function invalidate() {
     generation++;
+    $("security-execution-key").value = "";
+    resetRun(null);
     for (const controller of controllers) controller.abort();
     sources = [];
     pending = null;
@@ -67,6 +71,7 @@
       button.type = "button";
       button.addEventListener("click", async () => {
         const version = ++detailVersion;
+        resetRun(null);
         try {
           const result = await request(`/security/cases/${encodeURIComponent(item.id)}`);
           if (version === detailVersion) render(result.data);
@@ -141,13 +146,14 @@
       render(result.data);
       offset = 0;
       await history();
-      message(result.status === 200 ? "Existing review loaded. No duplicate import created." : "Review saved. No model called.");
+      message(result.status === 200 ? "Existing review loaded. No duplicate import created." : "Review saved without a model call.");
     } catch (error) {
       message(`${error.message || "Upload failed."}${dispatched ? " If delivery is uncertain, retry unchanged files on this page to reuse the import key." : ""}`);
     } finally { button.disabled = false; }
   });
 
   function render(saved) {
+    resetRun(saved);
     const report = saved.report;
     $("security-empty").hidden = true;
     $("security-detail").hidden = false;
@@ -203,6 +209,132 @@
       request_sha256: saved.request_sha256, input_hashes: saved.input_hashes,
       source_snapshot: saved.source_snapshot }, null, 2);
   }
+  function resetRun(saved) {
+    runVersion++;
+    clearTimeout(runTimer);
+    activeCase = saved;
+    runId = saved?.investigation_id || null;
+    eventCursor = 0;
+    runEvidence.clear();
+    $("security-run-report").replaceChildren();
+    $("security-run-evidence").replaceChildren();
+    $("security-run-message").textContent = "";
+    $("security-run-status").textContent = runId ? "A linked investigation exists. Open it with the execution key." : "No investigation opened.";
+    $("security-run-consent").checked = false;
+    $("security-run-cancel").disabled = true;
+    $("security-run-form").querySelector("button").disabled = !saved;
+  }
+
+  function executionHeaders() {
+    const key = $("security-execution-key").value;
+    if (!key) throw new Error("Enter the separate investigation key.");
+    return { "X-API-Key": key };
+  }
+  $("security-execution-key").addEventListener("input", () => {
+    const consent = $("security-run-consent").checked;
+    resetRun(activeCase);
+    $("security-run-consent").checked = consent;
+  });
+
+  function renderDraft(report) {
+    const root = $("security-run-report");
+    root.replaceChildren();
+    if (!report) return;
+    root.append(element("p", `Model outcome: ${report.outcome}. Not independently verified.`));
+    for (const [title, findings] of [["Observations", report.observations], ["Alternatives", report.alternatives], ["Likely cause", report.likely_cause ? [report.likely_cause] : []]]) {
+      if (!findings.length) continue;
+      root.append(element("h4", title));
+      for (const finding of findings) {
+        const block = element("p", finding.claim);
+        for (const id of finding.evidence_ids) {
+          const button = element("button", id);
+          button.type = "button";
+          button.className = "citation";
+          button.addEventListener("click", () => {
+            const details = runEvidence.get(id);
+            if (!details) { $("security-run-message").textContent = "Citation is absent from the recorded evidence."; return; }
+            details.parentElement.parentElement.open = true;
+            details.open = true;
+            details.querySelector("summary").focus();
+            details.scrollIntoView({ block: "nearest" });
+          });
+          block.append(button);
+        }
+        root.append(block);
+      }
+    }
+    for (const [title, entries] of [["Missing evidence", report.missing_evidence], ["Suggested checks", report.suggested_checks]]) {
+      if (!entries.length) continue;
+      const list = element("ul");
+      list.append(...entries.map((entry) => element("li", entry)));
+      root.append(element("h4", title), list);
+    }
+  }
+
+  async function refreshRun(version) {
+    if (version !== runVersion || !runId || !activeCase) return;
+    const id = runId;
+    try {
+      const { data: run } = await request(`/investigations/${encodeURIComponent(id)}`, { headers: executionHeaders() });
+      if (version !== runVersion) return;
+      if (run.security_case_id !== activeCase.id) throw new Error("Investigation does not belong to the selected case.");
+      const { data: events } = await request(`/investigations/${encodeURIComponent(id)}/events?after=${eventCursor}`, { headers: executionHeaders() });
+      if (version !== runVersion) return;
+      for (const event of events) {
+        eventCursor = Math.max(eventCursor, event.sequence);
+        if (event.kind !== "tool_call") continue;
+        for (const item of event.payload.result?.items || []) {
+          if (runEvidence.has(item.evidence_id)) continue;
+          const details = element("details");
+          const pre = element("pre", JSON.stringify(item.content, null, 2));
+          pre.className = "citation-body";
+          details.append(element("summary", item.evidence_id), pre);
+          runEvidence.set(item.evidence_id, details);
+          $("security-run-evidence").append(details);
+        }
+      }
+      $("security-run-status").textContent = `${run.status}${run.error ? `: ${run.error}` : ""}. Run ${run.id}. Estimated cost: ${run.estimated_cost_usd ?? "unknown"} USD.`;
+      $("security-run-cancel").disabled = !["queued", "running"].includes(run.status);
+      renderDraft(run.report);
+      if (!["completed", "failed", "cancelled"].includes(run.status)) runTimer = setTimeout(() => refreshRun(version), 1000);
+    } catch (error) {
+      if (version === runVersion) $("security-run-message").textContent = `${error.message || "Could not read run."} Open the investigation again to refresh.`;
+    }
+  }
+
+  $("security-run-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!activeCase) return;
+    const version = ++runVersion;
+    const caseId = activeCase.id;
+    clearTimeout(runTimer);
+    const button = event.target.querySelector("button");
+    button.disabled = true;
+    $("security-run-message").textContent = "Opening case-bound investigation...";
+    try {
+      if (!runId) {
+        const { data } = await request(`/investigations/from-security-case/${encodeURIComponent(caseId)}`, { method: "POST", headers: executionHeaders() });
+        if (version !== runVersion) return;
+        runId = data.id;
+        activeCase.investigation_id = runId;
+      }
+      $("security-run-message").textContent = "Opening the existing run never creates a second run.";
+      await refreshRun(version);
+    } catch (error) {
+      if (version === runVersion) $("security-run-message").textContent = `${error.message || "Could not queue run."} Retry this same case to reopen any run already queued.`;
+    } finally { if (version === runVersion) button.disabled = false; }
+  });
+  $("security-run-cancel").addEventListener("click", async () => {
+    if (!runId) return;
+    const version = runVersion;
+    clearTimeout(runTimer);
+    try {
+      await request(`/investigations/${encodeURIComponent(runId)}/cancel`, { method: "POST", headers: executionHeaders() });
+      if (version === runVersion) await refreshRun(version);
+    } catch (error) { if (version === runVersion) $("security-run-message").textContent = error.message || "Cancellation was not confirmed."; }
+  });
+  window.addEventListener("pagehide", () => { runVersion++; clearTimeout(runTimer); for (const controller of controllers) controller.abort(); });
+
   for (const [id, step] of [["security-reload", 0], ["security-previous", -25], ["security-next", 25]]) {
     $(id).addEventListener("click", async () => {
       offset = Math.max(0, offset + step);

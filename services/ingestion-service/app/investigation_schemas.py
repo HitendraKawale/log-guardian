@@ -45,6 +45,14 @@ class LogQuery(InvestigationScope):
     limit: int = Field(50, strict=True, ge=1, le=50)
 
 
+class SecurityEvidenceQuery(BaseModel):
+    """The worker fixes case and scope; only bounded pagination is model-controlled."""
+
+    model_config = ConfigDict(extra="forbid")
+    offset: int = Field(0, strict=True, ge=0, le=1000)
+    limit: int = Field(25, strict=True, ge=1, le=48)
+
+
 class MetricQuery(BaseModel):
     """Fixed-template metric read; names map to server-owned queries, never PromQL."""
 
@@ -136,12 +144,12 @@ class InvestigationReport(BaseModel):
 
 class EvidenceItem(BaseModel):
     evidence_id: str
-    kind: Literal["log", "summary", "runbook", "metric"]
+    kind: Literal["log", "summary", "runbook", "metric", "security_event"]
     content: dict[str, Any]
 
 
 class EvidenceBatch(BaseModel):
-    source: Literal["replay", "database", "runbooks", "metrics"]
+    source: Literal["replay", "database", "runbooks", "metrics", "security_case"]
     version: str | None = None
     start: datetime | None = None
     end: datetime | None = None

@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database import get_session
-from ..models import SecurityCase, SecurityEvidence
+from ..models import Investigation, SecurityCase, SecurityEvidence
 from ..security_adapters import Registry, analyze_import
 from ..security_evidence import MAX_BYTES, decode_json
 
@@ -59,9 +59,13 @@ def digest(value):
     ).hexdigest()
 
 
-def public(case):
+async def public(case, session):
+    run_id = await session.scalar(
+        select(Investigation.id).where(Investigation.security_case_id == case.id)
+    )
     return {
         "id": case.id,
+        "investigation_id": run_id,
         "created_at": case.created_at.replace(tzinfo=UTC),
         "request_sha256": case.request_sha256,
         "source_snapshot": case.source_snapshot,
@@ -177,7 +181,7 @@ async def import_case(
     case, created = await save_case(session, owner, body, idempotency_key)
     response.status_code = 201 if created else 200
     response.headers["Cache-Control"] = "no-store"
-    return public(case)
+    return await public(case, session)
 
 
 @router.get("/cases")
@@ -210,4 +214,4 @@ async def get_case(case_id: str, response: Response, session: AsyncSession = Dep
     if case is None:
         fail(404, "Unknown security review")
     response.headers["Cache-Control"] = "no-store"
-    return public(case)
+    return await public(case, session)

@@ -34,16 +34,29 @@ def test_postgres_atomic_overlap_and_concurrent_imports():
         # Keep the fresh database for inspection; never drop a pre-existing database.
         url = admin_url.rsplit("/", 1)[0] + "/" + name
         database_url = url.replace("postgresql:", "postgresql+asyncpg:")
-        result = subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            cwd=SERVICE,
-            env={**os.environ, "DATABASE_URL": database_url},
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, result.stderr
+        for revision in ("0007", "head"):
+            result = subprocess.run(
+                [sys.executable, "-m", "alembic", "upgrade", revision],
+                cwd=SERVICE,
+                env={**os.environ, "DATABASE_URL": database_url},
+                capture_output=True,
+                text=True,
+            )
+            assert result.returncode == 0, result.stderr
+            if revision == "0007":
+                seed = await asyncpg.connect(url)
+                try:
+                    await seed.execute(
+                        "INSERT INTO investigations (id,question,system,scope,status,request_sha256,created_at) VALUES ('migration-old','preserve me','C','{}','completed','hash',now())"
+                    )
+                    await seed.execute(
+                        "INSERT INTO investigation_events (investigation_id,sequence,kind,payload,created_at) VALUES ('migration-old',1,'tool_request','{}',now())"
+                    )
+                finally:
+                    await seed.close()
         sys.path.insert(0, str(SERVICE))
-        from app.models import Investigation, SecurityCase, SecurityEvidence
+        from app.models import Investigation, InvestigationEvent, SecurityCase, SecurityEvidence
+        from app.routes.investigations import promote_security_case
         from app.routes.security_cases import list_cases, save_case
         from fastapi import HTTPException, Response
         from sqlalchemy import func, select
@@ -87,11 +100,31 @@ def test_postgres_atomic_overlap_and_concurrent_imports():
             async with factory() as session:
                 assert await session.scalar(select(func.count()).select_from(SecurityCase)) == 3
                 assert await session.scalar(select(func.count()).select_from(SecurityEvidence)) == 6
-                assert await session.scalar(select(func.count()).select_from(Investigation)) == 0
+                assert await session.scalar(select(func.count()).select_from(Investigation)) == 1
+                legacy = await session.get(Investigation, "migration-old")
+                assert legacy.question == "preserve me" and legacy.security_case_id is None
+                assert (
+                    await session.scalar(select(func.count()).select_from(InvestigationEvent)) == 1
+                )
                 history = await list_cases(Response(), session=session, limit=25, offset=0)
                 assert len(history) == 3
                 assert all(row["input_records"] == 6 and "report" not in row for row in history)
-            print(f"PostgreSQL security evidence verified in fresh database {name}")
+
+            async def promote():
+                async with factory() as session:
+                    reply = Response()
+                    run = await promote_security_case(a[0], reply, session=session)
+                    return run, reply.status_code
+
+            promotions = await asyncio.gather(*(promote() for _ in range(4)))
+            assert len({run["id"] for run, _ in promotions}) == 1
+            assert sorted(code for _, code in promotions) == [200, 200, 200, 201]
+            assert all(run["security_case_id"] == a[0] for run, _ in promotions)
+            async with factory() as session:
+                assert await session.scalar(select(func.count()).select_from(Investigation)) == 2
+            print(
+                f"PostgreSQL imports, migration and one-winner promotion verified in fresh database {name}"
+            )
         finally:
             await engine.dispose()
 

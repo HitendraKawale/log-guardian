@@ -9,7 +9,7 @@ import sys
 def test_security_upgrade_preserves_existing_log(tmp_path):
     path = tmp_path / "upgrade.db"
     env = {**os.environ, "DATABASE_URL": f"sqlite+aiosqlite:///{path}"}
-    for revision in ("0006", "head"):
+    for revision in ("0006", "0007"):
         result = subprocess.run(
             [sys.executable, "-m", "alembic", "upgrade", revision],
             env=env,

@@ -22,6 +22,10 @@
 .security-page #security-message { min-height: 1.5em; }
 .security-page .inv-list { margin-top: 12px; }
 .security-page [hidden] { display: none !important; }
+.security-execution { border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 20px 0; }
+.security-page .security-consent { flex-direction: row; align-items: start; line-height: 1.5; }
+.security-page input[type="checkbox"] { width: auto; margin-top: 3px; }
+.security-page #security-run-report { overflow-wrap: anywhere; }
 @media (max-width: 600px) {
   .security-page .security-connection { align-items: stretch; flex-direction: column; }
   .security-page .panel { padding: 16px; }

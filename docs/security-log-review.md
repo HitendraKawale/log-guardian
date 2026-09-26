@@ -1,9 +1,10 @@
 # Review nginx and application authentication logs
 
 Log Guardian can now import a bounded gateway/authentication log window, save its
-normalized evidence and review the linked timeline in a browser. This path calls no
-model and creates no paid Investigation rows. It reports observed outcomes and gaps,
-not an attack verdict, actor identity or proof of AI involvement.
+normalized evidence and review the linked timeline in a browser. Importing calls no
+model and creates no paid Investigation rows. A separate, explicit action can queue
+an AI investigation of that saved case. Its output is an unverified draft, not an
+attack verdict, actor identity or proof of AI involvement.
 
 ## Local setup
 
@@ -113,7 +114,7 @@ source identity for a genuinely new stream, rather than relabeling old evidence.
 
 ## API contract
 
-All routes require SECURITY_API_KEY in X-API-Key. An empty configured key returns 503;
+All /security routes require SECURITY_API_KEY in X-API-Key. An empty configured key returns 503;
 a missing or incorrect supplied key returns 401. This key is not the operational log
 key or the paid-investigation key. One authorized owner can review all stored cases;
 this is not multi-tenant authorization.
@@ -123,7 +124,7 @@ this is not multi-tenant authorization.
 | GET /security/sources | Current owner source settings and size limits |
 | POST /security/cases | Import `{scope, logs}` with a mandatory Idempotency-Key |
 | GET /security/cases?limit=25&offset=0 | Saved summaries, at most 50 per page |
-| GET /security/cases/{id} | Frozen report, source snapshot and input hashes |
+| GET /security/cases/{id} | Frozen report, source snapshot, input hashes and optional linked investigation ID |
 
 `scope` has services, start and end, with aware timestamps and a positive window of at
 most one hour. Its services must exactly match the configured source services. `logs` maps
@@ -148,6 +149,70 @@ source/event records. Conflicting content for any stored identity returns 409 an
 back the entire transaction, including newly introduced evidence in that request.
 Database uniqueness handles concurrent imports on SQLite and PostgreSQL.
 
+## Optional AI investigation
+
+Configure a distinct INVESTIGATION_API_KEY for the API and worker. An empty key disables
+execution endpoints. The review key cannot queue a run, read its report/events or cancel
+it. The linked run ID is visible to reviewers, but it is not an execution capability.
+Both keys stay in page memory. Changing the API endpoint clears the execution key.
+
+After inspecting a saved review, enter the investigation key, acknowledge provider
+sharing and choose Start or open investigation. Uploading, opening history and reloading
+the page never queue work. The control calls:
+
+```text
+POST /investigations/from-security-case/{case_id}
+X-API-Key: the separate investigation key
+```
+
+The route accepts no scope, question or system overrides. It copies the saved scope,
+uses a fixed question and queues system C. Creation returns 201; repeated requests
+return the same run with 200. The database enforces one run per saved case, including
+failed or cancelled runs. Reopening is not a paid retry. Separately imported cases can
+still get separate runs, even when their underlying events overlap.
+
+Upgrade the API and worker together before enabling case execution. Saved security runs
+carry an internal S discriminator, which old workers reject before provider dispatch
+instead of interpreting them as ordinary operational C runs. The updated worker verifies
+the case binding and executes the existing C algorithm; the public API reports C.
+An old worker may fail such a run, so stop old workers before queueing cases.
+
+The worker must run separately with the same database and INVESTIGATION_API_KEY. Its
+existing command is `python -m app.investigator` from services/ingestion-service, using
+the repository environment. OPENAI_API_KEY enables its provider client. Do not start a
+live worker against queued cases without current spending authorization. This milestone
+was verified with httpx.MockTransport only; old research allowances do not authorize a
+live check. No live worker was started for this implementation.
+
+The worker verifies the saved snapshot binding before contacting a provider. It uses
+only the case's frozen evidence, not today's source registry, operational logs with
+similar service names, other cases, metrics or runbooks. Missing/inconsistent source
+state fails the run rather than falling back to a broader source.
+
+The model sees only read_security_evidence, with offset and limit arguments. A bounded
+initial page is delivered before its first request and recorded in the existing tool
+journal. Every page carries whole-case counts, explicit gaps and a contiguous timeline
+page with next_offset. Pagination never converts unknown collection completeness into
+complete capture. Partner references do not authorize citations to undelivered records.
+
+Existing worker limits remain: six provider requests, eight tool executions including
+the initial read, 16 KiB per result, 64 KiB total evidence, 120 seconds and 1024 output
+tokens. The worker uses a $0.025 per-run allowance and disables SDK retries. That estimate
+is not a provider billing guarantee or account-wide cap. The existing pending-queue
+check is not a strict global ceiling under concurrent different-case submissions.
+Large cases can exceed evidence/cost limits before the model reads every record.
+
+The page displays status, missing evidence and the model draft, with links to the tool
+snapshots actually delivered. Cancel investigation requests cancellation through the
+existing endpoint. A provider request already in flight may still be billed. Partial
+evidence remains available after failure. Missing/ambiguous provider usage stays unknown.
+
+Every draft needs human review. Citation validation checks delivered membership, not
+whether a quote supports a claim. The experimental offline verifier is not in this path.
+Successful authentication still does not prove compromise; addresses and timing do not
+prove shared actors, coordination or AI automation. Security-case fields can contain
+attacker-controlled strings even when their source configuration is owner-controlled.
+
 ## Evidence, privacy and limits
 
 The saved report includes normalized source timestamps, auth outcomes, observed address
@@ -160,13 +225,14 @@ Stored data includes normalized records, source configuration, report and raw-in
 SHA-256 hashes. It does not retain raw uploaded lines, but addresses, routes, account
 references and request IDs can still be sensitive. Hashes bind content; they do not
 prove source authenticity, prevent a database administrator changing it, or anonymize
-predictable values. Protect the database, its backups, input files and report exports.
+predictable values. Protect the database, its backups, worker logs, input files and report exports.
 
-No continuous collector, automatic retention, production capacity claim, attack
-classifier or model narrative is included. The existing investigator does not yet
-query these security tables. This milestone adds an evidence-review workflow, not
-an autonomous incident verdict. Existing operational log ingestion and agent-recorder
-functionality remain available.
+No continuous collector, automatic retention, production capacity claim or validated
+attack classifier is included. The optional investigator produces drafts for review,
+not autonomous incident verdicts. Existing operational log ingestion and agent-recorder
+functionality remain available. Enabling provider execution shares normalized evidence,
+including potentially sensitive addresses and account references, outside this database.
+Investigation reads carry Cache-Control: no-store, as security review responses do.
 
 ## Verification
 
@@ -175,3 +241,8 @@ actual nginx header replacement and query-free logging against a synthetic upstr
 PostgreSQL concurrency, SQLite migration and real-API browser uploads.
 The application auth fixture is authored; nginx's upstream stub is not a real identity
 provider. No customer credentials or account attacks are part of the demonstration.
+
+The [investigator connection checks](verification/security-investigator/README.md)
+cover case isolation, first-request evidence delivery, durable tool intent, byte-bounded
+pagination, permission separation and the scripted-worker browser flow. They do not
+measure a real model's security-diagnosis accuracy.

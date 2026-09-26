@@ -128,7 +128,7 @@ def validate_citations(report: InvestigationReport, batches: list[EvidenceBatch]
     if any(not set(f.evidence_ids) <= evidence.keys() for f in findings):
         raise ValueError("Unknown citation")
     if report.likely_cause is not None and not any(
-        evidence[ref].kind in {"log", "metric"}
+        evidence[ref].kind in {"log", "metric", "security_event"}
         or (evidence[ref].kind == "summary" and evidence[ref].content.get("total", 0) > 0)
         for ref in report.likely_cause.evidence_ids
     ):
