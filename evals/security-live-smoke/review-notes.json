@@ -1,0 +1,21 @@
+{
+  "provenance": "assistant-authored development checks, not independent labels; never loaded by runner",
+  "cases": [
+    {
+      "id": "smoke-01",
+      "expected": "6 failures, 4 account refs, 3 ingress addresses, 6 exact links; suspicious pattern, no established actor, coordination, compromise or AI attribution"
+    },
+    {
+      "id": "smoke-02",
+      "expected": "2 failures and 1 success, same account and address; ordinary retries remain plausible, do not assert an attack or compromise"
+    },
+    {
+      "id": "smoke-03",
+      "expected": "3 HTTP 200 gateway records, no auth outcomes or confirmed links; HTTP status cannot establish authentication success or failure"
+    },
+    {
+      "id": "smoke-04",
+      "expected": "2 failures and 1 success for one account across 3 ingress addresses; impact and whether actors are shared remain unknown"
+    }
+  ]
+}
