@@ -1,0 +1,52 @@
+"""Read-only inspection of copied smoke databases; no provider worker exists here."""
+import contextlib
+import json
+import os
+from pathlib import Path
+
+import uvicorn
+from fastapi import HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.database import get_session
+from app.main import app
+
+state = json.loads(Path('/tmp/lg48-business-viewer-runtime.json').read_text())
+factories = {
+    name: async_sessionmaker(create_async_engine(f'sqlite+aiosqlite:///{path}'), expire_on_commit=False)
+    for name, path in state['databases'].items()
+}
+
+@contextlib.asynccontextmanager
+async def lifespan(app):
+    yield
+    for factory in factories.values():
+        await factory.kw['bind'].dispose()
+
+app.router.lifespan_context = lifespan
+
+async def session(request: Request):
+    name = request.url.hostname.split('.')[0]
+    name = 'smoke-03' if name in {'127', 'localhost'} else name
+    if name not in factories:
+        raise HTTPException(404, 'Unknown smoke case')
+    async with factories[name]() as db:
+        yield db
+
+app.dependency_overrides[get_session] = session
+
+@app.middleware('http')
+async def read_only(request, call_next):
+    if request.method not in {'GET', 'HEAD', 'OPTIONS'}:
+        return JSONResponse({'detail': 'Read-only live-batch review. No new execution allowed.'}, status_code=405)
+    return await call_next(request)
+
+@app.get('/')
+async def index():
+    links = ''.join(f'<li><a href="http://{name}.localhost:8485/ui/security.html?api=http://{name}.localhost:8485">{name}</a></li>' for name in factories)
+    return HTMLResponse('<h1>Business-log live results</h1><p>Four synthetic cases, real provider responses. Three reports rejected; one accepted. Read-only. Use Chrome for the named localhost links.</p><ul>' + links + '</ul><p>Keys are in the owner-only /tmp/lg48-business-viewer-runtime.json file. No provider worker is running.</p>')
+
+app.mount('/ui', StaticFiles(directory=os.environ['LG48_FRONTEND'], html=True))
+uvicorn.run(app, host='127.0.0.1', port=8485, log_level='warning')

@@ -1,0 +1,4 @@
+smoke-01: failed: invalid_report; read-only POST 405; no browser errors
+smoke-02: failed: incomplete_output; read-only POST 405; no browser errors
+smoke-03: completed; read-only POST 405; no browser errors
+smoke-04: failed: invalid_report; read-only POST 405; no browser errors

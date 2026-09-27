@@ -7,7 +7,7 @@ import httpx
 import pytest
 from app.config import settings
 from app.investigation_schemas import InvestigationScope
-from app.investigation_security import snapshot
+from app.investigation_security import SECURITY_GUIDANCE, snapshot
 from app.investigation_tools import EvidenceTools
 from app.investigator import RecordingTools, claim_next, execute_run
 from app.models import Investigation, InvestigationEvent, SecurityCase
@@ -255,6 +255,67 @@ async def test_worker_delivers_security_before_provider_and_records_citations(
             )
             + "\n"
         )
+
+
+@pytest.mark.parametrize(
+    "mode,error",
+    [
+        ("compact", None),
+        ("supported-without-cause", "invalid_report"),
+        ("cut-off", "incomplete_output"),
+    ],
+)
+async def test_security_guidance_delivery_keeps_report_rejection_strict(
+    client, session_factory, monkeypatch, mode, error
+):
+    run_id, _ = await queue(client, session_factory, monkeypatch)
+    requests = []
+
+    def provider(request):
+        body = json.loads(request.content)
+        requests.append(body)
+        assert body["messages"][0]["role"] == "system"
+        assert body["messages"][0]["content"].endswith(SECURITY_GUIDANCE)
+        assert body["max_completion_tokens"] == 1024
+        batch = json.loads(body["messages"][-1]["content"])
+        auth = next(
+            i
+            for i in batch["items"]
+            if i["kind"] == "security_event" and i["content"].get("auth_outcome") == "failure"
+        )
+        report = {
+            "observations": [
+                {
+                    "claim": "One authentication failure was recorded.",
+                    "evidence_ids": [auth["evidence_id"]],
+                }
+            ],
+            "missing_evidence": ["Account ownership and downstream activity are unknown."],
+            "alternatives": [],
+            "likely_cause": None,
+            "outcome": "supported" if mode == "supported-without-cause" else "inconclusive",
+            "suggested_checks": [],
+        }
+        # This proves a compact fixture fits, not that a model will produce it.
+        assert len(json.dumps(report).encode()) < 700
+        data = response(body, report).json()
+        if mode == "cut-off":
+            data["choices"][0]["finish_reason"] = "length"
+            data["choices"][0]["message"]["content"] = '{"observations":['
+            data["usage"].update(completion_tokens=1024, total_tokens=1124)
+        return httpx.Response(200, json=data)
+
+    async with scripted_client(provider) as provider_client:
+        await execute_run(session_factory, run_id, provider_client)
+    async with session_factory() as session:
+        run = await session.get(Investigation, run_id)
+        assert run.status == ("failed" if error else "completed")
+        assert run.error == error and len(requests) == 1
+        assert run.usage["output_tokens"] == (1024 if mode == "cut-off" else 100)
+        if error:
+            assert run.report is None
+        else:
+            assert run.report["outcome"] == "inconclusive" and run.report["likely_cause"] is None
 
 
 @pytest.mark.parametrize("mutation", ["report", "scope", "system", "question"])

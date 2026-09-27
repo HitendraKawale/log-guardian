@@ -133,34 +133,6 @@ def test_batch_caps_and_foreign_cases_cannot_reserve(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_mock_rehearsal_allows_source_changes_but_live_still_checks_base(
-    tmp_path, monkeypatch
-):
-    original = s.subprocess.run
-
-    def changed_source(command, *args, **kwargs):
-        if command[:2] == ["git", "diff"]:
-            raise s.subprocess.CalledProcessError(1, command)
-        return original(command, *args, **kwargs)
-
-    def forbidden_network(**kwargs):
-        pytest.fail("changed production source reached live transport construction")
-
-    monkeypatch.setattr(s.subprocess, "run", changed_source)
-    result = await s.run_batch(
-        tmp_path / "offline", s.manifest()[1], transport=httpx.MockTransport(response)
-    )
-    assert result["cases"] == dict.fromkeys(s.CASE_IDS, "completed")
-    monkeypatch.setattr(s.p, "clean_worktree", lambda: True)
-    target = tmp_path / "live"
-    monkeypatch.setattr(s, "ledger", lambda: target)
-    monkeypatch.setattr(s.httpx, "AsyncHTTPTransport", forbidden_network)
-    with pytest.raises(s.subprocess.CalledProcessError):
-        await s.run_batch(target, s.manifest()[1], live=True, key="not-a-real-key")
-    assert not target.exists()
-
-
-@pytest.mark.asyncio
 async def test_frozen_digest_and_live_gate(tmp_path):
     with pytest.raises(ValueError, match="frozen"):
         await s.run_batch(tmp_path / "changed", "wrong", transport=httpx.MockTransport(response))

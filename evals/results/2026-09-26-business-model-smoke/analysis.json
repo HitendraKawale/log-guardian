@@ -1,0 +1,96 @@
+{
+  "summary": {
+    "allowance_closed": true,
+    "attempts": 4,
+    "cases": {
+      "smoke-01": "failed",
+      "smoke-02": "failed",
+      "smoke-03": "completed",
+      "smoke-04": "failed"
+    },
+    "fatal": null,
+    "known_cost_upper_usd": "0.0103760",
+    "mode": "live",
+    "reserved_usd": "0.03393520",
+    "usage_complete": true
+  },
+  "cases": {
+    "smoke-01": {
+      "status": "failed",
+      "error": "invalid_report",
+      "estimated_cost_usd": "0.00289240",
+      "delivered_records": 15,
+      "responses": [
+        {
+          "finish_reason": "stop",
+          "content": "{\"observations\":[{\"claim\":\"There were 15 total records in the scope from 12:00 to 12:10, with 9 gateway requests and 6 authentication results.\",\"evidence_ids\":[\"security-summary:b7f2b357cdec05590e88f27eb6149ba8b5d3307b61467af6aace25b3401807e4\"]},{\"claim\":\"All 6 authentication attempts failed; there were no successful authentications recorded.\",\"evidence_ids\":[\"security-summary:b7f2b357cdec05590e88f27eb6149ba8b5d3307b61467af6aace25b3401807e4\"]},{\"claim\":\"Gateway requests included 3 distinct client addresses and all returned HTTP status codes indicating no success or failure in authentication (200, 401, 429).\",\"evidence_ids\":[\"security-summary:b7f2b357cdec05590e88f27eb6149ba8b5d3307b61467af6aace25b3401807e4\"]},{\"claim\":\"Six gateway requests to the /api/auth/login route correlated with six authentication failure events, all returning HTTP 401 status codes.\",\"evidence_ids\":[\"security-event:9870eeef7a05089691a53931f49fd825274883ad7a99091dcd82a702c11c252d\",\"security-event:fead131a4b6d805ac9d301a95c75712615d4938182f95212c9135eaae45c245c\",\"security-event:6fffaa4c9df63b5585ab9196d5f641d23225427edc29302e0faf1b094097bd4a\",\"security-event:790f2ddaa97b1c9fcaa7c141677d136eb2a7ea9342309f1a006eecf972198ae8\",\"security-event:05b3f045e30305697da6e25c423e87f95026954b4a42e7eb5a39bdaa31c79d1b\",\"security-event:d43a13395912b241158265a0122572cc895e6b2946f721f858bebf16e1308a79\",\"security-event:e11bf61352978e919ada99f89cf5ba1984e363181e486cc05e9e7c54ac6e970f\",\"security-event:67ac56cd5921c1e55b824e19f89ac2d6132724f65152c070749435892fb979b3\"]},{\"claim\":\"There were three gateway requests that were unlinked to authentication events: two successful 200 responses to /api/catalog/products and /api/cart, and one 429 rate-limited response to /api/auth/login.\",\"evidence_ids\":[\"security-event:5ec38ddb5eee0407e05cde80d8f50539d9024a22fb4a9704e913475df47ccc6f\",\"security-event:722c654cf19182d9fb38c08f5b4a0d6307773733ee21e48e5724c74247decfb1\",\"security-event:e0f134cad99621a18e30d397cb0195b606ff9808fa0c50220e6c4fd23db14c08\"]}],\"missing_evidence\":[\"authentication success events\",\"detailed request payloads\",\"upstream service logs\",\"correlation of successful gateway requests with authentication\"],\"alternatives\":[],\"likely_cause\":null,\"outcome\":\"supported\",\"suggested_checks\":[\"Review authentication failure reasons and IP address patterns for potential abuse\",\"Check rate limiting configuration due to 429 response observed\",\"Investigate unlinked successful gateway requests for possible unauthorized access attempts\"]}",
+          "unknown_citations": [],
+          "outcome": "supported",
+          "likely_cause": null,
+          "validation_errors": [
+            {
+              "type": "value_error",
+              "loc": [],
+              "msg": "Value error, Supported reports require observations and a cited cause",
+              "url": "https://errors.pydantic.dev/2.10/v/value_error"
+            }
+          ]
+        }
+      ]
+    },
+    "smoke-02": {
+      "status": "failed",
+      "error": "incomplete_output",
+      "estimated_cost_usd": "0.00276720",
+      "delivered_records": 8,
+      "responses": [
+        {
+          "finish_reason": "length",
+          "content": "{\"observations\":[{\"claim\":\"There were 8 total records in the scope from 12:00 to 12:10, including 5 gateway requests and 3 authentication results.\",\"evidence_ids\":[\"security-summary:e2e751795a2a61589ff8eb207967fa4f7086c103d7fbaeb0f06cda54460b5bff\"]},{\"claim\":\"The gateway service received 5 requests from client address 192.0.2.44 with HTTP status codes 200, 401, 401, 200, and 200 respectively.\",\"evidence_ids\":[\"security-event:56824931f7080ea3b9acf90fc8396d58d20db33d03f06590919e4337c924e145\",\"security-event:7f3f7f1ceb49684b23f8e37a20dc14d56fe4a4f578a242f3da9d9bfb84dc5da5\",\"security-event:95727312bc17e08520f4fd5e7d003bf07bebe9658e6be26995f260fea23af117\",\"security-event:36e4457b44d93a67811b21bd99b2aade3567bdd57ad11ec6c02f5bf151e727fe\",\"security-event:0991906b026d23dd4b5786b25b1bbb9931ba4e4120fa719b2f2c12b7df70283b\"]},{\"claim\":\"There were 3 authentication attempts for account customer-2042, with 2 failures followed by 1 success.\",\"evidence_ids\":[\"security-event:73d76eef7b968329cd52566c9dce9a62fd1a09774eaea1cc01f5ebefa9d6555c\",\"security-event:7651a589be033e613dcdf77f232ee4d0751629b19f81005fec9277841dc4ebba\",\"security-event:75bafe55b757c4a3f8e1c0f7ec8e196aa4872a13731b456f9c2fcd90a4561915\"]},{\"claim\":\"Each authentication event is paired with a corresponding gateway request to /api/auth/login with matching request IDs and client address 192.0.2.44.\",\"evidence_ids\":[\"security-event:73d76eef7b968329cd52566c9dce9a62fd1a09774eaea1cc01f5ebefa9d6555c\",\"security-event:7f3f7f1ceb49684b23f8e37a20dc14d56fe4a4f578a242f3da9d9bfb84dc5da5\",\"security-event:7651a589be033e613dcdf77f232ee4d0751629b19f81005fec9277841dc4ebba\",\"security-event:95727312bc17e08520f4fd5e7d003bf07bebe9658e6be26995f260fea23af117\",\"security-event:75bafe55b757c4a3f8e1c0f7ec8e196aa4872a13731b456f9c2fcd90a4561915\",\"security-event:36e4457b44d93a67811b21bd99b2aade3567bdd57ad11ec6c02f5bf151e727fe\"]},{\"claim\":\"There are 3 confirmed pairs of gateway requests and authentication results, and 2 unlinked gateway requests without authentication events.\",\"evidence_ids\":[\"security-summary:e2e751795a2a61589ff8eb207967fa4f7086c103d7fbaeb0f06cda54460b5bff\"]},{\"claim\":\"The unlinked gateway requests are to /api/catalog/products and /api/cart with HTTP 200 status, from the same client address 192.0.2.44.\",\"evidence_ids\":[\"security-event:56824931f7080ea3b9acf90fc8396d58d20db33d03f06590919e4337c924e145\",\"security-event:0991906b026d23dd4b5786b25b1bbb9931ba4e4120fa719b2f2c12b7df70283b\"]}],\"missing_evidence\":[\"authentication logs for other accounts\",\"gateway logs for other client addresses\",\"correlation details for unlinked gateway requests\",\"detailed request payloads and headers\",\"post-authentication activity logs for account customer-2042\"],\"alternatives\":[],\"likely_c"
+        }
+      ]
+    },
+    "smoke-03": {
+      "status": "completed",
+      "error": null,
+      "estimated_cost_usd": "0.00216080",
+      "delivered_records": 4,
+      "responses": [
+        {
+          "finish_reason": "stop",
+          "content": "{\"observations\":[{\"claim\":\"Four gateway requests were observed within the 10-minute window from three distinct client IP addresses.\",\"evidence_ids\":[\"security-summary:40e70e000dd919af7f887cc58069fa923f835443968c348036c851a864fcd88e\",\"security-event:5f7e6cc255904fccd0e71586acfa53cd7b68a517d5404f74d6fb2c04c4822c56\",\"security-event:f6ade274723956c6471a3e7fa69d562c56b6e0a3040a7fafc949f81b12e3f587\",\"security-event:2cdebd8650d0fa8c518e78f71637c855e8a394ec391de462e8e6937fad73913c\",\"security-event:88ce49ba26dc1760dc491a1ac9029ec3c553bebcbc6ea6ca31b71f17d4323abf\"]},{\"claim\":\"The requests targeted the /api/catalog/products and /api/auth/login routes with varying HTTP status outcomes: 200 OK, 401 Unauthorized, and 503 Service Unavailable.\",\"evidence_ids\":[\"security-event:5f7e6cc255904fccd0e71586acfa53cd7b68a517d5404f74d6fb2c04c4822c56\",\"security-event:f6ade274723956c6471a3e7fa69d562c56b6e0a3040a7fafc949f81b12e3f587\",\"security-event:2cdebd8650d0fa8c518e78f71637c855e8a394ec391de462e8e6937fad73913c\",\"security-event:88ce49ba26dc1760dc491a1ac9029ec3c553bebcbc6ea6ca31b71f17d4323abf\"]},{\"claim\":\"No authentication service records were found for the same time window, resulting in no authentication outcomes or confirmed correlations between gateway requests and authentication results.\",\"evidence_ids\":[\"security-summary:40e70e000dd919af7f887cc58069fa923f835443968c348036c851a864fcd88e\"]},{\"claim\":\"All gateway requests are marked as 'unlinked' in correlation, indicating no confirmed pairing with authentication events.\",\"evidence_ids\":[\"security-event:5f7e6cc255904fccd0e71586acfa53cd7b68a517d5404f74d6fb2c04c4822c56\",\"security-event:f6ade274723956c6471a3e7fa69d562c56b6e0a3040a7fafc949f81b12e3f587\",\"security-event:2cdebd8650d0fa8c518e78f71637c855e8a394ec391de462e8e6937fad73913c\",\"security-event:88ce49ba26dc1760dc491a1ac9029ec3c553bebcbc6ea6ca31b71f17d4323abf\"]}],\"missing_evidence\":[\"authentication service records for the specified time window\",\"correlation data linking gateway requests to authentication results\",\"detailed authentication outcomes such as success or failure events\"],\"alternatives\":[],\"likely_cause\":null,\"outcome\":\"inconclusive\",\"suggested_checks\":[\"Verify the collection and ingestion of authentication service logs for the specified time window.\",\"Check for any gaps or failures in telemetry collection between gateway and authentication services.\",\"Investigate why no authentication results were recorded despite gateway login requests.\"]}",
+          "unknown_citations": [],
+          "outcome": "inconclusive",
+          "likely_cause": null,
+          "validation_errors": []
+        }
+      ]
+    },
+    "smoke-04": {
+      "status": "failed",
+      "error": "invalid_report",
+      "estimated_cost_usd": "0.00255560",
+      "delivered_records": 8,
+      "responses": [
+        {
+          "finish_reason": "stop",
+          "content": "{\"observations\":[{\"claim\":\"There were 8 total records in the scope from 12:00 to 12:10 involving gateway and authentication services.\",\"evidence_ids\":[\"security-summary:bf5ecac777c84a92d5c95f119566ce7f125ebaf22569e337a234d0e005c709a0\"]},{\"claim\":\"Authentication service recorded 3 authentication results for account 'customer-3091' with 1 success and 2 failures.\",\"evidence_ids\":[\"security-summary:bf5ecac777c84a92d5c95f119566ce7f125ebaf22569e337a234d0e005c709a0\"]},{\"claim\":\"Gateway service recorded 5 gateway requests from 2 distinct client addresses with no direct authentication outcome recorded at gateway level.\",\"evidence_ids\":[\"security-summary:bf5ecac777c84a92d5c95f119566ce7f125ebaf22569e337a234d0e005c709a0\"]},{\"claim\":\"Three pairs of gateway requests and authentication results are confirmed correlated by request_id and partner references.\",\"evidence_ids\":[\"security-summary:bf5ecac777c84a92d5c95f119566ce7f125ebaf22569e337a234d0e005c709a0\"]},{\"claim\":\"Two authentication attempts from client addresses 198.51.100.10 and 203.0.113.77 failed with HTTP 401 status on /api/auth/login route.\",\"evidence_ids\":[\"security-event:b6e62048dd1da256dd079160708b8381c289d2462d1243cba9a288c91b77ae64\",\"security-event:0ed7ca52c68fdd12607b284e1b7f2efafc8973ef33e1550ada2b350610b3dd56\",\"security-event:b2bd94b0fc9c73b96cbf92b5dbe5937b851178e29f6db79562b6e2dde35e8dce\",\"security-event:507cb216e2dc8029c2b4ac38521f6634dec11016dad9e7764896ad6d30bc1c34\"]},{\"claim\":\"One authentication attempt from client address 203.0.113.77 succeeded with HTTP 200 status on /api/auth/login route.\",\"evidence_ids\":[\"security-event:b9d7aad5ef8d5c3f806acbdc3e9459f70a3869f4c1a90a3ce7a469a90363556a\",\"security-event:0d61c0d84bb734c02848d6122d35ddb0fe2218f49e9d77016ca97d361327d635\"]},{\"claim\":\"Two gateway requests to /api/orders and /api/checkout routes from client address 203.0.113.77 succeeded with HTTP 200 status but have no linked authentication evidence.\",\"evidence_ids\":[\"security-event:f87cf1f3f6aaf00e8a0f0ac6a0c2a3f49f3f7cc08cd5c9ae2ef835d00992e3d5\",\"security-event:39cbf5920ab6899fa024b937dca5c9b0711b585c79f8f2a4e1849912984ed6f4\"]}],\"missing_evidence\":[\"authentication logs for other accounts or client addresses\",\"gateway logs showing authentication outcomes for unlinked requests\",\"correlation evidence for unlinked gateway requests to authentication results\",\"detailed request payloads or headers to assess abuse patterns\"],\"alternatives\":[],\"likely_cause\":null,\"outcome\":\"supported\",\"suggested_checks\":[\"Review authentication logs for other accounts and client addresses in the time range to detect broader abuse.\",\"Check gateway logs for authentication outcomes or errors related to unlinked requests.\",\"Investigate unlinked gateway requests to determine if they represent authenticated sessions or anonymous access.\",\"Analyze request payloads and headers for signs of automated abuse or credential stuffing attempts.\"]}",
+          "unknown_citations": [],
+          "outcome": "supported",
+          "likely_cause": null,
+          "validation_errors": [
+            {
+              "type": "value_error",
+              "loc": [],
+              "msg": "Value error, Supported reports require observations and a cited cause",
+              "url": "https://errors.pydantic.dev/2.10/v/value_error"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "input_tokens": 11756,
+  "output_tokens": 3546,
+  "cached_tokens": 0
+}

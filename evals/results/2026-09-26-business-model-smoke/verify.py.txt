@@ -1,0 +1,70 @@
+"""Replay captured facts without a key, model call or current application imports."""
+import ast
+import gzip
+import hashlib
+import json
+from decimal import Decimal
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+
+def load(name):
+    return json.loads((root / name).read_bytes())
+
+originals = load('original-files.json')
+for name, expected in originals.items():
+    raw = gzip.decompress((root / (name + '.gz')).read_bytes()) if name.endswith('.db') else (root / name).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == expected, name
+source = ast.parse((root / 'candidate/services/ingestion-service/app/investigation_schemas.py').read_text())
+cls = next(n for n in source.body if isinstance(n, ast.ClassDef) and n.name == 'InvestigationReport')
+expected_order = [n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)]
+inputs = outputs = records = 0
+cost = Decimal(0)
+expected = [('failed', 'invalid_report', 15), ('failed', 'incomplete_output', 8), ('completed', None, 4), ('failed', 'invalid_report', 8)]
+for n, (status, error, count) in enumerate(expected, 1):
+    reservation = load(f'request-{n:03}.reservation.json')
+    receipt = load(f'request-{n:03}.response.json')
+    case = load(f'smoke-{n:02}.json')
+    wire = reservation['request_json'].encode()
+    assert hashlib.sha256(wire).hexdigest() == reservation['request_sha256']
+    body = json.loads(wire)
+    assert body == reservation['request']
+    assert list(body['response_format']['json_schema']['schema']['properties']) == expected_order
+    assert [tool['function']['name'] for tool in body['tools']] == ['read_security_evidence']
+    assert Decimal(reservation['reserved_usd']) <= Decimal('0.025')
+    assert case['run']['status'] == status and case['run']['error'] == error
+    events = case['events']
+    assert [event['kind'] for event in events] == ['tool_request', 'tool_call', 'status']
+    assert events[1]['payload']['request_sequence'] == events[0]['sequence']
+    batch = events[1]['payload']['result']
+    assert json.loads(next(m['content'] for m in body['messages'] if m['role'] == 'tool')) == batch
+    assert not batch['truncated']
+    assert sum(item['kind'] == 'security_event' for item in batch['items']) == count
+    records += count
+    choice = receipt['response']['choices'][0]
+    assert receipt['http_status'] == 200
+    if n == 2:
+        assert choice['finish_reason'] == 'length'
+        assert receipt['usage']['completion_tokens'] == 1024
+        try:
+            json.loads(choice['message']['content'])
+        except json.JSONDecodeError:
+            pass
+        else:
+            raise AssertionError('Expected the preserved incomplete JSON, not a repaired report')
+    else:
+        assert choice['finish_reason'] == 'stop'
+        report = json.loads(choice['message']['content'])
+        assert report['likely_cause'] is None
+        assert report['outcome'] == ('inconclusive' if n == 3 else 'supported')
+        ids = {item['evidence_id'] for item in batch['items']}
+        for finding in report['observations'] + report['alternatives']:
+            assert set(finding['evidence_ids']) <= ids
+    inputs += receipt['usage']['prompt_tokens']
+    outputs += receipt['usage']['completion_tokens']
+    cost += Decimal(receipt['cost_upper_usd'])
+summary = load('summary.json')
+assert summary['allowance_closed'] and summary['usage_complete'] and summary['attempts'] == 4
+assert Decimal(summary['reserved_usd']) == Decimal('0.03393520')
+assert (records, inputs, outputs, cost) == (35, 11756, 3546, Decimal('0.0103760'))
+print(f'PASS: {len(originals)} original files; native schema order; 35 delivered records; 4 responses; 2 outcome mismatches; 1 truncated output; closed allowance.')

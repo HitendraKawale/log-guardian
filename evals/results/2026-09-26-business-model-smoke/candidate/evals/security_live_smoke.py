@@ -28,6 +28,9 @@ CASE_IDS = [f"smoke-{n:02}" for n in range(1, 5)]
 
 
 def manifest():
+    subprocess.run(
+        ["git", "diff", "--quiet", BASE, "--", "services", "frontend"], cwd=p.ROOT, check=True
+    )
     files = [
         Path(__file__),
         INPUTS,
@@ -42,7 +45,7 @@ def manifest():
     ] + sorted((p.ROOT / "services/ingestion-service/app").rglob("*.py"))
     value = {
         "authorization": AUTHORIZATION,
-        "required_production_revision": BASE,
+        "production_revision": BASE,
         "model": p.MODEL,
         "case_ids": CASE_IDS,
         "per_case_usd": "0.025",
@@ -137,10 +140,6 @@ async def run_batch(output, expected, *, transport=None, key=None, live=False):
     ):
         raise ValueError(
             "live run requires clean source, explicit approval and its exclusive ledger"
-        )
-    if not mocked:
-        subprocess.run(
-            ["git", "diff", "--quiet", BASE, "--", "services", "frontend"], cwd=p.ROOT, check=True
         )
     current, digest = manifest()
     if digest != expected:
