@@ -1,0 +1,57 @@
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/security/cases \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/41767728-5961-44db-9fe3-4b2d977e9d7f \"HTTP/1.1 401 Unauthorized\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/41767728-5961-44db-9fe3-4b2d977e9d7f \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/566579de-207b-4003-99c4-1cf757a5c08a \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/566579de-207b-4003-99c4-1cf757a5c08a/events \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/41767728-5961-44db-9fe3-4b2d977e9d7f \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/security/cases \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/2e65e1b2-0bed-4423-8e1a-ef0006ea9699 \"HTTP/1.1 401 Unauthorized\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/2e65e1b2-0bed-4423-8e1a-ef0006ea9699 \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/a83e9090-5105-4680-bbb5-9541962738bd \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/a83e9090-5105-4680-bbb5-9541962738bd/events \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/2e65e1b2-0bed-4423-8e1a-ef0006ea9699 \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/security/cases \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/72135388-801a-4eee-ab66-c64fbd3f9467 \"HTTP/1.1 401 Unauthorized\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/72135388-801a-4eee-ab66-c64fbd3f9467 \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/46ae3a03-fa21-4fed-9336-5c89d79e7e28 \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/46ae3a03-fa21-4fed-9336-5c89d79e7e28/events \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/72135388-801a-4eee-ab66-c64fbd3f9467 \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/security/cases \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/e9c69d40-d534-4cec-8b79-0a41a6750dff \"HTTP/1.1 401 Unauthorized\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/e9c69d40-d534-4cec-8b79-0a41a6750dff \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/3baf8a83-2048-4fa2-9a85-adf80e044e5b \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations/3baf8a83-2048-4fa2-9a85-adf80e044e5b/events \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://smoke.local/investigations/from-security-case/e9c69d40-d534-4cec-8b79-0a41a6750dff \"HTTP/1.1 200 OK\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://smoke.local/investigations \"HTTP/1.1 200 OK\""}
+smoke-01: 19 records delivered, v2 assembled, native wire order/hash verified
+smoke-02: 8 records delivered, v2 assembled, native wire order/hash verified
+smoke-03: 6 records delivered, v2 assembled, native wire order/hash verified
+smoke-04: 8 records delivered, v2 assembled, native wire order/hash verified
+MOCK_ONLY: 41 records, 4 scripted selections, no real model calls
+Rehearsal artifacts: /var/folders/qz/ycfy4hxs01321rg_7tdl5kqr0000gn/T/lg48-typed-business-rehearsal-ay8s351o/batch
+{
+  "mode": "mock",
+  "cases": {
+    "smoke-01": "completed",
+    "smoke-02": "completed",
+    "smoke-03": "completed",
+    "smoke-04": "completed"
+  },
+  "fatal": null,
+  "attempts": 4,
+  "reserved_usd": "0.03280640",
+  "known_cost_upper_usd": "0.0008000",
+  "usage_complete": true,
+  "allowance_closed": true
+}
