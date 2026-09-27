@@ -21,8 +21,8 @@ from app.models import Base
 from openai import AsyncOpenAI
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-BASE = "3841bf9548b2b76f906cbaa61d34378417a70bbc"
-AUTHORIZATION = "security-business-smoke-2026-09-26-02"
+BASE = "147444fdada01becc86415d5a5ab58ee30eba4de"
+AUTHORIZATION = "security-report-guidance-2026-09-26-03"
 INPUTS = p.ROOT / "evals/business-model-smoke/inputs.json"
 CASE_IDS = [f"smoke-{n:02}" for n in range(1, 5)]
 
@@ -36,7 +36,7 @@ def manifest():
         p.ROOT / "evals/validate.py",
         p.ROOT / "evals/tests/test_security_live_smoke.py",
         p.ROOT / "examples/security-review/sources.json",
-        p.ROOT / "docs/plans/business-model-smoke-authorization.md",
+        p.ROOT / "docs/plans/report-guidance-live-authorization.md",
         p.ROOT / "evals/security-live-smoke/pricing.txt",
         p.ROOT / "services/ingestion-service/requirements.txt",
     ] + sorted((p.ROOT / "services/ingestion-service/app").rglob("*.py"))
