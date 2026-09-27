@@ -256,7 +256,15 @@
     );
     const container = $("inv-report");
     container.replaceChildren();
-    if (report.outcome === "inconclusive") {
+    const typed = report.schema_version === 2;
+    if (!typed && report.schema_version !== undefined) {
+      outcome.replaceChildren(text("Unsupported report version"));
+      container.append(element("p", "callout", "Claims are not displayed as recorded facts."));
+      return;
+    }
+    if (typed) {
+      container.append(element("p", "callout", "Recorded facts are derived from supplied logs, not independently verified reality. Possible explanations are not confirmed causes."));
+    } else if (report.outcome === "inconclusive") {
       container.append(
         element(
           "p",
@@ -265,7 +273,10 @@
         )
       );
     }
-    const sections = [
+    const sections = typed ? [
+      ["Recorded facts", report.facts],
+      ["Possible explanations", report.hypotheses],
+    ] : [
       ["Likely cause", report.likely_cause ? [report.likely_cause] : []],
       ["Observations", report.observations],
       ["Alternatives", report.alternatives],
@@ -275,7 +286,10 @@
       container.append(element("h4", "", title));
       for (const finding of findings) container.append(findingBlock(finding));
     }
-    const lists = [
+    const lists = typed ? [
+      ["Unknowns", report.unknowns],
+      ["Read-only next checks", report.checks],
+    ] : [
       ["Missing evidence", report.missing_evidence],
       ["Suggested checks", report.suggested_checks],
     ];

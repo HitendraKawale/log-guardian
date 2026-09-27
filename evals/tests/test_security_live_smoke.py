@@ -13,14 +13,7 @@ def response(request):
     body = json.loads(request.content)
     assert [t["function"]["name"] for t in body["tools"]] == ["read_security_evidence"]
     assert body["service_tier"] == "default"
-    report = {
-        "observations": [],
-        "likely_cause": None,
-        "alternatives": [],
-        "missing_evidence": ["Scripted rehearsal, not a security judgment."],
-        "suggested_checks": [],
-        "outcome": "inconclusive",
-    }
+    report = {"focus_evidence_ids": [], "hypothesis_codes": [], "check_codes": []}
     return httpx.Response(
         200,
         json={

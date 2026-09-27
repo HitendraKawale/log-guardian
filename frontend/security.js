@@ -240,8 +240,18 @@
     const root = $("security-run-report");
     root.replaceChildren();
     if (!report) return;
-    root.append(element("p", `Model outcome: ${report.outcome}. Not independently verified.`));
-    for (const [title, findings] of [["Observations", report.observations], ["Alternatives", report.alternatives], ["Likely cause", report.likely_cause ? [report.likely_cause] : []]]) {
+    const typed = report.schema_version === 2;
+    if (!typed && report.schema_version !== undefined) {
+      root.append(element("p", "Unsupported report version. Claims are not displayed as recorded facts."));
+      return;
+    }
+    root.append(element("p", typed
+      ? "Assessment: inconclusive. Recorded facts are derived from supplied logs, not independently verified reality. Possible explanations are not confirmed causes."
+      : `Legacy model draft. Model outcome: ${report.outcome}. These model-written claims are not independently verified.`));
+    const findingsSections = typed
+      ? [["Recorded facts", report.facts], ["Possible explanations", report.hypotheses]]
+      : [["Observations", report.observations], ["Alternatives", report.alternatives], ["Likely cause", report.likely_cause ? [report.likely_cause] : []]];
+    for (const [title, findings] of findingsSections) {
       if (!findings.length) continue;
       root.append(element("h4", title));
       for (const finding of findings) {
@@ -263,7 +273,10 @@
         root.append(block);
       }
     }
-    for (const [title, entries] of [["Missing evidence", report.missing_evidence], ["Suggested checks", report.suggested_checks]]) {
+    const listSections = typed
+      ? [["Unknowns", report.unknowns], ["Read-only next checks", report.checks]]
+      : [["Missing evidence", report.missing_evidence], ["Suggested checks", report.suggested_checks]];
+    for (const [title, entries] of listSections) {
       if (!entries.length) continue;
       const list = element("ul");
       list.append(...entries.map((entry) => element("li", entry)));

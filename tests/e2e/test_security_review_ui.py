@@ -37,11 +37,9 @@ from fastapi.staticfiles import StaticFiles
 async def scripted(request):
     body = json.loads(request.content)
     batch = json.loads(body['messages'][-1]['content'])
-    ref = next(i['evidence_id'] for i in batch['items']
-               if i['kind'] == 'security_event' and i['content'].get('auth_outcome') == 'failure')
-    report = dict(observations=[dict(claim='Scripted check: one recorded authentication failure.', evidence_ids=[ref])],
-                  missing_evidence=['Account compromise is not established.'], alternatives=[],
-                  likely_cause=None, outcome='inconclusive', suggested_checks=[])
+    events = [i for i in batch['items'] if i['kind'] == 'security_event']
+    chosen = next((i for i in events if i['content'].get('auth_outcome') == 'failure'), events[0])
+    report = dict(focus_evidence_ids=[chosen['evidence_id']], hypothesis_codes=[], check_codes=[])
     return httpx.Response(200, json=dict(id='scripted-browser', object='chat.completion', created=1,
         model=body['model'], choices=[dict(index=0, finish_reason='stop', message=dict(role='assistant', content=json.dumps(report)))],
         usage=dict(prompt_tokens=100, completion_tokens=100, total_tokens=200, prompt_tokens_details=dict(cached_tokens=0))))
@@ -85,7 +83,7 @@ uvicorn.run(app, fd=int(sys.argv[1]), log_level='warning')
             "INVESTIGATION_API_KEY": "execution-test",
             "OPENAI_API_KEY": "",
             "OTEL_EXPORTER_OTLP_ENDPOINT": "",
-            "OTEL_CONSOLE": "0",
+            "OTEL_CONSOLE": "",
         },
     )
     sock.close()
@@ -249,7 +247,10 @@ def test_explicit_security_investigation_with_scripted_worker(page, security_sta
     page.get_by_role("button", name="Start or open investigation", exact=True).click()
     expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
     assert len(deliveries) == 2 and len(set(deliveries)) == 1
-    expect(page.locator("#security-run-report")).to_contain_text("Scripted check")
+    expect(page.locator("#security-run-report")).to_contain_text(
+        "Authentication service recorded failure"
+    )
+    expect(page.get_by_role("heading", name="Recorded facts", exact=True)).to_be_visible()
     page.locator("#security-run-report .citation").first.click()
     expect(page.locator("#security-run-evidence details[open] pre")).to_contain_text(
         '"auth_outcome": "failure"'
@@ -271,14 +272,16 @@ def test_explicit_security_investigation_with_scripted_worker(page, security_sta
     page.get_by_label("Investigation API key", exact=True).fill("execution-test")
     page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
     page.get_by_role("button", name="Start or open investigation", exact=True).click()
-    expect(page.locator("#security-run-report")).to_contain_text("Scripted check")
+    expect(page.locator("#security-run-report")).to_contain_text(
+        "Authentication service recorded failure"
+    )
     runs = page.request.get(f"{security_stack}/investigations", headers=execution).json()
     hostile = '<img src=x onerror="window.xss=1">'
 
     def hostile_draft(route):
         reply = route.fetch()
         run = reply.json()
-        run["report"]["observations"][0]["claim"] = hostile
+        run["report"]["facts"][0]["claim"] = hostile
         route.fulfill(response=reply, json=run)
 
     page.route(f"{security_stack}/investigations/{runs[0]['id']}", hostile_draft)
@@ -370,17 +373,19 @@ def test_security_walkthrough(browser, security_stack, tmp_path):
         )
         page.get_by_role("button", name="Start or open investigation", exact=True).click()
         expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
-        expect(page.locator("#security-run-report")).to_contain_text("Scripted check")
+        expect(page.locator("#security-run-report")).to_contain_text(
+            "Authentication service recorded failure"
+        )
         page.locator("#security-run-report").scroll_into_view_if_needed()
         hold(
-            "The worker produces an unverified draft. Displayed usage is simulated, not money spent."
+            "The host renders facts from typed records. Model selections and displayed usage are scripted, not paid."
         )
         page.locator("#security-run-report .citation").first.click()
         expect(page.locator("#security-run-evidence details[open] pre")).to_contain_text(
             '"auth_outcome": "failure"'
         )
         hold(
-            "The citation opens evidence delivered to the worker. Membership does not prove the claim."
+            "The citation opens supplied evidence. Its completeness and correspondence to reality remain unverified."
         )
         page.locator("#security-limits").scroll_into_view_if_needed()
         hold(
@@ -424,6 +429,132 @@ def test_security_walkthrough(browser, security_stack, tmp_path):
         context.close()
     if recording:
         page.video.save_as(str(tmp_path / "security-review.webm"))
+
+
+def test_missing_auth_v2_and_preserved_legacy_claim(page, security_stack, tmp_path):
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    connect(page, security_stack)
+    page.get_by_label("From (UTC)", exact=True).fill("2026-09-01T10:00:00Z")
+    page.get_by_label("To (UTC)", exact=True).fill("2026-09-01T10:10:00Z")
+    page.get_by_label("edge log file").set_input_files(
+        ROOT / "examples/security-review/nginx.jsonl"
+    )
+    page.get_by_label("auth log file").set_input_files(
+        {"name": "empty.jsonl", "mimeType": "application/json", "buffer": b""}
+    )
+    page.get_by_role("button", name="Save review", exact=True).click()
+    expect(page.get_by_role("heading", name="0 linked requests", exact=True)).to_be_visible()
+    page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+    page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
+    report = page.locator("#security-run-report")
+    expect(report).to_contain_text("Gateway recorded HTTP 200")
+    expect(report).to_contain_text(
+        "Authentication outcome is unknown; no authentication results were supplied."
+    )
+    expect(report).not_to_contain_text("Authentication service recorded success")
+    button = report.locator(".citation").first
+    button.focus()
+    page.keyboard.press("Enter")
+    expect(page.locator("#security-run-evidence details[open] pre")).to_contain_text(
+        '"http_status": 200'
+    )
+    for width, name in [(1280, "desktop"), (390, "mobile")]:
+        page.set_viewport_size({"width": width, "height": 900})
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        page.screenshot(path=str(tmp_path / f"typed-missing-auth-{name}.png"), full_page=True)
+    archive = json.loads(
+        (ROOT / "evals/results/2026-09-26-report-guidance-live/smoke-03.json").read_text()
+    )
+    run_id = page.request.get(
+        f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
+    ).json()[0]["id"]
+    replacement = archive["run"]["report"]
+    invalidate_during_read = False
+
+    def old_report(route):
+        response = route.fetch()
+        data = response.json()
+        data["report"] = replacement
+        if invalidate_during_read:
+            page.get_by_label("Investigation API key", exact=True).fill("")
+        route.fulfill(response=response, json=data)
+
+    page.route(f"{security_stack}/investigations/{run_id}", old_report)
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(report).to_contain_text("Legacy model draft")
+    expect(report).to_contain_text("successful login attempt (HTTP 200)")
+    expect(page.get_by_role("heading", name="Recorded facts", exact=True)).to_have_count(0)
+    for width, name in [(1280, "desktop"), (390, "mobile")]:
+        page.set_viewport_size({"width": width, "height": 900})
+        page.screenshot(path=str(tmp_path / f"legacy-false-claim-{name}.png"), full_page=True)
+    replacement = {"schema_version": 99, "facts": [{"claim": "HIDDEN_UNKNOWN_VERSION"}]}
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(report).to_contain_text("Unsupported report version")
+    expect(report).not_to_contain_text("HIDDEN_UNKNOWN_VERSION")
+    invalidate_during_read = True
+    with page.expect_response(f"{security_stack}/investigations/{run_id}") as pending:
+        page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    pending.value.finished()
+    expect(page.get_by_label("Investigation API key", exact=True)).to_have_value("")
+    expect(report).to_be_empty()
+    expect(page.locator("#security-run-status")).to_contain_text("A linked investigation exists")
+    assert page.evaluate("JSON.stringify(localStorage) + JSON.stringify(sessionStorage)") == "{}{}"
+    assert errors == []
+
+
+def test_v2_security_report_in_shared_investigation_history(page, security_stack, tmp_path):
+    connect(page, security_stack)
+    upload_example(page)
+    page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+    page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
+    dashboard = page.context.new_page()
+    errors = []
+    dashboard.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        dashboard.set_extra_http_headers({"X-API-Key": "execution-test"})
+        dashboard.goto(f"{security_stack}/ui/index.html?api={security_stack}")
+        dashboard.get_by_role("button", name="Investigations", exact=True).click()
+        dashboard.locator("#inv-list .inv-item-btn").first.click()
+        expect(dashboard.locator("#inv-question")).to_contain_text("saved gateway")
+        expect(dashboard.locator("#inv-report")).to_contain_text(
+            "Authentication service recorded failure"
+        )
+        expect(dashboard.get_by_role("heading", name="Recorded facts", exact=True)).to_be_visible()
+        expect(dashboard.locator("#inv-report")).to_contain_text(
+            "business impact are not established"
+        )
+        expect(dashboard.locator("#inv-events .event-tool")).to_have_count(1)
+        dashboard.locator("#inv-report .citation").first.click()
+        expect(dashboard.locator("#citation-body")).to_contain_text('"auth_outcome": "failure"')
+        dashboard.get_by_role("button", name="Close", exact=True).click()
+        dashboard.screenshot(path=str(tmp_path / "shared-history-v2.png"), full_page=True)
+        run = page.request.get(
+            f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
+        ).json()[0]
+
+        def unsupported(route):
+            response = route.fetch()
+            data = response.json()
+            data["report"] = {
+                "schema_version": 99,
+                "outcome": "inconclusive",
+                "facts": [{"claim": "HIDDEN_UNKNOWN_VERSION"}],
+            }
+            route.fulfill(response=response, json=data)
+
+        dashboard.route(f"{security_stack}/investigations/{run['id']}", unsupported)
+        dashboard.locator("#inv-list .inv-item-btn").first.click()
+        expect(dashboard.locator("#inv-outcome")).to_have_text("Unsupported report version")
+        expect(dashboard.locator("#inv-report")).not_to_contain_text("HIDDEN_UNKNOWN_VERSION")
+        assert errors == []
+    finally:
+        print("Shared history browser errors:", errors)
+        dashboard.close()
 
 
 @pytest.mark.parametrize("security_stack", ["idle"], indirect=True)

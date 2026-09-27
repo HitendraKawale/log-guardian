@@ -30,6 +30,7 @@ from .investigation_schemas import (
 )
 from .investigation_security import SECURITY_GUIDANCE
 from .investigation_tools import MAX_RESULT_BYTES, redact
+from .security_assessment import SecuritySelection, assemble_security_assessment
 
 MAX_MODEL_REQUESTS = 6
 MAX_TOOL_EXECUTIONS = 8
@@ -85,13 +86,7 @@ SECURITY_TOOLS = [
         },
     }
 ]
-SECURITY_AGENT_PROMPT = (
-    AGENT_PROMPT.replace(
-        "An initial bounded, unfiltered log sample is already supplied.",
-        "An initial bounded security-evidence page is already supplied.",
-    )
-    + SECURITY_GUIDANCE
-)
+SECURITY_AGENT_PROMPT = SECURITY_GUIDANCE
 
 
 async def run_agent(question, tools, client, config, *, dry_run=False):
@@ -108,7 +103,7 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
         "json_schema": {
             "name": "investigation_report",
             "strict": True,
-            "schema": InvestigationReport.model_json_schema(),
+            "schema": (SecuritySelection if security else InvestigationReport).model_json_schema(),
         },
     }
     result = {
@@ -323,12 +318,21 @@ async def run_agent(question, tools, client, config, *, dry_run=False):
                     if choice.finish_reason != "stop":
                         result["error"] = "incomplete_output"
                         return result
-                    report = InvestigationReport.model_validate_json(choice.message.content or "")
-                    report = InvestigationReport.model_validate(
-                        redact(report.model_dump(mode="json"))
-                    )
-                    validate_citations(report, batches)
-                    result.update(status="completed", report=report.model_dump(mode="json"))
+                    if security:
+                        selection = SecuritySelection.model_validate_json(
+                            choice.message.content or ""
+                        )
+                        stored_report = assemble_security_assessment(selection, batches)
+                    else:
+                        report = InvestigationReport.model_validate_json(
+                            choice.message.content or ""
+                        )
+                        report = InvestigationReport.model_validate(
+                            redact(report.model_dump(mode="json"))
+                        )
+                        validate_citations(report, batches)
+                        stored_report = report.model_dump(mode="json")
+                    result.update(status="completed", report=stored_report)
                     return result
                 if choice.finish_reason != "tool_calls":
                     result["error"] = "incomplete_output"

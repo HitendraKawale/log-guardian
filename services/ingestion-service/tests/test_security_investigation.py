@@ -137,6 +137,17 @@ def response(body, report=None, tool=None):
     )
 
 
+def report_ids(body):
+    batch = json.loads(body["messages"][-1]["content"])
+    return [
+        next(
+            i["evidence_id"]
+            for i in batch["items"]
+            if i["content"].get("event_kind") == "authentication_result"
+        )
+    ]
+
+
 async def queue(client, factory, monkeypatch):
     monkeypatch.setattr(settings, "investigation_api_key", "execution-test")
     saved = await saved_source(factory)
@@ -197,18 +208,15 @@ async def test_worker_delivers_security_before_provider_and_records_citations(
             assert [r.kind for r in receipts] == ["tool_request", "tool_call"]
             assert receipts[1].payload["request_sequence"] == receipts[0].sequence
             assert receipts[0].payload["origin"] == "server_initial"
+        assert set(body["response_format"]["json_schema"]["schema"]["properties"]) == {
+            "focus_evidence_ids",
+            "hypothesis_codes",
+            "check_codes",
+        }
         report = {
-            "observations": [
-                {
-                    "claim": "One authentication failure was recorded.",
-                    "evidence_ids": [auth["evidence_id"]],
-                }
-            ],
-            "missing_evidence": ["Account ownership and downstream access are not established."],
-            "alternatives": [],
-            "likely_cause": None,
-            "outcome": "inconclusive",
-            "suggested_checks": [],
+            "focus_evidence_ids": [auth["evidence_id"]],
+            "hypothesis_codes": [],
+            "check_codes": ["read_rejection_reasons"],
         }
         return response(body, report)
 
@@ -218,6 +226,9 @@ async def test_worker_delivers_security_before_provider_and_records_citations(
         run = await session.get(Investigation, run_id)
         assert run.status == "completed", run.error
         assert run.report["outcome"] == "inconclusive" and len(wire) == 1
+        assert run.report["schema_version"] == 2
+        assert "Authentication service recorded failure" in run.report["facts"][0]["claim"]
+        assert run.report["facts"][0]["evidence_ids"] == report_ids(wire[0])
         assert run.usage["input_tokens"] == 100
         assert run.security_case_id == saved["case_id"]
         events = (
@@ -263,6 +274,8 @@ async def test_worker_delivers_security_before_provider_and_records_citations(
         ("compact", None),
         ("supported-without-cause", "invalid_report"),
         ("cut-off", "incomplete_output"),
+        ("unknown-id", "invalid_report"),
+        ("unmet-prerequisite", "invalid_report"),
     ],
 )
 async def test_security_guidance_delivery_keeps_report_rejection_strict(
@@ -284,18 +297,12 @@ async def test_security_guidance_delivery_keeps_report_rejection_strict(
             if i["kind"] == "security_event" and i["content"].get("auth_outcome") == "failure"
         )
         report = {
-            "observations": [
-                {
-                    "claim": "One authentication failure was recorded.",
-                    "evidence_ids": [auth["evidence_id"]],
-                }
-            ],
-            "missing_evidence": ["Account ownership and downstream activity are unknown."],
-            "alternatives": [],
-            "likely_cause": None,
-            "outcome": "supported" if mode == "supported-without-cause" else "inconclusive",
-            "suggested_checks": [],
+            "focus_evidence_ids": ["other-case" if mode == "unknown-id" else auth["evidence_id"]],
+            "hypothesis_codes": ["retry_possible"] if mode == "unmet-prerequisite" else [],
+            "check_codes": [],
         }
+        if mode == "supported-without-cause":
+            report.update(outcome="supported", likely_cause=None)
         # This proves a compact fixture fits, not that a model will produce it.
         assert len(json.dumps(report).encode()) < 700
         data = response(body, report).json()
@@ -315,7 +322,47 @@ async def test_security_guidance_delivery_keeps_report_rejection_strict(
         if error:
             assert run.report is None
         else:
-            assert run.report["outcome"] == "inconclusive" and run.report["likely_cause"] is None
+            assert run.report["schema_version"] == 2
+            assert run.report["outcome"] == "inconclusive"
+            assert "Authentication service recorded failure" in run.report["facts"][0]["claim"]
+
+
+@pytest.mark.parametrize("old_worker", [True, False])
+async def test_workflow_mismatch_refuses_execution_before_provider(
+    client, session_factory, monkeypatch, old_worker
+):
+    from app import investigator
+    from app.investigation_security import SECURITY_QUESTION, digest
+
+    run_id, saved = await queue(client, session_factory, monkeypatch)
+    legacy = digest({"snapshot": saved, "question": SECURITY_QUESTION, "workflow": 1})
+    if old_worker:
+        monkeypatch.setattr(investigator, "binding", lambda case: legacy)
+    else:
+        async with session_factory() as session:
+            run = await session.get(Investigation, run_id)
+            run.request_sha256 = legacy
+            await session.commit()
+    calls = []
+
+    def provider(request):
+        calls.append(True)
+        return response(
+            json.loads(request.content),
+            {"focus_evidence_ids": [], "hypothesis_codes": [], "check_codes": []},
+        )
+
+    async with scripted_client(provider) as provider_client:
+        await execute_run(session_factory, run_id, provider_client)
+    assert calls == []
+    async with session_factory() as session:
+        run = await session.get(Investigation, run_id)
+        assert (run.status, run.error, run.report, run.usage) == (
+            "failed",
+            "worker_error",
+            None,
+            None,
+        )
 
 
 @pytest.mark.parametrize("mutation", ["report", "scope", "system", "question"])

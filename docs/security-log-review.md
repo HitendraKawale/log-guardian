@@ -3,8 +3,9 @@
 Log Guardian can now import a bounded gateway/authentication log window, save its
 normalized evidence and review the linked timeline in a browser. Importing calls no
 model and creates no paid Investigation rows. A separate, explicit action can queue
-an AI investigation of that saved case. Its output is an unverified draft, not an
-attack verdict, actor identity or proof of AI involvement.
+an AI investigation of that saved case. New security assessments use model selections
+with server-generated facts and mandatory unknowns. They do not establish attack intent,
+actor identity or AI involvement. Historical model-written drafts remain unverified.
 
 ## Local setup
 
@@ -177,6 +178,12 @@ instead of interpreting them as ordinary operational C runs. The updated worker 
 the case binding and executes the existing C algorithm; the public API reports C.
 An old worker may fail such a run, so stop old workers before queueing cases.
 
+The selection-only contract binds workflow version 2. A v1 worker rejects a new v2-bound
+run, and a v2 worker rejects an old queued v1 run before contacting the provider. Binding
+mismatch retains the existing worker_error status. There is no migration or automatic
+retry of old runs. Terminal reports remain readable and reopening them does not spend.
+A rollout requires an explicit decision about old pending work, not silent reinterpretation.
+
 The worker must run separately with the same database and INVESTIGATION_API_KEY. Its
 existing command is `python -m app.investigator` from services/ingestion-service, using
 the repository environment. OPENAI_API_KEY enables its provider client. Do not start a
@@ -202,13 +209,30 @@ is not a provider billing guarantee or account-wide cap. The existing pending-qu
 check is not a strict global ceiling under concurrent different-case submissions.
 Large cases can exceed evidence/cost limits before the model reads every record.
 
-The page displays status, missing evidence and the model draft, with links to the tool
-snapshots actually delivered. Cancel investigation requests cancellation through the
+The page displays status and versioned assessments, with links to the tool snapshots
+actually delivered. In v2, recorded facts are separate from possible explanations,
+mandatory unknowns and read-only next checks. Cancel investigation requests cancellation through the
 existing endpoint. A provider request already in flight may still be billed. Partial
 evidence remains available after failure. Missing/ambiguous provider usage stays unknown.
 
-Every draft needs human review. Citation validation checks delivered membership, not
-whether a quote supports a claim. The experimental offline verifier is not in this path.
+The security provider returns only up to three focus evidence IDs, two hypothesis codes
+and two check codes. It cannot supply factual prose, account names, numbers, causes,
+verdicts, commands or URLs. The server checks delivered membership and each code's
+prerequisites, then renders facts and citations from typed fields. Gateway status never
+becomes an authentication outcome. A summary count never becomes an account identity.
+Invalid selections fail without repair or retry. The assembled report is capped at 16 KiB;
+it is rejected rather than truncated if that bound is exceeded.
+
+For example, HTTP 200 without auth records produces a recorded HTTP fact and a mandatory
+unknown authentication outcome. No supplied records does not mean the service recorded
+nothing. Partial pages and tool errors do not establish whole-case absence. Hypotheses
+remain possibilities; this contract cannot produce a confirmed compromise or attack verdict.
+
+Every assessment still needs human review. Code-generated facts describe supplied logs,
+not independently verified reality. Older reports remain visibly labeled legacy model
+drafts, including incorrect claims. Their citation validation checked membership, not
+entailment. Unknown report versions do not render as recorded facts. The experimental
+offline verifier is not in this path.
 Successful authentication still does not prove compromise; addresses and timing do not
 prove shared actors, coordination or AI automation. Security-case fields can contain
 attacker-controlled strings even when their source configuration is owner-controlled.

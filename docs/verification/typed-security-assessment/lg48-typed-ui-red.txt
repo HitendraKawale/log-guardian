@@ -1,0 +1,40 @@
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_missing_auth_v2_and_preserved_legacy_claim[chromium] ___________
+
+page = <Page url='http://127.0.0.1:60716/ui/security.html?api=http://127.0.0.1:60716'>
+security_stack = 'http://127.0.0.1:60716'
+tmp_path = PosixPath('/private/var/folders/qz/ycfy4hxs01321rg_7tdl5kqr0000gn/T/pytest-of-hitesh/pytest-439/test_missing_auth_v2_and_prese0')
+
+    def test_missing_auth_v2_and_preserved_legacy_claim(page, security_stack, tmp_path):
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        connect(page, security_stack)
+        page.get_by_label("From (UTC)", exact=True).fill("2026-09-01T10:00:00Z")
+        page.get_by_label("To (UTC)", exact=True).fill("2026-09-01T10:10:00Z")
+        page.get_by_label("edge log file").set_input_files(ROOT / "examples/security-review/nginx.jsonl")
+        page.get_by_label("auth log file").set_input_files({"name": "empty.jsonl", "mimeType": "application/json", "buffer": b""})
+        page.get_by_role("button", name="Save review", exact=True).click()
+        expect(page.get_by_role("heading", name="0 linked requests", exact=True)).to_be_visible()
+        page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+        page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+        page.get_by_role("button", name="Start or open investigation", exact=True).click()
+        expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
+        report = page.locator("#security-run-report")
+>       expect(report).to_contain_text("Gateway recorded HTTP 200")
+E       AssertionError: Locator expected to contain text 'Gateway recorded HTTP 200'
+E       Actual value: Model outcome: inconclusive. Not independently verified. 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for locator("#security-run-report")
+E           14 × locator resolved to <div id="security-run-report">…</div>
+E              - unexpected value "Model outcome: inconclusive. Not independently verified."
+
+e2e/test_security_review_ui.py:443: AssertionError
+=========================== short test summary info ============================
+FAILED e2e/test_security_review_ui.py::test_missing_auth_v2_and_preserved_legacy_claim[chromium]
+1 failed, 7 deselected in 8.94s

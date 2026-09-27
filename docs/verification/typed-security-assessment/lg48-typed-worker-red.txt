@@ -1,0 +1,154 @@
+..FF.......................                                              [100%]
+=================================== FAILURES ===================================
+_____ test_worker_delivers_security_before_provider_and_records_citations ______
+
+client = <httpx.AsyncClient object at 0x109fffcd0>
+session_factory = async_sessionmaker(class_='AsyncSession', bind=<sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x10a1c21c0>, autoflush=True, expire_on_commit=False)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a1c1bd0>
+tmp_path = PosixPath('/private/var/folders/qz/ycfy4hxs01321rg_7tdl5kqr0000gn/T/pytest-of-hitesh/pytest-436/test_worker_delivers_security_0')
+
+    async def test_worker_delivers_security_before_provider_and_records_citations(
+        client, session_factory, monkeypatch, tmp_path
+    ):
+        run_id, saved = await queue(client, session_factory, monkeypatch)
+        other = payload()
+        other["logs"] = {
+            k: json.dumps(
+                {
+                    **json.loads(v),
+                    "request_id": "other-request",
+                    **(
+                        {"event_id": "other-auth", "account_ref": "OTHER_CASE_CANARY"}
+                        if k == "auth"
+                        else {}
+                    ),
+                }
+            )
+            for k, v in other["logs"].items()
+        }
+        async with session_factory() as session:
+            await save_case(session, OWNER, other, "other-case")
+        wire = []
+    
+        async def provider(request):
+            body = json.loads(request.content)
+            wire.append(body)
+            assert "OTHER_CASE_CANARY" not in request.content.decode()
+            assert {t["function"]["name"] for t in body["tools"]} == {"read_security_evidence"}
+            batch = json.loads(body["messages"][-1]["content"])
+            assert batch["source"] == "security_case"
+            auth = next(
+                i
+                for i in batch["items"]
+                if i["kind"] == "security_event"
+                and i["content"]["event_kind"] == "authentication_result"
+            )
+            async with session_factory() as session:
+                receipts = (
+                    await session.scalars(
+                        select(InvestigationEvent)
+                        .where(InvestigationEvent.investigation_id == run_id)
+                        .order_by(InvestigationEvent.sequence)
+                    )
+                ).all()
+                assert [r.kind for r in receipts] == ["tool_request", "tool_call"]
+                assert receipts[1].payload["request_sequence"] == receipts[0].sequence
+                assert receipts[0].payload["origin"] == "server_initial"
+            assert set(body["response_format"]["json_schema"]["schema"]["properties"]) == {
+                "focus_evidence_ids", "hypothesis_codes", "check_codes"
+            }
+            report = {
+                "focus_evidence_ids": [auth["evidence_id"]],
+                "hypothesis_codes": [],
+                "check_codes": ["read_rejection_reasons"],
+            }
+            return response(body, report)
+    
+        async with scripted_client(provider) as provider_client:
+            await execute_run(session_factory, run_id, provider_client)
+        async with session_factory() as session:
+            run = await session.get(Investigation, run_id)
+>           assert run.status == "completed", run.error
+E           AssertionError: provider_error
+E           assert 'failed' == 'completed'
+E             
+E             - completed
+E             + failed
+
+tests/test_security_investigation.py:220: AssertionError
+----------------------------- Captured stderr call -----------------------------
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://test/investigations/from-security-case/09c11467-a17a-4e68-a0bd-2be19294381b \"HTTP/1.1 201 Created\""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/investigations/from-security-case/09c11467-a17a-4e68-a0bd-2be19294381b "HTTP/1.1 201 Created"
+_ test_security_guidance_delivery_keeps_report_rejection_strict[compact-None] __
+
+client = <httpx.AsyncClient object at 0x10a1c3250>
+session_factory = async_sessionmaker(class_='AsyncSession', bind=<sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x10a0ec5c0>, autoflush=True, expire_on_commit=False)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a7683d0>
+mode = 'compact', error = None
+
+    @pytest.mark.parametrize(
+        "mode,error",
+        [
+            ("compact", None),
+            ("supported-without-cause", "invalid_report"),
+            ("cut-off", "incomplete_output"),
+            ("unknown-id", "invalid_report"),
+            ("unmet-prerequisite", "invalid_report"),
+        ],
+    )
+    async def test_security_guidance_delivery_keeps_report_rejection_strict(
+        client, session_factory, monkeypatch, mode, error
+    ):
+        run_id, _ = await queue(client, session_factory, monkeypatch)
+        requests = []
+    
+        def provider(request):
+            body = json.loads(request.content)
+            requests.append(body)
+            assert body["messages"][0]["role"] == "system"
+            assert body["messages"][0]["content"].endswith(SECURITY_GUIDANCE)
+            assert body["max_completion_tokens"] == 1024
+            batch = json.loads(body["messages"][-1]["content"])
+            auth = next(
+                i
+                for i in batch["items"]
+                if i["kind"] == "security_event" and i["content"].get("auth_outcome") == "failure"
+            )
+            report = {
+                "focus_evidence_ids": ["other-case" if mode == "unknown-id" else auth["evidence_id"]],
+                "hypothesis_codes": ["retry_possible"] if mode == "unmet-prerequisite" else [],
+                "check_codes": [],
+            }
+            if mode == "supported-without-cause":
+                report.update(outcome="supported", likely_cause=None)
+            # This proves a compact fixture fits, not that a model will produce it.
+            assert len(json.dumps(report).encode()) < 700
+            data = response(body, report).json()
+            if mode == "cut-off":
+                data["choices"][0]["finish_reason"] = "length"
+                data["choices"][0]["message"]["content"] = '{"observations":['
+                data["usage"].update(completion_tokens=1024, total_tokens=1124)
+            return httpx.Response(200, json=data)
+    
+        async with scripted_client(provider) as provider_client:
+            await execute_run(session_factory, run_id, provider_client)
+        async with session_factory() as session:
+            run = await session.get(Investigation, run_id)
+>           assert run.status == ("failed" if error else "completed")
+E           AssertionError: assert 'failed' == 'completed'
+E             
+E             - completed
+E             + failed
+
+tests/test_security_investigation.py:312: AssertionError
+----------------------------- Captured stderr call -----------------------------
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://test/investigations/from-security-case/e55f2613-4a6b-45df-b692-3c12f2914739 \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/investigations/from-security-case/e55f2613-4a6b-45df-b692-3c12f2914739 "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_security_investigation.py::test_worker_delivers_security_before_provider_and_records_citations
+FAILED tests/test_security_investigation.py::test_security_guidance_delivery_keeps_report_rejection_strict[compact-None]
+2 failed, 25 passed in 1.37s
