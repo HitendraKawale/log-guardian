@@ -191,6 +191,7 @@ class RecordingTransport(httpx.AsyncBaseTransport):
                 **record,
                 "status": "reserved_attempt_may_have_been_sent",
                 "request_sha256": hashlib.sha256(raw).hexdigest(),
+                "request_json": raw.decode("utf-8"),
                 "request": body,
             },
         )
@@ -210,7 +211,8 @@ class RecordingTransport(httpx.AsyncBaseTransport):
             if body.get("service_tier", "default") != "default":
                 raise ValueError("nonstandard billing tier refused")
             body["service_tier"] = "default"
-            raw_request = canonical(body)
+            # Structured Outputs follows schema property order; never sort wire JSON.
+            raw_request = json.dumps(body, ensure_ascii=False, allow_nan=False).encode()
             record = self.reserve(raw_request)
             request = httpx.Request(
                 request.method,

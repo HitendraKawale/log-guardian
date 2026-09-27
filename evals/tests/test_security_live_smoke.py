@@ -1,5 +1,6 @@
 """The approved batch must fail closed before money or source boundaries can expand."""
 
+import hashlib
 import json
 from decimal import Decimal
 
@@ -41,20 +42,40 @@ def response(request):
 
 
 @pytest.mark.asyncio
-async def test_real_routes_worker_capture_and_single_use(tmp_path):
+async def test_real_routes_worker_capture_and_single_use(tmp_path, monkeypatch):
     output = tmp_path / "batch"
+    native, sent = [], []
+    original = s.p.RecordingTransport.handle_async_request
+
+    async def observe(self, request):
+        native.append(json.loads(await request.aread()))
+        return await original(self, request)
+
+    monkeypatch.setattr(s.p.RecordingTransport, "handle_async_request", observe)
 
     def provider(request):
         reservations = list(output.glob("*.reservation.json"))
         assert reservations
         prior = sorted(output.glob("*.response.json"))
         assert len(reservations) == len(prior) + 1
+        sent.append(request.content)
         return response(request)
 
     result = await s.run_batch(output, s.manifest()[1], transport=httpx.MockTransport(provider))
     assert result["cases"] == dict.fromkeys(s.CASE_IDS, "completed")
     assert result["attempts"] == 4 and result["usage_complete"] and result["allowance_closed"]
     assert Decimal(result["reserved_usd"]) <= Decimal("0.10")
+    assert len(native) == len(sent) == 4
+    for number, (body, wire) in enumerate(zip(native, sent, strict=True), 1):
+        # Compare serialization, not dict equality: nested property order matters.
+        body["service_tier"] = "default"
+        assert json.dumps(json.loads(wire), ensure_ascii=False) == json.dumps(
+            body, ensure_ascii=False
+        )
+        reservation = json.loads((output / f"request-{number:03}.reservation.json").read_bytes())
+        assert reservation["request_json"].encode() == wire
+        assert reservation["request_sha256"] == hashlib.sha256(wire).hexdigest()
+        assert reservation["request"] == json.loads(wire)
     for identity in s.CASE_IDS:
         case = json.loads((output / f"{identity}.json").read_bytes())
         events = case["events"]
