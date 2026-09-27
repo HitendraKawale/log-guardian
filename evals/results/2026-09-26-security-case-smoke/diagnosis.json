@@ -1,0 +1,115 @@
+[
+  {
+    "case_id": "smoke-01",
+    "schema_errors": [
+      {
+        "type": "value_error",
+        "loc": [],
+        "msg": "Value error, Supported reports require observations and a cited cause",
+        "url": "https://errors.pydantic.dev/2.10/v/value_error"
+      }
+    ],
+    "unknown_citations": [],
+    "delivered_items": 14,
+    "native_schema_order": [
+      "observations",
+      "missing_evidence",
+      "alternatives",
+      "likely_cause",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_schema_order": [
+      "alternatives",
+      "likely_cause",
+      "missing_evidence",
+      "observations",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_digest_reproduced": true
+  },
+  {
+    "case_id": "smoke-02",
+    "schema_errors": [
+      {
+        "type": "value_error",
+        "loc": [],
+        "msg": "Value error, Supported reports require observations and a cited cause",
+        "url": "https://errors.pydantic.dev/2.10/v/value_error"
+      }
+    ],
+    "unknown_citations": [],
+    "delivered_items": 8,
+    "native_schema_order": [
+      "observations",
+      "missing_evidence",
+      "alternatives",
+      "likely_cause",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_schema_order": [
+      "alternatives",
+      "likely_cause",
+      "missing_evidence",
+      "observations",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_digest_reproduced": true
+  },
+  {
+    "case_id": "smoke-03",
+    "schema_errors": [],
+    "unknown_citations": [],
+    "delivered_items": 5,
+    "native_schema_order": [
+      "observations",
+      "missing_evidence",
+      "alternatives",
+      "likely_cause",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_schema_order": [
+      "alternatives",
+      "likely_cause",
+      "missing_evidence",
+      "observations",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_digest_reproduced": true
+  },
+  {
+    "case_id": "smoke-04",
+    "schema_errors": [
+      {
+        "type": "value_error",
+        "loc": [],
+        "msg": "Value error, Supported reports require observations and a cited cause",
+        "url": "https://errors.pydantic.dev/2.10/v/value_error"
+      }
+    ],
+    "unknown_citations": [],
+    "delivered_items": 8,
+    "native_schema_order": [
+      "observations",
+      "missing_evidence",
+      "alternatives",
+      "likely_cause",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_schema_order": [
+      "alternatives",
+      "likely_cause",
+      "missing_evidence",
+      "observations",
+      "outcome",
+      "suggested_checks"
+    ],
+    "wire_digest_reproduced": true
+  }
+]

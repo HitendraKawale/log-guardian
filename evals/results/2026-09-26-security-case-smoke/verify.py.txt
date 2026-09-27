@@ -1,0 +1,50 @@
+"""Verify captured facts without a key, model, database write or current application imports."""
+import ast
+import gzip
+import hashlib
+import json
+from decimal import Decimal
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+load = lambda name: json.loads((root / name).read_bytes())
+for name, expected in load('original-files.json').items():
+    raw = gzip.decompress((root / (name + '.gz')).read_bytes()) if name.endswith('.db') else (root / name).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == expected, name
+source = ast.parse((root / 'candidate/services/ingestion-service/app/investigation_schemas.py').read_text())
+report_class = next(n for n in source.body if isinstance(n, ast.ClassDef) and n.name == 'InvestigationReport')
+native_order = [n.target.id for n in report_class.body if isinstance(n, ast.AnnAssign)]
+records = inputs = outputs = 0
+cost = Decimal(0)
+for n in range(1, 5):
+    reservation = load(f'request-{n:03}.reservation.json')
+    receipt = load(f'request-{n:03}.response.json')
+    case = load(f'smoke-{n:02}.json')
+    wire = json.dumps(reservation['request'], sort_keys=True, ensure_ascii=False, allow_nan=False).encode()
+    assert hashlib.sha256(wire).hexdigest() == reservation['request_sha256']
+    sent_order = list(reservation['request']['response_format']['json_schema']['schema']['properties'])
+    assert sent_order == sorted(native_order) and sent_order != native_order
+    batches = [json.loads(m['content']) for m in reservation['request']['messages'] if m['role'] == 'tool']
+    items = [item for batch in batches for item in batch['items']]
+    records += sum(item['kind'] == 'security_event' for item in items)
+    ids = {item['evidence_id'] for item in items}
+    choice = receipt['response']['choices'][0]
+    assert receipt['http_status'] == 200 and choice['finish_reason'] == 'stop'
+    report = json.loads(choice['message']['content'])
+    for finding in report['observations'] + report['alternatives'] + ([report['likely_cause']] if report['likely_cause'] else []):
+        assert set(finding['evidence_ids']) <= ids
+    assert report['likely_cause'] is None
+    assert report['outcome'] == ('inconclusive' if n == 3 else 'supported')
+    assert case['run']['status'] == ('completed' if n == 3 else 'failed')
+    assert case['run']['error'] == (None if n == 3 else 'invalid_report')
+    assert [event['kind'] for event in case['events']] == ['tool_request', 'tool_call', 'status']
+    assert case['events'][1]['payload']['request_sequence'] == case['events'][0]['sequence']
+    assert batches[0] == case['events'][1]['payload']['result']
+    inputs += receipt['usage']['prompt_tokens']
+    outputs += receipt['usage']['completion_tokens']
+    cost += Decimal(receipt['cost_upper_usd'])
+assert (records, inputs, outputs, cost) == (27, 9950, 2883, Decimal('0.0085928'))
+summary = load('summary.json')
+assert summary['attempts'] == 4 and summary['usage_complete'] and summary['allowance_closed']
+assert Decimal(summary['reserved_usd']) == Decimal('0.03163320')
+print('PASS: 61 originals, 27 delivered records, 4 captured responses, known citations, 3 outcome mismatches, schema-order difference and closed allowance.')
