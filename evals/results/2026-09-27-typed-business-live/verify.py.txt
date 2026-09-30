@@ -1,0 +1,79 @@
+"""Verify captured execution facts without credentials, dependencies or model calls."""
+import gzip
+import hashlib
+import json
+from decimal import Decimal
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+
+def load(name):
+    return json.loads((root / name).read_bytes())
+
+originals = load('original-files.json')
+for name, expected in originals.items():
+    raw = gzip.decompress((root / (name + '.gz')).read_bytes()) if name.endswith('.db') else (root / name).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == expected, name
+manifest = load('manifest.json')
+assert manifest['candidate_sha256'] == 'd9f98312ad6951ad6e1e2b112992bdcfde5972ea2da8aaa47bfc4176c83701ea'
+assert manifest['authorization'] == 'security-typed-business-2026-09-27-04'
+for name, expected in manifest['files'].items():
+    assert hashlib.sha256((root / 'candidate' / name).read_bytes()).hexdigest() == expected
+inputs = outputs = delivered = 0
+cost = Decimal(0)
+for n, count in enumerate([19, 8, 6, 8], 1):
+    case = load(f'smoke-{n:02}.json')
+    reservation = load(f'request-{n:03}.reservation.json')
+    receipt = load(f'request-{n:03}.response.json')
+    wire = reservation['request_json'].encode()
+    assert hashlib.sha256(wire).hexdigest() == reservation['request_sha256']
+    body = json.loads(wire)
+    assert body == reservation['request']
+    assert list(body['response_format']['json_schema']['schema']['properties']) == ['focus_evidence_ids', 'hypothesis_codes', 'check_codes']
+    assert [tool['function']['name'] for tool in body['tools']] == ['read_security_evidence']
+    assert body['max_completion_tokens'] == 1024
+    assert Decimal(reservation['reserved_usd']) <= Decimal('0.025')
+    events = case['events']
+    assert [e['kind'] for e in events] == ['tool_request', 'tool_call', 'status']
+    assert events[1]['payload']['request_sequence'] == events[0]['sequence']
+    batch = events[1]['payload']['result']
+    assert json.loads(next(m['content'] for m in body['messages'] if m['role'] == 'tool')) == batch
+    assert not batch['truncated'] and not batch['error']
+    assert sum(i['kind'] == 'security_event' for i in batch['items']) == count
+    delivered += count
+    choice = receipt['response']['choices'][0]
+    assert receipt['http_status'] == 200 and choice['finish_reason'] == 'stop'
+    selection = json.loads(choice['message']['content'])
+    assert set(selection) == {'focus_evidence_ids', 'hypothesis_codes', 'check_codes'}
+    items = {i['evidence_id']: i for i in batch['items']}
+    unknown = set(selection['focus_evidence_ids']) - items.keys()
+    report = case['run']['report']
+    if n in (1, 3):
+        assert (case['run']['status'], case['run']['error']) == ('completed', None)
+        assert not unknown and report['schema_version'] == 2 and report['outcome'] == 'inconclusive'
+        assert len(report['facts']) == 3
+        for finding in report['facts'] + report['hypotheses']:
+            assert set(finding['evidence_ids']) <= items.keys()
+        if n == 3:
+            assert batch['items'][0]['content']['sources']['auth']['records'] == 0
+            assert 'Authentication outcome is unknown; no authentication results were supplied.' in report['unknowns']
+            assert report['hypotheses'] == []
+            assert not any('Authentication service recorded success' in f['claim'] for f in report['facts'])
+    else:
+        assert (case['run']['status'], case['run']['error'], report) == ('failed', 'invalid_report', None)
+        assert len(unknown) == 3
+        source_ids = {i['content'].get('evidence_id') for i in batch['items'] if i['kind'] == 'security_event'}
+        assert unknown <= source_ids  # Existing source-local IDs, not selectable outer IDs.
+        if n == 4:
+            assert batch['items'][0]['content']['sources']['auth']['auth_outcomes']['failure'] == 1
+            assert 'repeated_login_attempts' in selection['hypothesis_codes']
+    assert receipt['usage']['prompt_tokens_details']['cached_tokens'] == 0
+    inputs += receipt['usage']['prompt_tokens']
+    outputs += receipt['usage']['completion_tokens']
+    cost += Decimal(receipt['cost_upper_usd'])
+summary = load('summary.json')
+assert summary['allowance_closed'] and summary['usage_complete'] and summary['attempts'] == 4
+assert summary['fatal'] is None
+assert Decimal(summary['reserved_usd']) == Decimal('0.03280640')
+assert (delivered, inputs, outputs, cost) == (41, 11754, 437, Decimal('0.0054008'))
+print(f'PASS: {len(originals)} originals; 41 delivered records; exact wire hashes; 2 completed/2 rejected; wrong-namespace IDs and unsupported hypothesis retained; allowance closed.')

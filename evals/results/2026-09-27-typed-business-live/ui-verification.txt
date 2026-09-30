@@ -1,0 +1,4 @@
+smoke-01: completed; report visibility correct; POST 405; storage empty; no browser errors
+smoke-02: failed: invalid_report; report visibility correct; POST 405; storage empty; no browser errors
+smoke-03: completed; report visibility correct; POST 405; storage empty; no browser errors
+smoke-04: failed: invalid_report; report visibility correct; POST 405; storage empty; no browser errors

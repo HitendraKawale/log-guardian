@@ -1,0 +1,70 @@
+[
+  {
+    "case_id": "smoke-01",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-27T14:00:00+00:00",
+        "end": "2026-09-27T14:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-27T14:00:00+00:00\", \"request_id\": \"commerce-v2-1-001\", \"remote_addr\": \"192.0.2.81\", \"status\": \"200\", \"route\": \"/store/catalog\"}\n{\"time\": \"2026-09-27T14:00:40+00:00\", \"request_id\": \"commerce-v2-1-002\", \"remote_addr\": \"198.51.100.81\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:42+00:00\", \"request_id\": \"commerce-v2-1-003\", \"remote_addr\": \"203.0.113.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:44+00:00\", \"request_id\": \"commerce-v2-1-004\", \"remote_addr\": \"198.51.100.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:46+00:00\", \"request_id\": \"commerce-v2-1-005\", \"remote_addr\": \"203.0.113.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:48+00:00\", \"request_id\": \"commerce-v2-1-006\", \"remote_addr\": \"198.51.100.81\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:50+00:00\", \"request_id\": \"commerce-v2-1-007\", \"remote_addr\": \"203.0.113.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:52+00:00\", \"request_id\": \"commerce-v2-1-008\", \"remote_addr\": \"198.51.100.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:54+00:00\", \"request_id\": \"commerce-v2-1-009\", \"remote_addr\": \"203.0.113.81\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:58+00:00\", \"request_id\": \"commerce-v2-1-010\", \"remote_addr\": \"198.51.100.81\", \"status\": \"429\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:02:00+00:00\", \"request_id\": \"commerce-v2-1-011\", \"remote_addr\": \"192.0.2.81\", \"status\": \"200\", \"route\": \"/basket\"}",
+        "auth": "{\"event_id\": \"commerce-v2-auth-1-001\", \"timestamp\": \"2026-09-27T14:00:40+00:00\", \"request_id\": \"commerce-v2-1-002\", \"account_ref\": \"buyer-5100\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-002\", \"timestamp\": \"2026-09-27T14:00:42+00:00\", \"request_id\": \"commerce-v2-1-003\", \"account_ref\": \"buyer-5101\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-003\", \"timestamp\": \"2026-09-27T14:00:44+00:00\", \"request_id\": \"commerce-v2-1-004\", \"account_ref\": \"buyer-5102\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-004\", \"timestamp\": \"2026-09-27T14:00:46+00:00\", \"request_id\": \"commerce-v2-1-005\", \"account_ref\": \"buyer-5103\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-005\", \"timestamp\": \"2026-09-27T14:00:48+00:00\", \"request_id\": \"commerce-v2-1-006\", \"account_ref\": \"buyer-5100\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-006\", \"timestamp\": \"2026-09-27T14:00:50+00:00\", \"request_id\": \"commerce-v2-1-007\", \"account_ref\": \"buyer-5101\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-007\", \"timestamp\": \"2026-09-27T14:00:52+00:00\", \"request_id\": \"commerce-v2-1-008\", \"account_ref\": \"buyer-5102\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-1-008\", \"timestamp\": \"2026-09-27T14:00:54+00:00\", \"request_id\": \"commerce-v2-1-009\", \"account_ref\": \"buyer-5103\", \"outcome\": \"failure\"}"
+      }
+    }
+  },
+  {
+    "case_id": "smoke-02",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-27T14:00:00+00:00",
+        "end": "2026-09-27T14:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-27T14:00:00+00:00\", \"request_id\": \"commerce-v2-2-001\", \"remote_addr\": \"192.0.2.82\", \"status\": \"200\", \"route\": \"/store/catalog\"}\n{\"time\": \"2026-09-27T14:00:20+00:00\", \"request_id\": \"commerce-v2-2-002\", \"remote_addr\": \"192.0.2.82\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:01:30+00:00\", \"request_id\": \"commerce-v2-2-003\", \"remote_addr\": \"192.0.2.82\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:03:10+00:00\", \"request_id\": \"commerce-v2-2-004\", \"remote_addr\": \"192.0.2.82\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:03:25+00:00\", \"request_id\": \"commerce-v2-2-005\", \"remote_addr\": \"192.0.2.82\", \"status\": \"200\", \"route\": \"/basket\"}",
+        "auth": "{\"event_id\": \"commerce-v2-auth-2-001\", \"timestamp\": \"2026-09-27T14:00:20+00:00\", \"request_id\": \"commerce-v2-2-002\", \"account_ref\": \"buyer-5017\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-2-002\", \"timestamp\": \"2026-09-27T14:01:30+00:00\", \"request_id\": \"commerce-v2-2-003\", \"account_ref\": \"buyer-5017\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-2-003\", \"timestamp\": \"2026-09-27T14:03:10+00:00\", \"request_id\": \"commerce-v2-2-004\", \"account_ref\": \"buyer-5017\", \"outcome\": \"success\"}"
+      }
+    }
+  },
+  {
+    "case_id": "smoke-03",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-27T14:00:00+00:00",
+        "end": "2026-09-27T14:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-27T14:00:00+00:00\", \"request_id\": \"commerce-v2-3-001\", \"remote_addr\": \"192.0.2.83\", \"status\": \"200\", \"route\": \"/store/catalog\"}\n{\"time\": \"2026-09-27T14:00:15+00:00\", \"request_id\": \"commerce-v2-3-002\", \"remote_addr\": \"192.0.2.83\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:35+00:00\", \"request_id\": \"commerce-v2-3-003\", \"remote_addr\": \"198.51.100.88\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:00:55+00:00\", \"request_id\": \"commerce-v2-3-004\", \"remote_addr\": \"203.0.113.92\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:01:30+00:00\", \"request_id\": \"commerce-v2-3-005\", \"remote_addr\": \"203.0.113.92\", \"status\": \"503\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:02:20+00:00\", \"request_id\": \"commerce-v2-3-006\", \"remote_addr\": \"192.0.2.83\", \"status\": \"200\", \"route\": \"/basket\"}",
+        "auth": ""
+      }
+    }
+  },
+  {
+    "case_id": "smoke-04",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-27T14:00:00+00:00",
+        "end": "2026-09-27T14:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-27T14:00:00+00:00\", \"request_id\": \"commerce-v2-4-001\", \"remote_addr\": \"192.0.2.84\", \"status\": \"200\", \"route\": \"/store/catalog\"}\n{\"time\": \"2026-09-27T14:00:30+00:00\", \"request_id\": \"commerce-v2-4-002\", \"remote_addr\": \"198.51.100.84\", \"status\": \"401\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:01:15+00:00\", \"request_id\": \"commerce-v2-4-003\", \"remote_addr\": \"203.0.113.84\", \"status\": \"200\", \"route\": \"/session/login\"}\n{\"time\": \"2026-09-27T14:01:35+00:00\", \"request_id\": \"commerce-v2-4-004\", \"remote_addr\": \"203.0.113.84\", \"status\": \"201\", \"route\": \"/orders\"}\n{\"time\": \"2026-09-27T14:01:55+00:00\", \"request_id\": \"commerce-v2-4-005\", \"remote_addr\": \"203.0.113.84\", \"status\": \"200\", \"route\": \"/checkout\"}\n{\"time\": \"2026-09-27T14:02:40+00:00\", \"request_id\": \"commerce-v2-4-006\", \"remote_addr\": \"203.0.113.84\", \"status\": \"200\", \"route\": \"/orders/status\"}",
+        "auth": "{\"event_id\": \"commerce-v2-auth-4-001\", \"timestamp\": \"2026-09-27T14:00:30+00:00\", \"request_id\": \"commerce-v2-4-002\", \"account_ref\": \"buyer-6208\", \"outcome\": \"failure\"}\n{\"event_id\": \"commerce-v2-auth-4-002\", \"timestamp\": \"2026-09-27T14:01:15+00:00\", \"request_id\": \"commerce-v2-4-003\", \"account_ref\": \"buyer-6208\", \"outcome\": \"success\"}"
+      }
+    }
+  }
+]
