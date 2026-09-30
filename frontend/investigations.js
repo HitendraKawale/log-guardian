@@ -178,6 +178,17 @@
     for (const [label, value] of pairs) {
       meta.append(element("dt", "", label), element("dd", "", value));
     }
+    if (run.security_case_id && !RECORDED_URL) {
+      const url = new URL("security.html", location.href);
+      url.search = "";
+      url.searchParams.set("api", API);
+      url.searchParams.set("case", run.security_case_id);
+      const link = element("a", "", "Open factual assessment");
+      link.href = url.href;
+      const value = element("dd");
+      value.append(link);
+      meta.append(element("dt", "", "Saved evidence"), value);
+    }
     const error = $("inv-error");
     if (run.status === "failed") {
       error.hidden = false;

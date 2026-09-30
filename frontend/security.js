@@ -10,6 +10,7 @@
   let pending = null;
   let activeCase = null, runId = null, runVersion = 0, runTimer = null, eventCursor = 0;
   const runEvidence = new Map();
+  const baselineEvidence = new Map();
   const controllers = new Set();
   const message = (value) => { $("security-message").textContent = value; };
   $("security-api").value = new URLSearchParams(location.search).get("api") || "http://localhost:8000";
@@ -49,6 +50,7 @@
     generation++;
     $("security-execution-key").value = "";
     resetRun(null);
+    clearBaseline();
     for (const controller of controllers) controller.abort();
     sources = [];
     pending = null;
@@ -62,6 +64,14 @@
   $("security-api").addEventListener("input", invalidate);
   $("security-key").addEventListener("input", invalidate);
 
+  async function openCase(id) {
+    const version = ++detailVersion;
+    resetRun(null);
+    clearBaseline();
+    const { data } = await request(`/security/cases/${encodeURIComponent(id)}`);
+    if (version === detailVersion) render(data);
+  }
+
   async function history() {
     const { data } = await request(`/security/cases?limit=25&offset=${offset}`);
     $("security-history").replaceChildren(...data.map((item) => {
@@ -70,12 +80,8 @@
       button.className = "inv-item-btn";
       button.type = "button";
       button.addEventListener("click", async () => {
-        const version = ++detailVersion;
-        resetRun(null);
-        try {
-          const result = await request(`/security/cases/${encodeURIComponent(item.id)}`);
-          if (version === detailVersion) render(result.data);
-        } catch (error) { message(error.message || "Could not load review."); }
+        try { await openCase(item.id); }
+        catch (error) { message(error.message || "Could not load review."); }
       });
       li.append(button);
       return li;
@@ -92,26 +98,38 @@
     button.disabled = true;
     message("Loading owner-configured sources...");
     try {
-      const { data } = await request("/security/sources");
-      if (epoch !== generation) return;
-      sources = data.sources;
-      maxBytes = data.max_bytes;
-      $("security-source-files").replaceChildren(...sources.map((source, index) => {
-        const block = element("div");
-        const label = element("label", `${source.source_id} log file`);
-        const input = element("input");
-        input.type = "file";
-        input.required = true;
-        input.id = `security-file-${index}`;
-        label.append(input);
-        block.append(label, element("small", `${source.service}: ${source.format}. Request namespace: ${source.request_namespace || "not configured"}.`));
-        return block;
-      }));
-      $("security-import").hidden = false;
+      let sourceError = null;
+      try {
+        const { data } = await request("/security/sources");
+        if (epoch !== generation) return;
+        sources = data.sources;
+        maxBytes = data.max_bytes;
+        $("security-source-files").replaceChildren(...sources.map((source, index) => {
+          const block = element("div");
+          const label = element("label", `${source.source_id} log file`);
+          const input = element("input");
+          input.type = "file";
+          input.required = true;
+          input.id = `security-file-${index}`;
+          label.append(input);
+          block.append(label, element("small", `${source.service}: ${source.format}. Request namespace: ${source.request_namespace || "not configured"}.`));
+          return block;
+        }));
+        $("security-import").hidden = false;
+      } catch (error) {
+        if (epoch !== generation) return;
+        sourceError = error;
+        sources = [];
+        $("security-import").hidden = true;
+      }
       $("security-reload").disabled = false;
       offset = 0;
       await history();
-      message("Sources loaded. Files are sent only when you choose Save review.");
+      const caseId = new URLSearchParams(location.search).get("case");
+      if (caseId) await openCase(caseId);
+      message(sourceError
+        ? `Imports unavailable: ${sourceError.message}. Saved reviews remain available.`
+        : "Sources loaded. Files are sent only when you choose Save review.");
     } catch (error) {
       $("security-import").hidden = true;
       message(error.message || "Connection failed.");
@@ -154,6 +172,8 @@
 
   function render(saved) {
     resetRun(saved);
+    clearBaseline();
+    loadBaseline(saved.id, detailVersion);
     const report = saved.report;
     $("security-empty").hidden = true;
     $("security-detail").hidden = false;
@@ -209,6 +229,46 @@
       request_sha256: saved.request_sha256, input_hashes: saved.input_hashes,
       source_snapshot: saved.source_snapshot }, null, 2);
   }
+  function clearBaseline() {
+    baselineEvidence.clear();
+    $("security-assessment-report").replaceChildren();
+    $("security-assessment-evidence").replaceChildren();
+    $("security-assessment-status").textContent = "";
+  }
+
+  function retainEvidence(items, index, root) {
+    for (const item of items) {
+      if (index.has(item.evidence_id)) continue;
+      const details = element("details");
+      const pre = element("pre", JSON.stringify(item.content, null, 2));
+      pre.className = "citation-body";
+      details.append(element("summary", item.evidence_id), pre);
+      index.set(item.evidence_id, details);
+      root.append(details);
+    }
+  }
+
+  async function loadBaseline(caseId, version) {
+    const current = () => version === detailVersion && activeCase?.id === caseId;
+    $("security-assessment-status").textContent = "Loading factual assessment...";
+    try {
+      const { data } = await request(`/security/cases/${encodeURIComponent(caseId)}/assessment`);
+      if (!current()) return;
+      if (data.method !== "deterministic" || data.policy_version !== 1 || data.report?.schema_version !== 2) {
+        throw new Error("Unsupported factual assessment version.");
+      }
+      retainEvidence(data.evidence, baselineEvidence, $("security-assessment-evidence"));
+      renderDraft(data.report, $("security-assessment-report"), baselineEvidence, "security-assessment-status");
+      const coverage = data.coverage;
+      $("security-assessment-status").textContent = `Generated by deterministic rules. No model call. Policy ${data.policy_version}. Reviewed ${coverage.reviewed_records} of ${coverage.saved_records} saved records; displayed ${coverage.displayed_event_facts} event facts; omitted ${coverage.omitted_event_facts} from this summary. ${coverage.display_limited ? "Display limited; inspect the saved timeline for other records. " : ""}Collection completeness remains unknown.`;
+    } catch (error) {
+      if (current()) {
+        clearBaseline();
+        $("security-assessment-status").textContent = `Factual assessment unavailable: ${error.message || "read failed"}. Saved evidence remains available below.`;
+      }
+    }
+  }
+
   function resetRun(saved) {
     runVersion++;
     clearTimeout(runTimer);
@@ -236,8 +296,7 @@
     $("security-run-consent").checked = consent;
   });
 
-  function renderDraft(report) {
-    const root = $("security-run-report");
+  function renderDraft(report, root = $("security-run-report"), evidence = runEvidence, messageId = "security-run-message") {
     root.replaceChildren();
     if (!report) return;
     const typed = report.schema_version === 2;
@@ -261,8 +320,8 @@
           button.type = "button";
           button.className = "citation";
           button.addEventListener("click", () => {
-            const details = runEvidence.get(id);
-            if (!details) { $("security-run-message").textContent = "Citation is absent from the recorded evidence."; return; }
+            const details = evidence.get(id);
+            if (!details) { $(messageId).textContent = "Citation is absent from the recorded evidence."; return; }
             details.parentElement.parentElement.open = true;
             details.open = true;
             details.querySelector("summary").focus();
@@ -296,17 +355,12 @@
       for (const event of events) {
         eventCursor = Math.max(eventCursor, event.sequence);
         if (event.kind !== "tool_call") continue;
-        for (const item of event.payload.result?.items || []) {
-          if (runEvidence.has(item.evidence_id)) continue;
-          const details = element("details");
-          const pre = element("pre", JSON.stringify(item.content, null, 2));
-          pre.className = "citation-body";
-          details.append(element("summary", item.evidence_id), pre);
-          runEvidence.set(item.evidence_id, details);
-          $("security-run-evidence").append(details);
-        }
+        retainEvidence(event.payload.result?.items || [], runEvidence, $("security-run-evidence"));
       }
       $("security-run-status").textContent = `${run.status}${run.error ? `: ${run.error}` : ""}. Run ${run.id}. Estimated cost: ${run.estimated_cost_usd ?? "unknown"} USD.`;
+      if (["failed", "cancelled"].includes(run.status)) {
+        $("security-run-status").textContent += " AI assessment unavailable. The factual assessment is independent of this run.";
+      }
       $("security-run-cancel").disabled = !["queued", "running"].includes(run.status);
       renderDraft(run.report);
       if (!["completed", "failed", "cancelled"].includes(run.status)) runTimer = setTimeout(() => refreshRun(version), 1000);

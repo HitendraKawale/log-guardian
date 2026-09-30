@@ -35,11 +35,14 @@ from app.investigator import run_once
 from fastapi.staticfiles import StaticFiles
 
 async def scripted(request):
+    if sys.argv[2] == 'provider-error':
+        return httpx.Response(503, json={'error': {'message': 'scripted provider unavailable'}})
     body = json.loads(request.content)
     batch = json.loads(body['messages'][-1]['content'])
     events = [i for i in batch['items'] if i['kind'] == 'security_event']
     chosen = next((i for i in events if i['content'].get('auth_outcome') == 'failure'), events[0])
-    report = dict(focus_evidence_ids=[chosen['evidence_id']], hypothesis_codes=[], check_codes=[])
+    identity = chosen['content']['evidence_id'] if sys.argv[2] == 'invalid' else chosen['evidence_id']
+    report = dict(focus_evidence_ids=[identity], hypothesis_codes=[], check_codes=[])
     return httpx.Response(200, json=dict(id='scripted-browser', object='chat.completion', created=1,
         model=body['model'], choices=[dict(index=0, finish_reason='stop', message=dict(role='assistant', content=json.dumps(report)))],
         usage=dict(prompt_tokens=100, completion_tokens=100, total_tokens=200, prompt_tokens_details=dict(cached_tokens=0))))
@@ -56,7 +59,7 @@ async def lifespan(app):
                 while not stop.is_set():
                     await run_once(factory, provider, 'scripted-browser-worker')
                     await asyncio.sleep(0.05)
-            task = asyncio.create_task(worker()) if sys.argv[2] == 'scripted' else None
+            task = asyncio.create_task(worker()) if sys.argv[2] in {'scripted', 'invalid', 'provider-error'} else None
             try:
                 yield
             finally:
@@ -212,7 +215,10 @@ def test_untrusted_saved_text_cannot_create_markup(page, security_stack):
         saved["report"]["timeline"][0]["auth_outcome"] = hostile
         route.fulfill(response=response, json=saved)
 
-    page.route(f"{security_stack}/security/cases/*", untrusted_report)
+    identity = page.request.get(
+        f"{security_stack}/security/cases", headers={"X-API-Key": "security-test"}
+    ).json()[0]["id"]
+    page.route(f"{security_stack}/security/cases/{identity}", untrusted_report)
     page.locator("#security-history button").click()
     expect(page.locator("#security-timeline")).to_contain_text(hostile)
     assert page.locator("#security-timeline img, #security-timeline script").count() == 0
@@ -250,7 +256,11 @@ def test_explicit_security_investigation_with_scripted_worker(page, security_sta
     expect(page.locator("#security-run-report")).to_contain_text(
         "Authentication service recorded failure"
     )
-    expect(page.get_by_role("heading", name="Recorded facts", exact=True)).to_be_visible()
+    expect(
+        page.locator("#security-run-report").get_by_role(
+            "heading", name="Recorded facts", exact=True
+        )
+    ).to_be_visible()
     page.locator("#security-run-report .citation").first.click()
     expect(page.locator("#security-run-evidence details[open] pre")).to_contain_text(
         '"auth_outcome": "failure"'
@@ -486,7 +496,10 @@ def test_missing_auth_v2_and_preserved_legacy_claim(page, security_stack, tmp_pa
     page.get_by_role("button", name="Start or open investigation", exact=True).click()
     expect(report).to_contain_text("Legacy model draft")
     expect(report).to_contain_text("successful login attempt (HTTP 200)")
-    expect(page.get_by_role("heading", name="Recorded facts", exact=True)).to_have_count(0)
+    expect(report.get_by_role("heading", name="Recorded facts", exact=True)).to_have_count(0)
+    expect(page.locator("#security-assessment-report")).to_contain_text(
+        "Authentication outcome is unknown"
+    )
     for width, name in [(1280, "desktop"), (390, "mobile")]:
         page.set_viewport_size({"width": width, "height": 900})
         page.screenshot(path=str(tmp_path / f"legacy-false-claim-{name}.png"), full_page=True)
@@ -573,3 +586,253 @@ def test_cancelled_case_is_not_requeued(page, security_stack):
         f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
     ).json()
     assert len(runs) == 1 and runs[0]["status"] == "cancelled"
+
+
+@pytest.mark.parametrize("security_stack", ["idle"], indirect=True)
+def test_baseline_before_ai_consent(page, security_stack, tmp_path):
+    connect(page, security_stack)
+    upload_example(page)
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+    expect(page.locator("#security-assessment-report")).to_contain_text(
+        "Authentication service recorded failure"
+    )
+    expect(page.get_by_label("Investigation API key", exact=True)).to_have_value("")
+    runs = page.request.get(
+        f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
+    ).json()
+    assert runs == []
+    button = (
+        page.locator("#security-assessment-report .citation")
+        .filter(has_text="security-event:")
+        .first
+    )
+    button.focus()
+    page.keyboard.press("Enter")
+    expect(page.locator("#security-assessment-evidence details[open] pre")).to_be_visible()
+    assert page.evaluate("JSON.stringify(localStorage) + JSON.stringify(sessionStorage)") == "{}{}"
+    page.screenshot(path=str(tmp_path / "baseline-no-model-desktop.png"), full_page=True)
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    page.screenshot(path=str(tmp_path / "baseline-no-model-mobile.png"), full_page=True)
+    page.reload()
+    expect(page.get_by_label("Security API key", exact=True)).to_have_value("")
+    page.get_by_label("Security API key", exact=True).fill("security-test")
+    page.get_by_role("button", name="Connect", exact=True).click()
+    page.locator("#security-history button").first.click()
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+
+
+@pytest.mark.parametrize("security_stack", ["invalid", "provider-error"], indirect=True)
+def test_baseline_survives_ai_failure(page, security_stack, tmp_path):
+    connect(page, security_stack)
+    upload_example(page)
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+    baseline = page.locator("#security-assessment-report").text_content()
+    page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+    expect(page.locator("#security-assessment-report")).to_have_text(baseline)
+    page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(page.locator("#security-run-status")).to_contain_text("failed", timeout=15000)
+    expect(page.locator("#security-run-status")).to_contain_text(
+        "factual assessment is independent"
+    )
+    expect(page.locator("#security-run-report")).to_be_empty()
+    expect(page.locator("#security-assessment-report")).to_have_text(baseline)
+    run = page.request.get(
+        f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
+    ).json()[0]
+    assert run["status"] == "failed" and run["report"] is None
+    assert run["error"] in {"invalid_report", "provider_error"}
+    page.screenshot(path=str(tmp_path / f"baseline-{run['error']}.png"), full_page=True)
+
+
+@pytest.mark.parametrize("security_stack", ["idle"], indirect=True)
+def test_baseline_untrusted_text_versions_and_fetch_failure(page, security_stack):
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    connect(page, security_stack)
+    upload_example(page)
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+    hostile = '<img src=x onerror="window.xss=1"><script>window.xss=2</script>'
+    mode = "hostile"
+
+    def intercept(route):
+        response = route.fetch()
+        data = response.json()
+        if mode == "hostile":
+            data["report"]["facts"][0]["claim"] = hostile * 8
+        elif mode == "version":
+            data["policy_version"] = 99
+            data["report"]["facts"][0]["claim"] = "HIDDEN_UNKNOWN_VERSION"
+        elif mode == "failure":
+            route.fulfill(
+                status=422, json={"detail": "Saved evidence cannot produce a bounded assessment"}
+            )
+            return
+        route.fulfill(response=response, json=data)
+
+    page.route(f"{security_stack}/security/cases/*/assessment", intercept)
+    page.locator("#security-history button").click()
+    expect(page.locator("#security-assessment-report")).to_contain_text(hostile)
+    assert (
+        page.locator("#security-assessment-report img, #security-assessment-report script").count()
+        == 0
+    )
+    assert page.evaluate("window.xss") is None
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    mode = "version"
+    page.locator("#security-history button").click()
+    expect(page.locator("#security-assessment-status")).to_contain_text(
+        "Unsupported factual assessment version"
+    )
+    expect(page.locator("#security-assessment-report")).to_be_empty()
+    mode = "failure"
+    page.locator("#security-history button").click()
+    expect(page.locator("#security-assessment-status")).to_contain_text(
+        "Saved evidence remains available"
+    )
+    expect(page.locator("#security-timeline details")).to_have_count(6)
+    assert (
+        page.request.get(
+            f"{security_stack}/investigations", headers={"X-API-Key": "execution-test"}
+        ).json()
+        == []
+    )
+    assert errors == []
+
+
+@pytest.mark.parametrize("security_stack", ["idle"], indirect=True)
+@pytest.mark.parametrize(
+    "field,value", [("Security API key", "changed"), ("API endpoint", "http://localhost:1")]
+)
+def test_baseline_response_after_connection_change_is_discarded(page, security_stack, field, value):
+    connect(page, security_stack)
+    upload_example(page)
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+
+    def delayed(route):
+        response = route.fetch()
+        page.get_by_label(field, exact=True).fill(value)
+        route.fulfill(response=response)
+
+    page.route(f"{security_stack}/security/cases/*/assessment", delayed)
+    with page.expect_event(
+        "requestfailed", predicate=lambda request: request.url.endswith("/assessment")
+    ) as pending:
+        page.locator("#security-history button").click()
+    assert pending.value.failure
+    expect(page.locator("#security-detail")).to_be_hidden()
+    expect(page.locator("#security-assessment-report")).to_be_empty()
+    expect(page.locator("#security-assessment-evidence")).to_be_empty()
+
+
+@pytest.mark.parametrize("security_stack", ["idle"], indirect=True)
+def test_baseline_response_cannot_replace_another_case(page, security_stack):
+    connect(page, security_stack)
+    upload_example(page)
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+    headers = {"X-API-Key": "security-test"}
+    first = page.request.get(f"{security_stack}/security/cases", headers=headers).json()[0]["id"]
+    body = json.loads((ROOT / "evals/typed-business-live/inputs.json").read_text())[2]["body"]
+    second = page.request.post(
+        f"{security_stack}/security/cases",
+        headers={**headers, "Idempotency-Key": "other-case"},
+        data=body,
+    ).json()["id"]
+    page.get_by_role("button", name="Reload", exact=True).click()
+    expect(page.locator("#security-history button")).to_have_count(2)
+
+    def delayed(route):
+        response = route.fetch()
+        page.locator("#security-history button").filter(has_text=second[:8]).click()
+        expect(page.locator("#security-title")).to_have_text("0 linked requests")
+        route.fulfill(response=response)
+
+    url = f"{security_stack}/security/cases/{first}/assessment"
+    page.route(url, delayed)
+    with page.expect_response(url) as pending:
+        page.locator("#security-history button").filter(has_text=first[:8]).click()
+    pending.value.finished()
+    expect(page.locator("#security-assessment-status")).to_contain_text("Reviewed 6 of 6")
+    expect(page.locator("#security-assessment-report")).to_contain_text(
+        "no authentication results were supplied"
+    )
+    expect(page.locator("#security-assessment-report")).not_to_contain_text(
+        "Authentication service recorded success"
+    )
+
+
+@pytest.mark.parametrize("security_stack", ["invalid"], indirect=True)
+def test_shared_history_links_to_baseline_outside_first_page_without_source_registry(
+    page, security_stack
+):
+    connect(page, security_stack)
+    upload_example(page)
+    page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+    page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+    page.get_by_role("button", name="Start or open investigation", exact=True).click()
+    expect(page.locator("#security-run-status")).to_contain_text(
+        "failed: invalid_report", timeout=15000
+    )
+    headers = {"X-API-Key": "security-test"}
+    case_id = page.request.get(f"{security_stack}/security/cases", headers=headers).json()[0]["id"]
+    body = {
+        "scope": {
+            "services": ["gateway", "authentication"],
+            "start": "2026-09-01T10:00:00Z",
+            "end": "2026-09-01T10:10:00Z",
+        },
+        "logs": {
+            "edge": (ROOT / "examples/security-review/nginx.jsonl").read_text(),
+            "auth": (ROOT / "examples/security-review/auth.jsonl").read_text(),
+        },
+    }
+    for i in range(26):
+        response = page.request.post(
+            f"{security_stack}/security/cases",
+            headers={**headers, "Idempotency-Key": f"later-{i}"},
+            data=body,
+        )
+        assert response.status == 201
+    assert case_id not in {
+        row["id"]
+        for row in page.request.get(f"{security_stack}/security/cases", headers=headers).json()
+    }
+    page.route(
+        f"{security_stack}/investigations**",
+        lambda route: route.continue_(
+            headers={**route.request.headers, "X-API-Key": "execution-test"}
+        ),
+    )
+    page.goto(f"{security_stack}/ui/index.html?api={security_stack}")
+    page.get_by_role("button", name="Investigations", exact=True).click()
+    page.locator("#inv-list .inv-item-btn").first.click()
+    link = page.get_by_role("link", name="Open factual assessment", exact=True)
+    expect(link).to_be_visible()
+    assert "execution-test" not in link.get_attribute("href")
+    assert "security-test" not in link.get_attribute("href")
+    reads = []
+    page.on(
+        "request",
+        lambda request: reads.append((request.url, request.headers.get("x-api-key")))
+        if "/security/" in request.url
+        else None,
+    )
+    link.click()
+    expect(page.get_by_label("Security API key", exact=True)).to_have_value("")
+    assert reads == []
+    page.route(
+        f"{security_stack}/security/sources",
+        lambda route: route.fulfill(
+            status=503, json={"detail": "Current source registry unavailable"}
+        ),
+    )
+    page.get_by_label("Security API key", exact=True).fill("security-test")
+    page.get_by_role("button", name="Connect", exact=True).click()
+    expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+    expect(page.locator("#security-provenance")).to_contain_text(case_id)
+    expect(page.locator("#security-message")).to_contain_text("Saved reviews remain available")
+    expect(page.locator("#security-import")).to_be_hidden()
+    assert reads and all(key == "security-test" for _, key in reads)
+    assert "execution-test" not in page.url and "security-test" not in page.url

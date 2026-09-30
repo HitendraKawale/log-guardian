@@ -1,0 +1,5 @@
+smoke-01: baseline reviewed 19/19; historical AI completed; citations opened; POST 405; storage empty; desktop/mobile no overflow or page errors
+smoke-02: baseline reviewed 8/8; historical AI failed; citations opened; POST 405; storage empty; desktop/mobile no overflow or page errors
+smoke-03: baseline reviewed 6/6; historical AI completed; citations opened; POST 405; storage empty; desktop/mobile no overflow or page errors
+smoke-04: baseline reviewed 8/8; historical AI failed; citations opened; POST 405; storage empty; desktop/mobile no overflow or page errors
+PASS: 41 saved records reviewed without model execution; historical reports unchanged.

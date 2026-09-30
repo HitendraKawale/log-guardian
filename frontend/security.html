@@ -52,6 +52,12 @@
           <p id="security-outcomes"></p>
           <p id="security-scope" class="security-note"></p>
           <p id="security-limits" class="callout">Collection completeness and clock alignment are unknown. Compromise, data access, actor identity and AI involvement are not established.</p>
+          <section aria-labelledby="security-assessment-title">
+            <h3 id="security-assessment-title">Factual assessment</h3>
+            <p id="security-assessment-status" role="status" aria-live="polite"></p>
+            <div id="security-assessment-report"></div>
+            <details><summary>Assessment evidence</summary><div id="security-assessment-evidence"></div></details>
+          </section>
           <section class="security-execution" aria-labelledby="security-run-title">
             <h3 id="security-run-title">Optional AI investigation</h3>
             <p class="security-note">An explicit start sends this case's normalized evidence, including addresses and account references, to the configured model provider. The worker uses a $0.025 per-run allowance, not an account-wide billing cap. Uploading alone does not start a run. Reopening never retries a failed or cancelled run.</p>

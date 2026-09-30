@@ -1,0 +1,40 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_baseline_works_without_execution_key_or_network _____________
+
+client = <httpx.AsyncClient object at 0x10d7d0f50>
+configured = PosixPath('/private/var/folders/qz/ycfy4hxs01321rg_7tdl5kqr0000gn/T/pytest-of-hitesh/pytest-481/test_baseline_works_without_ex0/sources.json')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d39c350>
+session_factory = async_sessionmaker(class_='AsyncSession', bind=<sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x10d64fe00>, autoflush=True, expire_on_commit=False)
+
+    async def test_baseline_works_without_execution_key_or_network(
+        client, configured, monkeypatch, session_factory
+    ):
+        import httpx
+        from app.models import Investigation, InvestigationEvent
+    
+        async def forbidden_network(*args, **kwargs):
+            raise AssertionError("Baseline attempted outbound network access")
+    
+        monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", forbidden_network)
+        monkeypatch.setattr(settings, "investigation_api_key", "")
+        monkeypatch.setenv("OPENAI_API_KEY", "")
+        created = await client.post("/security/cases", json=payload(), headers=HEADERS)
+        assert created.status_code == 201
+        case = created.json()
+        url = f"/security/cases/{case['id']}/assessment"
+        first = await client.get(url, headers=HEADERS)
+>       assert first.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests/test_security_cases.py:147: AssertionError
+----------------------------- Captured stderr call -----------------------------
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://test/security/cases \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://test/security/cases/f331448d-4928-4593-a146-74f0484f5302/assessment \"HTTP/1.1 404 Not Found\""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/security/cases "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1740 HTTP Request: GET http://test/security/cases/f331448d-4928-4593-a146-74f0484f5302/assessment "HTTP/1.1 404 Not Found"
+=========================== short test summary info ============================
+FAILED tests/test_security_cases.py::test_baseline_works_without_execution_key_or_network
+1 failed, 5 deselected in 0.06s

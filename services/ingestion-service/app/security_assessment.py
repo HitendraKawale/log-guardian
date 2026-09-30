@@ -6,9 +6,13 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .investigation_schemas import Finding
+from .investigation_schemas import EvidenceBatch, Finding, SecurityEvidenceQuery
+from .investigation_security import digest, security_page
 from .investigation_tools import MAX_RESULT_BYTES
-from .security_evidence import AuthEvent, GatewayEvent
+from .security_evidence import MAX_RECORDS, AuthEvent, GatewayEvent
+
+MAX_BASELINE_FACTS = 12
+MAX_BASELINE_BYTES = 64 * 1024
 
 
 class SecuritySelection(BaseModel):
@@ -50,7 +54,7 @@ def _finding(claim, ids):
     return Finding(claim=claim, evidence_ids=ids).model_dump(mode="json")
 
 
-def _assemble(selection, batches):
+def _derive(batches):
     items = {}
     versions = set()
     failed = False
@@ -101,6 +105,7 @@ def _assemble(selection, batches):
         )
 
     auth = []
+    events = {}
     for item in items.values():
         if item.kind == "summary":
             continue
@@ -147,6 +152,7 @@ def _assemble(selection, batches):
         else:
             raise ValueError("Unknown security event kind")
         facts[item.evidence_id] = _finding(claim, [item.evidence_id])
+        events[item.evidence_id] = row
 
     # One pass over recorded order; never join redacted identities or ambiguous requests.
     earlier_failures = {}
@@ -164,28 +170,20 @@ def _assemble(selection, batches):
         if row.auth_outcome == "failure" and previous is None:
             earlier_failures[key] = (item, row)
 
-    hypotheses = []
-    for code in selection.hypothesis_codes:
-        if code == "repeated_login_attempts" and summary and failures > 1:
-            hypotheses.append(
-                _finding(
-                    "More than one authentication failure was recorded. Mistakes and unauthorized guessing "
-                    "are possible explanations; intent and actor identity are unknown.",
-                    [summary.evidence_id],
-                )
-            )
-        elif code == "retry_possible" and retry:
-            hypotheses.append(
-                _finding(
-                    "A same-source, same-account failure precedes a success in recorded order. "
-                    "A retry is possible; causal order, actor identity and legitimate ownership are not established.",
-                    retry,
-                )
-            )
-        else:
-            raise ValueError("Unsupported security hypothesis")
+    hypotheses = {}
+    if summary and failures > 1:
+        hypotheses["repeated_login_attempts"] = _finding(
+            "More than one authentication failure was recorded. Mistakes and unauthorized guessing "
+            "are possible explanations; intent and actor identity are unknown.",
+            [summary.evidence_id],
+        )
+    if retry:
+        hypotheses["retry_possible"] = _finding(
+            "A same-source, same-account failure precedes a success in recorded order. "
+            "A retry is possible; causal order, actor identity and legitimate ownership are not established.",
+            retry,
+        )
 
-    checks = []
     prerequisites = {
         "read_auth_results": not summary or auth_records == 0 or unlinked > 0,
         "read_rejection_reasons": failures > 0 or any(r.auth_outcome == "failure" for _, r in auth),
@@ -198,10 +196,7 @@ def _assemble(selection, batches):
         "read_rejection_reasons": "Inspect redacted authentication rejection reasons for the scoped attempts. Do not collect credentials, cookies, tokens or request payload dumps.",
         "read_session_audit": "Inspect session policy and redacted activity audit records for the scoped requests; do not presume compromise or business effects.",
     }
-    for code in selection.check_codes:
-        if not prerequisites[code]:
-            raise ValueError("Unsupported security check")
-        checks.append(instructions[code])
+    checks = {code: instructions[code] for code, eligible in prerequisites.items() if eligible}
 
     unknowns = [
         "Collection completeness is unknown; supplied records may be incomplete.",
@@ -222,13 +217,37 @@ def _assemble(selection, batches):
             "A delivered evidence page was truncated; page contents do not establish whole-case absence."
         )
     return {
-        "schema_version": 2,
-        "outcome": "inconclusive",
-        "facts": [facts[identity] for identity in selection.focus_evidence_ids],
+        "items": items,
+        "events": events,
+        "summary_id": summary.evidence_id if summary else None,
+        "auth_counts": (auth_records, failures, successes),
+        "facts": facts,
         "hypotheses": hypotheses,
         "unknowns": unknowns,
         "checks": checks,
     }
+
+
+def _report(derived, ids, hypotheses, checks):
+    return {
+        "schema_version": 2,
+        "outcome": "inconclusive",
+        "facts": [derived["facts"][identity] for identity in ids],
+        "hypotheses": [derived["hypotheses"][code] for code in hypotheses],
+        "unknowns": derived["unknowns"],
+        "checks": [derived["checks"][code] for code in checks],
+    }
+
+
+def _assemble(selection, batches):
+    derived = _derive(batches)
+    if any(code not in derived["hypotheses"] for code in selection.hypothesis_codes):
+        raise ValueError("Unsupported security hypothesis")
+    if any(code not in derived["checks"] for code in selection.check_codes):
+        raise ValueError("Unsupported security check")
+    return _report(
+        derived, selection.focus_evidence_ids, selection.hypothesis_codes, selection.check_codes
+    )
 
 
 def assemble_security_assessment(selection: SecuritySelection, batches):
@@ -240,3 +259,142 @@ def assemble_security_assessment(selection: SecuritySelection, batches):
     if len(json.dumps(report, ensure_ascii=False).encode()) > MAX_RESULT_BYTES:
         raise ValueError("Security report exceeds byte limit")
     return report
+
+
+def _saved_evidence(saved):
+    timeline = saved["report"]["timeline"]
+    if not isinstance(timeline, list) or len(timeline) > MAX_RECORDS:
+        raise ValueError("Invalid saved record count")
+    version = digest(saved)
+    expected_ids = {"security-event:" + digest([version, row["evidence"]]) for row in timeline}
+    if len(expected_ids) != len(timeline):
+        raise ValueError("Duplicate saved evidence")
+    items, offset = {}, 0
+    while True:
+        batch = security_page(saved, SecurityEvidenceQuery(offset=offset, limit=48))
+        if batch.error or batch.source != "security_case" or batch.version != version:
+            raise ValueError("Unavailable or inconsistent saved evidence")
+        summaries = [i for i in batch.items if i.content.get("count_scope") == "whole_saved_case"]
+        pages = [i for i in batch.items if i.evidence_id.startswith("security-page:")]
+        records = [i for i in batch.items if i.kind == "security_event"]
+        if len(summaries) != 1 or len(pages) != 1 or len(batch.items) != len(records) + 2:
+            raise ValueError("Invalid saved evidence page")
+        summary, page = summaries[0], pages[0].content
+        end = offset + len(records)
+        more = end < len(timeline)
+        if (
+            _count(summary.content["total"]) != len(timeline)
+            or _count(page["offset"]) != offset
+            or _count(page["returned_records"]) != len(records)
+            or len(records) > 48
+            or end > len(timeline)
+            or (more and not records)
+            or batch.truncated != more
+            or (more and _count(page["next_offset"]) != end)
+            or (not more and page["next_offset"] is not None)
+        ):
+            raise ValueError("Incomplete saved evidence scan")
+        for item in [summary, *records]:
+            previous = items.get(item.evidence_id)
+            if previous is not None and (item.kind != "summary" or previous != item):
+                raise ValueError("Conflicting or repeated saved evidence")
+            items[item.evidence_id] = item
+        if not more:
+            break
+        offset = end
+    if {i.evidence_id for i in items.values() if i.kind == "security_event"} != expected_ids:
+        raise ValueError("Incomplete saved evidence membership")
+    return EvidenceBatch(
+        source="security_case",
+        version=version,
+        start=batch.start,
+        end=batch.end,
+        items=list(items.values()),
+        truncated=False,
+    )
+
+
+def _baseline_order(derived):
+    events = derived["events"]
+    ordered = sorted(
+        events,
+        key=lambda identity: (
+            events[identity].event_time,
+            tuple(derived["items"][identity].content["evidence"]),
+        ),
+    )
+    auth = [identity for identity in ordered if isinstance(events[identity], AuthEvent)]
+    gateway = [identity for identity in ordered if isinstance(events[identity], GatewayEvent)]
+    candidates = [derived["summary_id"]]
+    retry = derived["hypotheses"].get("retry_possible")
+    if retry:
+        candidates.extend(retry["evidence_ids"])
+    for outcome in ("failure", "success", "unavailable"):
+        candidates.extend(
+            next(([identity] for identity in auth if events[identity].auth_outcome == outcome), [])
+        )
+    statuses = {events[identity].http_status for identity in gateway}
+    for status in sorted(statuses, key=lambda s: (6, 0) if s is None else (5 - s // 100, s)):
+        candidates.append(
+            next(identity for identity in gateway if events[identity].http_status == status)
+        )
+    return list(dict.fromkeys([*candidates, *auth, *gateway]))
+
+
+def _json_size(value):
+    # Match Starlette JSONResponse's UTF-8 serialization, including Unicode and separators.
+    return len(
+        json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode()
+    )
+
+
+def build_security_baseline(saved: dict) -> dict:
+    """Review a complete bounded snapshot locally; never interpret an AI result as a baseline."""
+    try:
+        batch = _saved_evidence(saved)
+        derived = _derive([batch])
+        auth = [row for row in derived["events"].values() if isinstance(row, AuthEvent)]
+        if derived["auth_counts"] != (
+            len(auth),
+            sum(row.auth_outcome == "failure" for row in auth),
+            sum(row.auth_outcome == "success" for row in auth),
+        ):
+            raise ValueError("Inconsistent authentication counts")
+        checks = [
+            code
+            for code in ("read_rejection_reasons", "read_session_audit", "read_auth_results")
+            if code in derived["checks"] and (code != "read_auth_results" or not auth)
+        ]
+        ids = _baseline_order(derived)[:MAX_BASELINE_FACTS]
+        total = len(derived["events"])
+        while ids:
+            report = _report(derived, ids, derived["hypotheses"], checks)
+            cited = dict.fromkeys(
+                identity
+                for finding in report["facts"] + report["hypotheses"]
+                for identity in finding["evidence_ids"]
+            )
+            shown = len(ids) - 1
+            result = {
+                "method": "deterministic",
+                "policy_version": 1,
+                "case_version": batch.version,
+                "report": report,
+                "coverage": {
+                    "saved_records": total,
+                    "reviewed_records": total,
+                    "displayed_event_facts": shown,
+                    "omitted_event_facts": total - shown,
+                    "fact_limit": MAX_BASELINE_FACTS,
+                    "display_limited": shown < total,
+                },
+                "evidence": [
+                    derived["items"][identity].model_dump(mode="json") for identity in cited
+                ],
+            }
+            if _json_size(report) <= MAX_RESULT_BYTES and _json_size(result) <= MAX_BASELINE_BYTES:
+                return result
+            ids.pop()
+        raise ValueError("Mandatory baseline exceeds byte limit")
+    except (KeyError, TypeError, IndexError, StopIteration, OverflowError) as exc:
+        raise ValueError("Invalid saved security evidence") from exc
