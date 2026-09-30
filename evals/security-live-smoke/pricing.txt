@@ -1,0 +1,362 @@
+npm notice run npx
+npm notice run 'ctx7' docs /websites/developers_openai_api GPT-4.1 mini standard pricing input /bin/bash.40 cached input /bin/bash.10 output .60 per million tokens model gpt-4.1-mini-2025-04-14
+### Count input tokens with cURL
+
+Source: https://developers.openai.com/api/reference/resources/beta/subresources/responses/subresources/input_tokens/methods/count
+
+Send a POST request to count the number of input tokens for a specified prompt and model. Requires an OpenAI API key passed in the authorization header.
+
+```bash
+curl -X POST https://api.openai.com/v1/responses/input_tokens \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAI_API_KEY" \
+    -d '{
+      "model": "gpt-5",
+      "input": "Tell me a joke."
+    }'
+
+```
+
+--------------------------------
+
+### POST /v1/responses/input_tokens
+
+Source: https://developers.openai.com/api/docs/guides/token-counting
+
+Counts the number of input tokens for a given prompt and model. Useful for estimating token usage and managing context lengths before sending requests.
+
+```APIDOC
+## POST /v1/responses/input_tokens
+
+### Description
+Count tokens in basic messages for a specified model.
+
+### Method
+POST
+
+### Endpoint
+`https://api.openai.com/v1/responses/input_tokens`
+
+### Parameters
+#### Request Body
+- **model** (string) - The model ID to use for token counting (e.g., `gpt-5.6`).
+- **input** (string) - The input text to count tokens for.
+
+### Request Example
+```json
+{
+  "model": "gpt-5.6",
+  "input": "Tell me a joke."
+}
+```
+
+### Response
+#### Success Response (200)
+- **input_tokens** (integer) - The number of tokens in the input.
+
+#### Response Example
+```json
+{
+  "input_tokens": 5
+}
+```
+```
+
+--------------------------------
+
+### Count input tokens with tool definitions
+
+Source: https://developers.openai.com/api/docs/guides/token-counting
+
+Calculate total input token counts including tool and function schemas alongside the prompt. Useful for estimating context size and pricing before making inference requests.
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI();
+
+const response = await client.responses.inputTokens.count({
+  model: "gpt-5.6",
+  tools: [
+    {
+      type: "function",
+      name: "get_weather",
+      description: "Get the current weather in a location",
+      strict: true,
+      parameters: {
+        type: "object",
+        properties: { location: { type: "string" } },
+        required: ["location"],
+        additionalProperties: false,
+      },
+    },
+  ],
+  input: "What is the weather in San Francisco?",
+});
+
+console.log(response.input_tokens);
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.input_tokens.count(
+    model="gpt-5.6",
+    tools=[
+        {
+            "type": "function",
+            "name": "get_weather",
+            "description": "Get the current weather in a location",
+            "parameters": {
+                "type": "object",
+                "properties": {"location": {"type": "string"}},
+                "required": ["location"],
+            },
+        }
+    ],
+    input="What is the weather in San Francisco?",
+)
+print(response.input_tokens)
+```
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/responses"
+)
+
+func main() {
+	client := openai.NewClient()
+	parameters := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"location": map[string]any{"type": "string"},
+		},
+		"required":             []string{"location"},
+		"additionalProperties": false,
+	}
+	tool := responses.ToolParamOfFunction("get_weather", parameters, true)
+	tool.OfFunction.Description = openai.String("Get the current weather in a location")
+	count, err := client.Responses.InputTokens.Count(context.Background(), responses.InputTokenCountParams{
+		Model: openai.String("gpt-5.6"),
+		Input: responses.InputTokenCountParamsInputUnion{OfString: openai.String("What is the weather in San Francisco?")},
+		Tools: []responses.ToolUnionParam{tool},
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(count.InputTokens)
+}
+```
+
+```java
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonValue;
+import com.openai.models.responses.FunctionTool;
+import com.openai.models.responses.inputtokens.InputTokenCountParams;
+import java.util.List;
+import java.util.Map;
+
+var count =
+    client
+        .responses()
+        .inputTokens()
+        .count(
+            InputTokenCountParams.builder()
+                .model("gpt-5.6")
+                .input("What is the weather in San Francisco?")
+                .addTool(
+                    FunctionTool.builder()
+                        .name("get_weather")
+                        .description("Get the current weather in a location")
+                        .strict(true)
+                        .parameters(
+                            FunctionTool.Parameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty(
+                                    "properties",
+                                    JsonValue.from(
+                                        Map.of("location", Map.of("type", "string"))))
+                                .putAdditionalProperty(
+                                    "required", JsonValue.from(List.of("location")))
+                                .putAdditionalProperty(
+                                    "additionalProperties", JsonValue.from(false))
+                                .build())
+                        .build())
+                .build());
+
+System.out.println(count.inputTokens());
+```
+
+```ruby
+require "openai"
+
+client = OpenAI::Client.new
+
+count = client.responses.input_tokens.count(
+  model: "gpt-5.6",
+  input: "What is the weather in San Francisco?",
+  tools: [
+    {
+      type: :function,
+      name: "get_weather",
+      description: "Get the current weather in a location",
+      strict: true,
+      parameters: {
+        type: "object",
+        properties: {location: {type: "string"}},
+        required: ["location"],
+        additionalProperties: false
+      }
+    }
+  ]
+)
+
+puts(count.input_tokens)
+```
+
+```bash
+curl https://api.openai.com/v1/responses/input_tokens \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.6",
+    "tools": [{
+      "type": "function",
+      "name": "get_weather",
+      "description": "Get the current weather in a location",
+      "parameters": {
+        "type": "object",
+        "properties": {"location": {"type": "string"}},
+        "required": ["location"]
+      }
+    }],
+    "input": "What is the weather in San Francisco?"
+  }'
+```
+
+--------------------------------
+
+### client.responses.create
+
+Source: https://developers.openai.com/api/reference/python/resources/responses/methods/create
+
+Creates a model response with specified inputs, including text and file inputs. Returns a response object containing the generated output and metadata.
+
+```APIDOC
+## client.responses.create
+
+### Description
+Creates a model response using the OpenAI Python SDK. This method accepts multimodal inputs such as text and file URLs to generate model completions.
+
+### Parameters
+- **model** (string) - Model identifier to use for generating the response.
+- **input** (list) - A list of input objects specifying `role` and `content` items (e.g., `input_text`, `input_file`).
+
+### Request Example
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-5.4",
+    input=[
+        {
+            "role": "user",
+            "content": [
+                { "type": "input_text", "text": "what is in this file?" },
+                {
+                    "type": "input_file",
+                    "file_url": "https://www.berkshirehathaway.com/letters/2024ltr.pdf",
+                    "detail": "auto"
+                }
+            ]
+        }
+    ]
+)
+
+print(response)
+```
+
+### Response Example
+```json
+{
+  "id": "resp_686eef60237881a2bd1180bb8b13de430e34c516d176ff86",
+  "object": "response",
+  "created_at": 1752100704,
+  "status": "completed",
+  "completed_at": 1752100705,
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5.4",
+  "output": [
+    {
+      "id": "msg_686eef60d3e081a29283bdcbc4322fd90e34c516d176ff86",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "The file seems to contain excerpts from a letter to the shareholders of Berkshire Hathaway Inc., likely written by Warren Buffett. It covers several topics:\n\n1. **Communication Philosophy**: Buffett emphasizes the importance of transparency and candidness in reporting mistakes and successes to shareholders.\n\n2. **Mistakes and Learnings**: The letter acknowledges past mistakes in business assessments and management hires, highlighting the importance of correcting errors promptly.\n\n3. **CEO Succession**: Mention of Greg Abel stepping in as the new CEO and continuing the tradition of honest communication.\n\n4. **Pete Liegl Story**: A detailed account of acquiring Forest River and the relationship with its founder, highlighting trust and effective business decisions.\n\n5. **2024 Performance**: Overview of business performance, particularly in insurance and investment activities, with a focus on GEICO's improvement.\n\n6. **Tax Contributions**: Discussion of significant tax payments to the U.S. Treasury, credited to shareholders' reinvestments.\n\n7. **Investment Strategy**: A breakdown of Berkshire’s investments in both controlled subsidiaries and marketable equities, along with a focus on long-term holding strategies.\n\n8. **American Capitalism**: Reflections on America’s economic development and Berkshire’s role within it.\n\n9. **Property-Casualty Insurance**: Insights into the P/C insurance business model and its challenges and benefits.\n\n10. **Japanese Investments**: Information about Berkshire’s investments in Japanese companies and future plans.\n\n11. **Annual Meeting**: Details about the upcoming annual gathering in Omaha, including schedule changes and new book releases.\n\n12. **Personal Anecdotes**: Light-hearted stories about family and interactions, conveying Buffett's personable approach.\n\n13. **Financial Performance Data**: Tables comparing Berkshire’s annual performance to the S&P 500, showing impressive long-term gains.\n\nOverall, the letter reinforces Berkshire Hathaway's commitment to transparency, investment in both its businesses and the wider economy, and emphasizes strong leadership and prudent financial management."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 8438,
+    "input_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0
+    },
+    "output_tokens": 398,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 8836
+  },
+  "user": null,
+  "metadata": {}
+}
+```
+```
+
+### GPT-4.1 mini > Pricing
+
+Source: https://developers.openai.com/api/docs/models/gpt-4.1-mini
+
+Pricing for GPT-4.1 mini is token-based, set at $0.40 per 1M input tokens, $0.10 per 1M cached input tokens, and $1.60 per 1M output tokens. Modalities are restricted to text input/output and image input, with audio and video not supported.

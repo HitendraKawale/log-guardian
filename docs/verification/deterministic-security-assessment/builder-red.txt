@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_same_snapshot_same_baseline_and_no_input_mutation ____________
+
+    def test_same_snapshot_same_baseline_and_no_input_mutation():
+>       from app.security_assessment import build_security_baseline
+E       ImportError: cannot import name 'build_security_baseline' from 'app.security_assessment' (/Users/hitesh/log-guardian-worktrees/48-deterministic-security/services/ingestion-service/app/security_assessment.py)
+
+tests/test_security_baseline.py:24: ImportError
+=========================== short test summary info ============================
+FAILED tests/test_security_baseline.py::test_same_snapshot_same_baseline_and_no_input_mutation
+1 failed in 0.04s

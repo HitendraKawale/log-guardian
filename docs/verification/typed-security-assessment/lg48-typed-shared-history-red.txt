@@ -1,0 +1,42 @@
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_v2_security_report_in_shared_investigation_history[chromium] _______
+
+page = <Page url='http://127.0.0.1:61060/ui/security.html?api=http://127.0.0.1:61060'>
+security_stack = 'http://127.0.0.1:61060'
+
+    def test_v2_security_report_in_shared_investigation_history(page, security_stack):
+        connect(page, security_stack)
+        upload_example(page)
+        page.get_by_label("Investigation API key", exact=True).fill("execution-test")
+        page.get_by_label("I authorize sharing this case with the model provider.", exact=True).check()
+        page.get_by_role("button", name="Start or open investigation", exact=True).click()
+        expect(page.locator("#security-run-status")).to_contain_text("completed", timeout=15000)
+        dashboard = page.context.new_page()
+        errors = []
+        dashboard.on("pageerror", lambda error: errors.append(str(error)))
+        try:
+            dashboard.set_extra_http_headers({"X-API-Key": "execution-test"})
+            dashboard.goto(f"{security_stack}/ui/index.html?api={security_stack}")
+            dashboard.get_by_role("button", name="Investigations", exact=True).click()
+            dashboard.locator("#inv-list .inv-item-btn").first.click()
+            expect(dashboard.locator("#inv-question")).to_contain_text("saved gateway")
+>           expect(dashboard.locator("#inv-report")).to_contain_text("Authentication service recorded failure")
+E           AssertionError: Locator expected to contain text 'Authentication service recorded failure'
+E           Actual value: The evidence does not establish a cause. Missing evidence is listed below rather than a guessed diagnosis. 
+E           Call log:
+E             - Expect "to_contain_text" with timeout 5000ms
+E             - waiting for locator("#inv-report")
+E               14 × locator resolved to <div class="report" id="inv-report">…</div>
+E                  - unexpected value "The evidence does not establish a cause. Missing evidence is listed below rather than a guessed diagnosis."
+
+e2e/test_security_review_ui.py:524: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Shared history browser errors: ["Cannot read properties of undefined (reading 'length')"]
+=========================== short test summary info ============================
+FAILED e2e/test_security_review_ui.py::test_v2_security_report_in_shared_investigation_history[chromium]
+1 failed, 8 deselected in 9.24s

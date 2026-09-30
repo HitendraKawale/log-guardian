@@ -1,0 +1,98 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_workflow_mismatch_refuses_execution_before_provider[True] ________
+
+client = <httpx.AsyncClient object at 0x1095d88d0>
+session_factory = async_sessionmaker(class_='AsyncSession', bind=<sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x109571900>, autoflush=True, expire_on_commit=False)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109562190>
+old_worker = True
+
+    @pytest.mark.parametrize("old_worker", [True, False])
+    async def test_workflow_mismatch_refuses_execution_before_provider(
+        client, session_factory, monkeypatch, old_worker
+    ):
+        from app import investigator
+        from app.investigation_security import SECURITY_QUESTION, digest
+    
+        run_id, saved = await queue(client, session_factory, monkeypatch)
+        legacy = digest({"snapshot": saved, "question": SECURITY_QUESTION, "workflow": 1})
+        if old_worker:
+            monkeypatch.setattr(investigator, "binding", lambda case: legacy)
+        else:
+            async with session_factory() as session:
+                run = await session.get(Investigation, run_id)
+                run.request_sha256 = legacy
+                await session.commit()
+        calls = []
+    
+        def provider(request):
+            calls.append(True)
+            return response(json.loads(request.content), {
+                "focus_evidence_ids": [], "hypothesis_codes": [], "check_codes": []
+            })
+    
+        async with scripted_client(provider) as provider_client:
+            await execute_run(session_factory, run_id, provider_client)
+>       assert calls == []
+E       assert [True] == []
+E         
+E         Left contains one more item: True
+E         Use -v to get more diff
+
+tests/test_security_investigation.py:349: AssertionError
+----------------------------- Captured stderr call -----------------------------
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://test/investigations/from-security-case/87131994-8729-43be-ab4e-5e0b2b88e2da \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/investigations/from-security-case/87131994-8729-43be-ab4e-5e0b2b88e2da "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+_______ test_workflow_mismatch_refuses_execution_before_provider[False] ________
+
+client = <httpx.AsyncClient object at 0x109d6bf10>
+session_factory = async_sessionmaker(class_='AsyncSession', bind=<sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x1095da1c0>, autoflush=True, expire_on_commit=False)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109d8bd90>
+old_worker = False
+
+    @pytest.mark.parametrize("old_worker", [True, False])
+    async def test_workflow_mismatch_refuses_execution_before_provider(
+        client, session_factory, monkeypatch, old_worker
+    ):
+        from app import investigator
+        from app.investigation_security import SECURITY_QUESTION, digest
+    
+        run_id, saved = await queue(client, session_factory, monkeypatch)
+        legacy = digest({"snapshot": saved, "question": SECURITY_QUESTION, "workflow": 1})
+        if old_worker:
+            monkeypatch.setattr(investigator, "binding", lambda case: legacy)
+        else:
+            async with session_factory() as session:
+                run = await session.get(Investigation, run_id)
+                run.request_sha256 = legacy
+                await session.commit()
+        calls = []
+    
+        def provider(request):
+            calls.append(True)
+            return response(json.loads(request.content), {
+                "focus_evidence_ids": [], "hypothesis_codes": [], "check_codes": []
+            })
+    
+        async with scripted_client(provider) as provider_client:
+            await execute_run(session_factory, run_id, provider_client)
+>       assert calls == []
+E       assert [True] == []
+E         
+E         Left contains one more item: True
+E         Use -v to get more diff
+
+tests/test_security_investigation.py:349: AssertionError
+----------------------------- Captured stderr call -----------------------------
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://test/investigations/from-security-case/dcf5b848-3f04-4a80-bade-c6b5e0d597ad \"HTTP/1.1 201 Created\""}
+{"level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://api.openai.com/v1/chat/completions \"HTTP/1.1 200 OK\""}
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/investigations/from-security-case/dcf5b848-3f04-4a80-bade-c6b5e0d597ad "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_security_investigation.py::test_workflow_mismatch_refuses_execution_before_provider[True]
+FAILED tests/test_security_investigation.py::test_workflow_mismatch_refuses_execution_before_provider[False]
+2 failed, 27 deselected in 0.56s

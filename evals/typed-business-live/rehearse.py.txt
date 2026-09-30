@@ -1,0 +1,43 @@
+"""Rehearse the actual API and worker with fixed selections and no provider network."""
+import asyncio, hashlib, json, sys, tempfile
+from pathlib import Path
+import httpx
+root=Path('/Users/hitesh/log-guardian-worktrees/48-typed-security')
+sys.path.insert(0,str(root/'evals'))
+import security_live_smoke as s
+from app.security_assessment import SecuritySelection
+
+sent=[]
+def provider(request):
+    body=json.loads(request.content)
+    batch=json.loads(body['messages'][-1]['content'])
+    assert list(body['response_format']['json_schema']['schema']['properties']) == list(SecuritySelection.model_json_schema()['properties'])
+    events=[i for i in batch['items'] if i['kind']=='security_event']
+    auth=[i for i in events if i['content']['event_kind']=='authentication_result']
+    n=len(sent)+1
+    sent.append(request.content)
+    chosen=[batch['items'][0]['evidence_id']]
+    chosen += [i['evidence_id'] for i in (auth[-2:] if auth else events[1:3])]
+    hypotheses={1:['repeated_login_attempts'],2:['retry_possible'],3:[],4:['retry_possible']}[n]
+    checks={1:['read_rejection_reasons'],2:['read_rejection_reasons','read_session_audit'],3:['read_auth_results'],4:['read_session_audit']}[n]
+    selection=dict(focus_evidence_ids=chosen,hypothesis_codes=hypotheses,check_codes=checks)
+    return httpx.Response(200,json=dict(id='scripted-response',object='chat.completion',created=1,model=s.p.MODEL,service_tier='default',choices=[dict(index=0,finish_reason='stop',message=dict(role='assistant',content=json.dumps(selection)))],usage=dict(prompt_tokens=100,completion_tokens=100,total_tokens=200,prompt_tokens_details=dict(cached_tokens=0))))
+
+async def main():
+    output=Path(tempfile.mkdtemp(prefix='lg48-typed-business-rehearsal-'))/'batch'
+    summary=await s.run_batch(output,s.manifest()[1],transport=httpx.MockTransport(provider))
+    assert summary['cases']==dict.fromkeys(s.CASE_IDS,'completed')
+    for n,count in enumerate([19,8,6,8],1):
+        data=json.loads((output/f'smoke-{n:02}.json').read_text())
+        batch=data['events'][1]['payload']['result']
+        assert not batch['truncated']
+        assert sum(i['kind']=='security_event' for i in batch['items'])==count
+        assert data['run']['report']['schema_version']==2
+        reservation=json.loads((output/f'request-{n:03}.reservation.json').read_text())
+        assert reservation['request_json'].encode()==sent[n-1]
+        assert reservation['request_sha256']==hashlib.sha256(sent[n-1]).hexdigest()
+        print(f'smoke-{n:02}: {count} records delivered, v2 assembled, native wire order/hash verified')
+    print('MOCK_ONLY: 41 records, 4 scripted selections, no real model calls')
+    print('Rehearsal artifacts:',output)
+    print(json.dumps(summary,indent=2))
+asyncio.run(main())

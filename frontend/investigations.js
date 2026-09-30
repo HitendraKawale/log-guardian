@@ -178,6 +178,17 @@
     for (const [label, value] of pairs) {
       meta.append(element("dt", "", label), element("dd", "", value));
     }
+    if (run.security_case_id && !RECORDED_URL) {
+      const url = new URL("security.html", location.href);
+      url.search = "";
+      url.searchParams.set("api", API);
+      url.searchParams.set("case", run.security_case_id);
+      const link = element("a", "", "Open factual assessment");
+      link.href = url.href;
+      const value = element("dd");
+      value.append(link);
+      meta.append(element("dt", "", "Saved evidence"), value);
+    }
     const error = $("inv-error");
     if (run.status === "failed") {
       error.hidden = false;
@@ -256,7 +267,15 @@
     );
     const container = $("inv-report");
     container.replaceChildren();
-    if (report.outcome === "inconclusive") {
+    const typed = report.schema_version === 2;
+    if (!typed && report.schema_version !== undefined) {
+      outcome.replaceChildren(text("Unsupported report version"));
+      container.append(element("p", "callout", "Claims are not displayed as recorded facts."));
+      return;
+    }
+    if (typed) {
+      container.append(element("p", "callout", "Recorded facts are derived from supplied logs, not independently verified reality. Possible explanations are not confirmed causes."));
+    } else if (report.outcome === "inconclusive") {
       container.append(
         element(
           "p",
@@ -265,7 +284,10 @@
         )
       );
     }
-    const sections = [
+    const sections = typed ? [
+      ["Recorded facts", report.facts],
+      ["Possible explanations", report.hypotheses],
+    ] : [
       ["Likely cause", report.likely_cause ? [report.likely_cause] : []],
       ["Observations", report.observations],
       ["Alternatives", report.alternatives],
@@ -275,7 +297,10 @@
       container.append(element("h4", "", title));
       for (const finding of findings) container.append(findingBlock(finding));
     }
-    const lists = [
+    const lists = typed ? [
+      ["Unknowns", report.unknowns],
+      ["Read-only next checks", report.checks],
+    ] : [
       ["Missing evidence", report.missing_evidence],
       ["Suggested checks", report.suggested_checks],
     ];

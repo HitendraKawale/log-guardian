@@ -1,0 +1,70 @@
+[
+  {
+    "case_id": "smoke-01",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-26T12:00:00+00:00",
+        "end": "2026-09-26T12:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-26T12:00:00+00:00\", \"request_id\": \"shop-1-req-001\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/catalog/products\"}\n{\"time\": \"2026-09-26T12:00:30+00:00\", \"request_id\": \"shop-1-req-002\", \"remote_addr\": \"198.51.100.10\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:33+00:00\", \"request_id\": \"shop-1-req-003\", \"remote_addr\": \"203.0.113.77\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:36+00:00\", \"request_id\": \"shop-1-req-004\", \"remote_addr\": \"198.51.100.10\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:39+00:00\", \"request_id\": \"shop-1-req-005\", \"remote_addr\": \"203.0.113.77\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:42+00:00\", \"request_id\": \"shop-1-req-006\", \"remote_addr\": \"198.51.100.10\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:45+00:00\", \"request_id\": \"shop-1-req-007\", \"remote_addr\": \"203.0.113.77\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:50+00:00\", \"request_id\": \"shop-1-req-008\", \"remote_addr\": \"198.51.100.10\", \"status\": \"429\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:01:30+00:00\", \"request_id\": \"shop-1-req-009\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/cart\"}",
+        "auth": "{\"event_id\": \"shop-1-auth-001\", \"timestamp\": \"2026-09-26T12:00:30+00:00\", \"request_id\": \"shop-1-req-002\", \"account_ref\": \"customer-100\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-1-auth-002\", \"timestamp\": \"2026-09-26T12:00:33+00:00\", \"request_id\": \"shop-1-req-003\", \"account_ref\": \"customer-101\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-1-auth-003\", \"timestamp\": \"2026-09-26T12:00:36+00:00\", \"request_id\": \"shop-1-req-004\", \"account_ref\": \"customer-102\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-1-auth-004\", \"timestamp\": \"2026-09-26T12:00:39+00:00\", \"request_id\": \"shop-1-req-005\", \"account_ref\": \"customer-103\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-1-auth-005\", \"timestamp\": \"2026-09-26T12:00:42+00:00\", \"request_id\": \"shop-1-req-006\", \"account_ref\": \"customer-100\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-1-auth-006\", \"timestamp\": \"2026-09-26T12:00:45+00:00\", \"request_id\": \"shop-1-req-007\", \"account_ref\": \"customer-101\", \"outcome\": \"failure\"}"
+      }
+    }
+  },
+  {
+    "case_id": "smoke-02",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-26T12:00:00+00:00",
+        "end": "2026-09-26T12:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-26T12:00:00+00:00\", \"request_id\": \"shop-2-req-001\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/catalog/products\"}\n{\"time\": \"2026-09-26T12:00:15+00:00\", \"request_id\": \"shop-2-req-002\", \"remote_addr\": \"192.0.2.44\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:48+00:00\", \"request_id\": \"shop-2-req-003\", \"remote_addr\": \"192.0.2.44\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:01:35+00:00\", \"request_id\": \"shop-2-req-004\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:01:55+00:00\", \"request_id\": \"shop-2-req-005\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/cart\"}",
+        "auth": "{\"event_id\": \"shop-2-auth-001\", \"timestamp\": \"2026-09-26T12:00:15+00:00\", \"request_id\": \"shop-2-req-002\", \"account_ref\": \"customer-2042\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-2-auth-002\", \"timestamp\": \"2026-09-26T12:00:48+00:00\", \"request_id\": \"shop-2-req-003\", \"account_ref\": \"customer-2042\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-2-auth-003\", \"timestamp\": \"2026-09-26T12:01:35+00:00\", \"request_id\": \"shop-2-req-004\", \"account_ref\": \"customer-2042\", \"outcome\": \"success\"}"
+      }
+    }
+  },
+  {
+    "case_id": "smoke-03",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-26T12:00:00+00:00",
+        "end": "2026-09-26T12:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-26T12:00:00+00:00\", \"request_id\": \"shop-3-req-001\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/catalog/products\"}\n{\"time\": \"2026-09-26T12:00:20+00:00\", \"request_id\": \"shop-3-req-002\", \"remote_addr\": \"192.0.2.44\", \"status\": \"200\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:40+00:00\", \"request_id\": \"shop-3-req-003\", \"remote_addr\": \"198.51.100.10\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:01:05+00:00\", \"request_id\": \"shop-3-req-004\", \"remote_addr\": \"203.0.113.77\", \"status\": \"503\", \"route\": \"/api/auth/login\"}",
+        "auth": ""
+      }
+    }
+  },
+  {
+    "case_id": "smoke-04",
+    "body": {
+      "scope": {
+        "services": [
+          "gateway",
+          "authentication"
+        ],
+        "start": "2026-09-26T12:00:00+00:00",
+        "end": "2026-09-26T12:10:00+00:00"
+      },
+      "logs": {
+        "edge": "{\"time\": \"2026-09-26T12:00:10+00:00\", \"request_id\": \"shop-4-req-001\", \"remote_addr\": \"198.51.100.10\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:25+00:00\", \"request_id\": \"shop-4-req-002\", \"remote_addr\": \"203.0.113.77\", \"status\": \"401\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:00:45+00:00\", \"request_id\": \"shop-4-req-003\", \"remote_addr\": \"203.0.113.77\", \"status\": \"200\", \"route\": \"/api/auth/login\"}\n{\"time\": \"2026-09-26T12:01:00+00:00\", \"request_id\": \"shop-4-req-004\", \"remote_addr\": \"203.0.113.77\", \"status\": \"200\", \"route\": \"/api/orders\"}\n{\"time\": \"2026-09-26T12:01:25+00:00\", \"request_id\": \"shop-4-req-005\", \"remote_addr\": \"203.0.113.77\", \"status\": \"200\", \"route\": \"/api/checkout\"}",
+        "auth": "{\"event_id\": \"shop-4-auth-001\", \"timestamp\": \"2026-09-26T12:00:10+00:00\", \"request_id\": \"shop-4-req-001\", \"account_ref\": \"customer-3091\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-4-auth-002\", \"timestamp\": \"2026-09-26T12:00:25+00:00\", \"request_id\": \"shop-4-req-002\", \"account_ref\": \"customer-3091\", \"outcome\": \"failure\"}\n{\"event_id\": \"shop-4-auth-003\", \"timestamp\": \"2026-09-26T12:00:45+00:00\", \"request_id\": \"shop-4-req-003\", \"account_ref\": \"customer-3091\", \"outcome\": \"success\"}"
+      }
+    }
+  }
+]

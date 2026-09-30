@@ -1,0 +1,1 @@
+{"allowance_closed": true, "attempts": 4, "cases": {"smoke-01": "failed", "smoke-02": "failed", "smoke-03": "completed", "smoke-04": "failed"}, "fatal": null, "known_cost_upper_usd": "0.0085928", "mode": "live", "reserved_usd": "0.03163320", "usage_complete": true}

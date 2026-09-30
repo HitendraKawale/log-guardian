@@ -1,0 +1,69 @@
+"""Check preserved execution facts, including the accepted report's semantic counterexample."""
+import ast
+import gzip
+import hashlib
+import json
+from decimal import Decimal
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+
+def load(name):
+    return json.loads((root / name).read_bytes())
+
+originals = load('original-files.json')
+for name, expected in originals.items():
+    raw = gzip.decompress((root / (name + '.gz')).read_bytes()) if name.endswith('.db') else (root / name).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == expected, name
+source = ast.parse((root / 'candidate/services/ingestion-service/app/investigation_schemas.py').read_text())
+cls = next(n for n in source.body if isinstance(n, ast.ClassDef) and n.name == 'InvestigationReport')
+order = [n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)]
+guidance_source = ast.parse((root / 'candidate/services/ingestion-service/app/investigation_security.py').read_text())
+guidance = next(ast.literal_eval(n.value) for n in guidance_source.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'SECURITY_GUIDANCE' for t in n.targets))
+inputs = outputs = records = 0
+cost = Decimal(0)
+for n, (count, output_tokens, citations) in enumerate(zip([15, 8, 4, 8], [802, 574, 496, 696], [14, 8, 7, 11]), 1):
+    reservation = load(f'request-{n:03}.reservation.json')
+    receipt = load(f'request-{n:03}.response.json')
+    case = load(f'smoke-{n:02}.json')
+    wire = reservation['request_json'].encode()
+    assert hashlib.sha256(wire).hexdigest() == reservation['request_sha256']
+    body = json.loads(wire)
+    assert body == reservation['request']
+    assert list(body['response_format']['json_schema']['schema']['properties']) == order
+    assert body['messages'][0]['content'].endswith(guidance)
+    assert [tool['function']['name'] for tool in body['tools']] == ['read_security_evidence']
+    assert body['max_completion_tokens'] == 1024
+    assert Decimal(reservation['reserved_usd']) <= Decimal('0.025')
+    assert case['run']['status'] == 'completed' and case['run']['error'] is None
+    events = case['events']
+    assert [e['kind'] for e in events] == ['tool_request', 'tool_call', 'status']
+    assert events[1]['payload']['request_sequence'] == events[0]['sequence']
+    batch = events[1]['payload']['result']
+    assert json.loads(next(m['content'] for m in body['messages'] if m['role'] == 'tool')) == batch
+    assert not batch['truncated']
+    assert sum(i['kind'] == 'security_event' for i in batch['items']) == count
+    records += count
+    choice = receipt['response']['choices'][0]
+    assert receipt['http_status'] == 200 and choice['finish_reason'] == 'stop'
+    report = json.loads(choice['message']['content'])
+    assert case['run']['report'] == report
+    assert report['likely_cause'] is None and report['outcome'] == 'inconclusive'
+    assert len(report['observations']) == 3 and len(report['alternatives']) == 1
+    ids = {i['evidence_id'] for i in batch['items']}
+    findings = report['observations'] + report['alternatives']
+    assert sum(len(f['evidence_ids']) for f in findings) == citations
+    for finding in findings:
+        assert set(finding['evidence_ids']) <= ids
+    if n == 3:
+        assert batch['items'][0]['content']['sources']['auth']['records'] == 0
+        assert any('successful login attempt (HTTP 200)' in f['claim'] for f in report['observations'])
+    inputs += receipt['usage']['prompt_tokens']
+    outputs += receipt['usage']['completion_tokens']
+    assert receipt['usage']['completion_tokens'] == output_tokens
+    cost += Decimal(receipt['cost_upper_usd'])
+summary = load('summary.json')
+assert summary['allowance_closed'] and summary['usage_complete'] and summary['attempts'] == 4
+assert Decimal(summary['reserved_usd']) == Decimal('0.03648400')
+assert (records, inputs, outputs, cost) == (35, 13008, 2568, Decimal('0.0093120'))
+print(f'PASS: {len(originals)} original files; new guidance delivered; 35 records; 4 structurally accepted reports; semantic counterexample retained; allowance closed.')

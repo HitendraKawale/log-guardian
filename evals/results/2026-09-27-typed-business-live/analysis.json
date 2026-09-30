@@ -1,0 +1,280 @@
+{
+  "summary": {
+    "allowance_closed": true,
+    "attempts": 4,
+    "cases": {
+      "smoke-01": "completed",
+      "smoke-02": "failed",
+      "smoke-03": "completed",
+      "smoke-04": "failed"
+    },
+    "fatal": null,
+    "known_cost_upper_usd": "0.0054008",
+    "mode": "live",
+    "reserved_usd": "0.03280640",
+    "usage_complete": true
+  },
+  "cases": {
+    "smoke-01": {
+      "status": "completed",
+      "error": null,
+      "selection": {
+        "focus_evidence_ids": [
+          "security-summary:984e1764e3a10c5e818a3828ada374030f63141c9df7e590e9f5b84faee9ed35",
+          "security-event:965c20a0af1bf7a5ecda43cc09a4710e7f9fc4a633fa17e5de99a3a72bf947ee",
+          "security-event:cd989845995320672e491ae0175aeca83fc132514451464860d2cadee4266142"
+        ],
+        "hypothesis_codes": [
+          "repeated_login_attempts"
+        ],
+        "check_codes": [
+          "read_auth_results",
+          "read_rejection_reasons"
+        ]
+      },
+      "unknown_focus_ids": [],
+      "source_local_matches": {},
+      "assembly_error": null,
+      "delivered_records": 19,
+      "host_report": {
+        "checks": [
+          "Obtain authentication-result records for the scoped requests and time window; absence from this case does not establish a service outage.",
+          "Inspect redacted authentication rejection reasons for the scoped attempts. Do not collect credentials, cookies, tokens or request payload dumps."
+        ],
+        "facts": [
+          {
+            "claim": "Whole saved case contains 19 supplied records, including 8 authentication results: 8 failure, 0 success. 3 records have no confirmed request counterpart.",
+            "evidence_ids": [
+              "security-summary:984e1764e3a10c5e818a3828ada374030f63141c9df7e590e9f5b84faee9ed35"
+            ]
+          },
+          {
+            "claim": "Authentication service recorded failure for account \"buyer-5100\" at 2026-09-27T14:00:40Z.",
+            "evidence_ids": [
+              "security-event:965c20a0af1bf7a5ecda43cc09a4710e7f9fc4a633fa17e5de99a3a72bf947ee"
+            ]
+          },
+          {
+            "claim": "Gateway recorded HTTP 429 for route \"/session/login\" at 2026-09-27T14:00:58Z from address \"198.51.100.81\".",
+            "evidence_ids": [
+              "security-event:cd989845995320672e491ae0175aeca83fc132514451464860d2cadee4266142"
+            ]
+          }
+        ],
+        "hypotheses": [
+          {
+            "claim": "More than one authentication failure was recorded. Mistakes and unauthorized guessing are possible explanations; intent and actor identity are unknown.",
+            "evidence_ids": [
+              "security-summary:984e1764e3a10c5e818a3828ada374030f63141c9df7e590e9f5b84faee9ed35"
+            ]
+          }
+        ],
+        "outcome": "inconclusive",
+        "schema_version": 2,
+        "unknowns": [
+          "Collection completeness is unknown; supplied records may be incomplete.",
+          "Clock alignment and causal order are unverified.",
+          "Real actor identity, account ownership and authorization are unestablished.",
+          "Account compromise, AI involvement and business impact are not established."
+        ]
+      },
+      "usage": {
+        "completion_tokens": 155,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens": 4337,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 4492
+      },
+      "cost_upper_usd": "0.0019828"
+    },
+    "smoke-02": {
+      "status": "failed",
+      "error": "invalid_report",
+      "selection": {
+        "focus_evidence_ids": [
+          "commerce-v2-auth-2-001",
+          "commerce-v2-auth-2-002",
+          "commerce-v2-auth-2-003"
+        ],
+        "hypothesis_codes": [
+          "repeated_login_attempts",
+          "retry_possible"
+        ],
+        "check_codes": [
+          "read_auth_results",
+          "read_rejection_reasons"
+        ]
+      },
+      "unknown_focus_ids": [
+        "commerce-v2-auth-2-001",
+        "commerce-v2-auth-2-002",
+        "commerce-v2-auth-2-003"
+      ],
+      "source_local_matches": {
+        "commerce-v2-auth-2-001": [
+          "security-event:6225c954b35e3b9627db63569f399a4acc2fb81b165d2b0e1a27ee11a442de05"
+        ],
+        "commerce-v2-auth-2-002": [
+          "security-event:716ed0864ec225c551632960a4584def4ad58427ad3df7b0e92dd8a09849d781"
+        ],
+        "commerce-v2-auth-2-003": [
+          "security-event:2161c53daa8d31bc1fd27c2e0da29ea905bfb775fd3361402be4a42c310817f8"
+        ]
+      },
+      "assembly_error": "Invalid security evidence or selection",
+      "delivered_records": 8,
+      "host_report": null,
+      "usage": {
+        "completion_tokens": 68,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens": 2582,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 2650
+      },
+      "cost_upper_usd": "0.0011416"
+    },
+    "smoke-03": {
+      "status": "completed",
+      "error": null,
+      "selection": {
+        "focus_evidence_ids": [
+          "security-summary:574b25b2c6e1ff35b9a81e95b7ab066947a975f8dbd279885a357a1612394b68",
+          "security-event:ac4a872c469d6fa39e356184ec982c67aebc10b5b59395e1da520733dd0fbb81",
+          "security-event:a5e12e223bcde354e29afb99ef8536f96c238a5d5e45bde821397eb7931ea40b"
+        ],
+        "hypothesis_codes": [],
+        "check_codes": [
+          "read_auth_results"
+        ]
+      },
+      "unknown_focus_ids": [],
+      "source_local_matches": {},
+      "assembly_error": null,
+      "delivered_records": 6,
+      "host_report": {
+        "checks": [
+          "Obtain authentication-result records for the scoped requests and time window; absence from this case does not establish a service outage."
+        ],
+        "facts": [
+          {
+            "claim": "Whole saved case contains 6 supplied records, including 0 authentication results: 0 failure, 0 success. 6 records have no confirmed request counterpart.",
+            "evidence_ids": [
+              "security-summary:574b25b2c6e1ff35b9a81e95b7ab066947a975f8dbd279885a357a1612394b68"
+            ]
+          },
+          {
+            "claim": "Gateway recorded HTTP 401 for route \"/session/login\" at 2026-09-27T14:00:55Z from address \"203.0.113.92\".",
+            "evidence_ids": [
+              "security-event:ac4a872c469d6fa39e356184ec982c67aebc10b5b59395e1da520733dd0fbb81"
+            ]
+          },
+          {
+            "claim": "Gateway recorded HTTP 503 for route \"/session/login\" at 2026-09-27T14:01:30Z from address \"203.0.113.92\".",
+            "evidence_ids": [
+              "security-event:a5e12e223bcde354e29afb99ef8536f96c238a5d5e45bde821397eb7931ea40b"
+            ]
+          }
+        ],
+        "hypotheses": [],
+        "outcome": "inconclusive",
+        "schema_version": 2,
+        "unknowns": [
+          "Collection completeness is unknown; supplied records may be incomplete.",
+          "Clock alignment and causal order are unverified.",
+          "Real actor identity, account ownership and authorization are unestablished.",
+          "Account compromise, AI involvement and business impact are not established.",
+          "Authentication outcome is unknown; no authentication results were supplied."
+        ]
+      },
+      "usage": {
+        "completion_tokens": 147,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens": 2257,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 2404
+      },
+      "cost_upper_usd": "0.0011380"
+    },
+    "smoke-04": {
+      "status": "failed",
+      "error": "invalid_report",
+      "selection": {
+        "focus_evidence_ids": [
+          "commerce-v2-auth-4-001",
+          "commerce-v2-auth-4-002",
+          "commerce-v2-4-002"
+        ],
+        "hypothesis_codes": [
+          "repeated_login_attempts",
+          "retry_possible"
+        ],
+        "check_codes": [
+          "read_auth_results",
+          "read_rejection_reasons"
+        ]
+      },
+      "unknown_focus_ids": [
+        "commerce-v2-auth-4-001",
+        "commerce-v2-auth-4-002",
+        "commerce-v2-4-002"
+      ],
+      "source_local_matches": {
+        "commerce-v2-auth-4-001": [
+          "security-event:0a9442053944834e7d3986239cd36c31b6e4d026a89b243ed7359d908a376dbc"
+        ],
+        "commerce-v2-auth-4-002": [
+          "security-event:8961c99ed11dbba99e887ded7cb25d2e23994124972474eeb9d9cee58ba43b44"
+        ],
+        "commerce-v2-4-002": [
+          "security-event:cded216143437c4825aa9b531bb6a38689f0a1d23e77b6c8ef727e055865a42f"
+        ]
+      },
+      "assembly_error": "Unsupported security hypothesis",
+      "delivered_records": 8,
+      "host_report": null,
+      "usage": {
+        "completion_tokens": 67,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens": 2578,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 2645
+      },
+      "cost_upper_usd": "0.0011384"
+    }
+  },
+  "input_tokens": 11754,
+  "output_tokens": 437,
+  "cached_tokens": 0
+}

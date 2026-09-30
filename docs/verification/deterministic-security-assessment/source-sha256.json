@@ -1,0 +1,11 @@
+{
+  "docs/security-log-review.md": "4cacbb4e6bb4fc4fa9670e1c932e9318fd78ff2412d690e31889f406c1e8c39c",
+  "frontend/investigations.js": "3709ff285c56257b63b0626e4bb546abf9f015eb693736e269f1fb8f621936a5",
+  "frontend/security.html": "3f633fb9517a03b5ef0cf00b777e985949726aaa12ac1b6ce0a24f061310cbb8",
+  "frontend/security.js": "dd760f407f07a3ed5b163cdb225e4c6e3df7a057e55e8865c3242af1009c956b",
+  "services/ingestion-service/app/routes/security_cases.py": "5df3f662df6f703185dc2048e3cc9324ab0e78bb95473b001e2b92a052cec231",
+  "services/ingestion-service/app/security_assessment.py": "d68b1237ddf1db85e021efad1143382b9b58e3df24fa3edcb34869e949ea2df8",
+  "services/ingestion-service/tests/test_security_baseline.py": "5b3ae36681342698bdf55cc7e3fd21190622c688ee481d859ae36af810ca4ed6",
+  "services/ingestion-service/tests/test_security_cases.py": "f764ec2ab32bf602501a1e88e4517c60ccd9ab05e8321ab579a0936b044bf947",
+  "tests/e2e/test_security_review_ui.py": "7a84da8c0f90e10bfadcfedbf8faae1b96c6a5c2c899248aa6383d427f06af0a"
+}

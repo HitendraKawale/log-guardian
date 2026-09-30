@@ -16,8 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..database import get_session
+from ..investigation_security import snapshot
 from ..models import Investigation, SecurityCase, SecurityEvidence
 from ..security_adapters import Registry, analyze_import
+from ..security_assessment import build_security_baseline
 from ..security_evidence import MAX_BYTES, decode_json
 
 MAX_WIRE_BYTES = 2 * MAX_BYTES
@@ -206,6 +208,21 @@ async def list_cases(
         .offset(offset)
     )
     return [{**row._mapping, "created_at": row.created_at.replace(tzinfo=UTC)} for row in rows]
+
+
+@router.get("/cases/{case_id}/assessment")
+async def get_assessment(
+    case_id: str, response: Response, session: AsyncSession = Depends(get_session)
+):
+    case = await session.get(SecurityCase, case_id)
+    if case is None:
+        fail(404, "Unknown security review")
+    try:
+        assessment = build_security_baseline(snapshot(case))
+    except ValueError:
+        fail(422, "Saved evidence cannot produce a bounded assessment")
+    response.headers["Cache-Control"] = "no-store"
+    return assessment
 
 
 @router.get("/cases/{case_id}")

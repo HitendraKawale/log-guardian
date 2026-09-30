@@ -1,0 +1,4 @@
+smoke-01: completed/inconclusive rendered; citation opened; POST 405; no browser errors
+smoke-02: completed/inconclusive rendered; citation opened; POST 405; no browser errors
+smoke-03: completed/inconclusive rendered; citation opened; POST 405; no browser errors
+smoke-04: completed/inconclusive rendered; citation opened; POST 405; no browser errors

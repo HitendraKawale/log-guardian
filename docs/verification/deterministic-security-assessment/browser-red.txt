@@ -1,0 +1,117 @@
+/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_baseline_before_ai_consent[chromium-idle] ________________
+
+page = <Page url='http://127.0.0.1:50224/ui/security.html?api=http://127.0.0.1:50224'>
+security_stack = 'http://127.0.0.1:50224'
+tmp_path = PosixPath('/private/tmp/lg48-baseline-ui-red/test_baseline_before_ai_consen0')
+
+    @pytest.mark.parametrize("security_stack", ["idle"], indirect=True)
+    def test_baseline_before_ai_consent(page, security_stack, tmp_path):
+        connect(page, security_stack)
+        upload_example(page)
+>       expect(page.locator("#security-assessment-status")).to_contain_text("No model call")
+E       AssertionError: Locator expected to contain text 'No model call'
+E       Actual value: - banner:
+E         - heading "Security review" [level=1]
+E         - paragraph: Log Guardian / gateway and authentication evidence
+E         - link "Operational investigations":
+E           - /url: index.html
+E       - main:
+E         - heading "Connect to your evidence store" [level=2]
+E         - text: API endpoint
+E         - textbox "API endpoint": http://127.0.0.1:50224
+E         - text: Security API key
+E         - textbox "Security API key": security-test
+E         - button "Connect"
+E         - paragraph: The key stays in this page's memory. Only connect to a server you own. Imports use deterministic correlation. Optional AI investigations require a separate key and an explicit start. Neither correlation nor a model draft establishes attacker identity or AI involvement.
+E         - status: Review saved without a model call.
+E         - complementary:
+E           - heading "Import a log window" [level=2]
+E           - paragraph: Connect to load server-owned sources. Upload nginx JSON access logs and application auth JSONL in the documented formats.
+E           - text: From (UTC)
+E           - textbox "From (UTC)":
+E             - /placeholder: 2026-09-01T10:00:00Z
+E             - text: 2026-09-01T10:00:00Z
+E           - text: To (UTC)
+E           - textbox "To (UTC)":
+E             - /placeholder: 2026-09-01T10:10:00Z
+E             - text: 2026-09-01T10:10:00Z
+E           - paragraph: At most one hour, 1 MiB total and 1,000 input records. Use an empty file for a source with no supplied evidence.
+E           - text: edge log file
+E           - button "edge log file"
+E           - text: "gateway: nginx_json. Request namespace: shop. auth log file"
+E           - button "auth log file"
+E           - text: "authentication: application_auth_json. Request namespace: shop."
+E           - button "Save review"
+E           - heading "Saved reviews" [level=2]
+E           - button "Reload"
+E           - list:
+E             - listitem:
+E               - button "gateway, authentication / 6 input records / d3fad934"
+E           - button "Previous" [disabled]
+E           - button "Next" [disabled]
+E         - article:
+E           - heading "3 linked requests" [level=2]
+E           - paragraph: 2 failures, 1 success, 0 unavailable.
+E           - paragraph: "gateway, authentication: 2026-09-01T10:00:00Z to 2026-09-01T10:10:00Z. 6 input records; 0 duplicate deliveries."
+E           - paragraph: Collection completeness and clock alignment are unknown. Compromise, data access, actor identity and AI involvement are not established.
+E           - region "Optional AI investigation":
+E             - heading "Optional AI investigation" [level=3]
+E             - paragraph: An explicit start sends this case's normalized evidence, including addresses and account references, to the configured model provider. The worker uses a $0.025 per-run allowance, not an account-wide billing cap. Uploading alone does not start a run. Reopening never retries a failed or cancelled run.
+E             - text: Investigation API key
+E             - textbox "Investigation API key"
+E             - checkbox "I authorize sharing this case with the model provider."
+E             - text: I authorize sharing this case with the model provider.
+E             - button "Start or open investigation"
+E             - status
+E             - paragraph: No investigation opened.
+E             - button "Cancel investigation" [disabled]
+E             - paragraph: New assessments use model-selected evidence and checks, with facts and unknowns rendered by the server. Possible explanations remain unconfirmed. Older runs remain unverified model drafts. Citation links expose supplied records, not proof of collection completeness or real-world outcomes. Human review is required.
+E             - group: Delivered investigation evidence
+E           - heading "Evidence gaps" [level=3]
+E           - list:
+E             - listitem: No structural gaps found in supplied records. Collection completeness remains unknown.
+E           - heading "Source observations" [level=3]
+E           - list:
+E             - listitem: "auth: 3 unique records, 0 observed addresses, 3 account references. These are not actor counts."
+E             - listitem: "edge: 3 unique records, 3 observed addresses, 0 account references. These are not actor counts."
+E           - heading "Linked requests" [level=3]
+E           - list:
+E             - listitem:
+E               - text: "shop / r1:"
+E               - button "[\"edge\",\"r1\"]"
+E               - button "[\"auth\",\"a1\"]"
+E             - listitem:
+E               - text: "shop / r2:"
+E               - button "[\"edge\",\"r2\"]"
+E               - button "[\"auth\",\"a2\"]"
+E             - listitem:
+E               - text: "shop / r3:"
+E               - button "[\"edge\",\"r3\"]"
+E               - button "[\"auth\",\"a3\"]"
+E           - heading "Ambiguous or unlinked evidence" [level=3]
+E           - list:
+E             - listitem: Every supplied record belongs to a confirmed pair.
+E           - heading "Evidence timeline" [level=3]
+E           - paragraph: Sorted by source timestamp, not proven causal order. Open a record to inspect its saved fields.
+E           - group: 2026-09-01T10:00:01Z / auth / a1 / failure
+E           - group: 2026-09-01T10:00:02Z / edge / r1 / HTTP 200
+E           - group: 2026-09-01T10:00:03Z / auth / a2 / failure
+E           - group: 2026-09-01T10:00:04Z / edge / r2 / HTTP 200
+E           - group: 2026-09-01T10:00:05Z / auth / a3 / success
+E           - group: 2026-09-01T10:00:06Z / edge / r3 / HTTP 200
+E           - group: Import provenance
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for locator("#security-assessment-status")
+
+e2e/test_security_review_ui.py:582: AssertionError
+=========================== short test summary info ============================
+FAILED e2e/test_security_review_ui.py::test_baseline_before_ai_consent[chromium-idle]
+1 failed, 9 deselected in 7.52s

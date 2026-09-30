@@ -1,0 +1,48 @@
+"""Author synthetic business-shaped records without accessing any production source."""
+import json
+from datetime import datetime, timedelta, UTC
+from pathlib import Path
+
+root=Path('/Users/hitesh/log-guardian-worktrees/48-typed-security')
+start=datetime(2026,9,27,14,0,tzinfo=UTC)
+cases=[]
+for n in range(1,5):
+    edge=[];auth=[]
+    def gateway(second,route,status,address):
+        identity=f'commerce-v2-{n}-{len(edge)+1:03}'
+        edge.append(dict(time=(start+timedelta(seconds=second)).isoformat(),request_id=identity,remote_addr=address,status=str(status),route=route))
+        return identity
+    def login(second,status,address,account,outcome):
+        identity=gateway(second,'/session/login',status,address)
+        auth.append(dict(event_id=f'commerce-v2-auth-{n}-{len(auth)+1:03}',timestamp=(start+timedelta(seconds=second)).isoformat(),request_id=identity,account_ref=account,outcome=outcome))
+    if n==1:
+        gateway(0,'/store/catalog',200,'192.0.2.81')
+        for i in range(8):
+            login(40+i*2,200 if i in (0,4) else 401,['198.51.100.81','203.0.113.81'][i%2],f'buyer-{5100+i%4}','failure')
+        gateway(58,'/session/login',429,'198.51.100.81')
+        gateway(120,'/basket',200,'192.0.2.81')
+    elif n==2:
+        gateway(0,'/store/catalog',200,'192.0.2.82')
+        login(20,200,'192.0.2.82','buyer-5017','failure')
+        login(90,200,'192.0.2.82','buyer-5017','failure')
+        login(190,200,'192.0.2.82','buyer-5017','success')
+        gateway(205,'/basket',200,'192.0.2.82')
+    elif n==3:
+        gateway(0,'/store/catalog',200,'192.0.2.83')
+        gateway(15,'/session/login',200,'192.0.2.83')
+        gateway(35,'/session/login',200,'198.51.100.88')
+        gateway(55,'/session/login',401,'203.0.113.92')
+        gateway(90,'/session/login',503,'203.0.113.92')
+        gateway(140,'/basket',200,'192.0.2.83')
+    else:
+        gateway(0,'/store/catalog',200,'192.0.2.84')
+        login(30,401,'198.51.100.84','buyer-6208','failure')
+        login(75,200,'203.0.113.84','buyer-6208','success')
+        gateway(95,'/orders',201,'203.0.113.84')
+        gateway(115,'/checkout',200,'203.0.113.84')
+        gateway(160,'/orders/status',200,'203.0.113.84')
+    scope=dict(services=['gateway','authentication'],start=start.isoformat(),end=(start+timedelta(minutes=10)).isoformat())
+    cases.append(dict(case_id=f'smoke-{n:02}',body=dict(scope=scope,logs=dict(edge='\n'.join(json.dumps(row) for row in edge),auth='\n'.join(json.dumps(row) for row in auth)))))
+    print(f'smoke-{n:02}: gateway={len(edge)}, auth={len(auth)}, total={len(edge)+len(auth)}')
+out=root/'evals/typed-business-live';out.mkdir(exist_ok=True)
+(out/'inputs.json').write_text(json.dumps(cases,indent=2)+'\n')
