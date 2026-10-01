@@ -1,0 +1,923 @@
+{
+  "id": "0d781846-a7ee-450d-89a4-0125fd843fa2",
+  "investigation_id": null,
+  "created_at": "2026-09-30T23:06:35.016053+00:00",
+  "request_sha256": "31feb98f28924edcfd29a4c41fa6ededc7b2e188a0121e5835d183a35ddf3ce1",
+  "source_snapshot": {
+    "sources": [
+      {
+        "source_id": "edge",
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "request_namespace": "juice-business-lab",
+        "format": "nginx_json"
+      },
+      {
+        "source_id": "auth",
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "request_namespace": "juice-business-lab",
+        "format": "application_auth_json"
+      }
+    ]
+  },
+  "input_hashes": {
+    "edge": "874fd70ebd0db328b8441df6a137b84ccf5436fb54d352eb6a7ad97ce1e58a76",
+    "auth": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report": {
+    "version": 1,
+    "scope": {
+      "services": [
+        "gateway",
+        "authentication"
+      ],
+      "start": "2026-09-30T23:06:33Z",
+      "end": "2026-09-30T23:06:35Z"
+    },
+    "source_config": [
+      {
+        "source_id": "auth",
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "request_namespace": "juice-business-lab"
+      },
+      {
+        "source_id": "edge",
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "request_namespace": "juice-business-lab"
+      }
+    ],
+    "collection_complete": null,
+    "input_records": 46,
+    "duplicate_records": 0,
+    "timeline": [
+      {
+        "evidence": [
+          "edge",
+          "073a0186409d9a2bb5b543d2466ea1e6"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "073a0186409d9a2bb5b543d2466ea1e6",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "073a0186409d9a2bb5b543d2466ea1e6",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "0a6d138e7f1c1fb30d7a3a026ea44fbb"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "0a6d138e7f1c1fb30d7a3a026ea44fbb",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "0a6d138e7f1c1fb30d7a3a026ea44fbb",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "1399e284f1c48bf6b1292b5150e4633b"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1399e284f1c48bf6b1292b5150e4633b",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "1399e284f1c48bf6b1292b5150e4633b",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "1a190157fdf80da29fc19c47fb5d10c0"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1a190157fdf80da29fc19c47fb5d10c0",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "1a190157fdf80da29fc19c47fb5d10c0",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "1b9cc9f0787bfb3a0749dbe9058d8ca1"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1b9cc9f0787bfb3a0749dbe9058d8ca1",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "1b9cc9f0787bfb3a0749dbe9058d8ca1",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "1fa01b17bb15f0b4148ef29c9f9878a7"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1fa01b17bb15f0b4148ef29c9f9878a7",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "1fa01b17bb15f0b4148ef29c9f9878a7",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "27fc147076dec43426d7ed02f8c80faa"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "27fc147076dec43426d7ed02f8c80faa",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "27fc147076dec43426d7ed02f8c80faa",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "2922f2a89b9b1c4e2cf19602f951663c"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "2922f2a89b9b1c4e2cf19602f951663c",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "2922f2a89b9b1c4e2cf19602f951663c",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "2e282938b9db52387253757ac7a77826"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "2e282938b9db52387253757ac7a77826",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "2e282938b9db52387253757ac7a77826",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "353a6e847848d35cb3dd93bb230cac90"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "353a6e847848d35cb3dd93bb230cac90",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "353a6e847848d35cb3dd93bb230cac90",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "40a5b78f4f00298518f52b22924854c7"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "40a5b78f4f00298518f52b22924854c7",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "40a5b78f4f00298518f52b22924854c7",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "4360b87fe90fb1c4a580645edde85ad4"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4360b87fe90fb1c4a580645edde85ad4",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "4360b87fe90fb1c4a580645edde85ad4",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "47295b7bc4d72c14e8d139068d857d93"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "47295b7bc4d72c14e8d139068d857d93",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "47295b7bc4d72c14e8d139068d857d93",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "47d0995cc7e86f73511933aec8041724"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "47d0995cc7e86f73511933aec8041724",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "47d0995cc7e86f73511933aec8041724",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "4bc532ca849e0bc3761983f79dfebaae"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4bc532ca849e0bc3761983f79dfebaae",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "4bc532ca849e0bc3761983f79dfebaae",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "4c704c5b965a874c7b3a148b149ab112"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4c704c5b965a874c7b3a148b149ab112",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "4c704c5b965a874c7b3a148b149ab112",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "4da7116a4ac8eaf56f6da3e56ee534f0"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4da7116a4ac8eaf56f6da3e56ee534f0",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "4da7116a4ac8eaf56f6da3e56ee534f0",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "4e3da640ffb0fe240df5005cf96b4771"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4e3da640ffb0fe240df5005cf96b4771",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "4e3da640ffb0fe240df5005cf96b4771",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "510dd365f0e89d3f3c40842a8bf61b53"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "510dd365f0e89d3f3c40842a8bf61b53",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "510dd365f0e89d3f3c40842a8bf61b53",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "52008feb4aa0df807e974e3dd9800762"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "52008feb4aa0df807e974e3dd9800762",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "52008feb4aa0df807e974e3dd9800762",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "522d311733aaabefddef1d69801ed704"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "522d311733aaabefddef1d69801ed704",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "522d311733aaabefddef1d69801ed704",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "618e944e8bc355f51ca6dfc66273d073"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "618e944e8bc355f51ca6dfc66273d073",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "618e944e8bc355f51ca6dfc66273d073",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "6b97327ba19ca921c38f01a194bd58ce"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "6b97327ba19ca921c38f01a194bd58ce",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "6b97327ba19ca921c38f01a194bd58ce",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "734ee03c19e27a8240b8b4e389dfd89f"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "734ee03c19e27a8240b8b4e389dfd89f",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "734ee03c19e27a8240b8b4e389dfd89f",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "78265aae95ddd19ef801e11fb1b3c720"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "78265aae95ddd19ef801e11fb1b3c720",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "78265aae95ddd19ef801e11fb1b3c720",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "7acec069f0335cd6a6b6d7a94752f729"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "7acec069f0335cd6a6b6d7a94752f729",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "7acec069f0335cd6a6b6d7a94752f729",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "7b811af018146f497f871381428caaf0"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "7b811af018146f497f871381428caaf0",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "7b811af018146f497f871381428caaf0",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "84522763f5f3fcdd5f84e230713588b2"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "84522763f5f3fcdd5f84e230713588b2",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "84522763f5f3fcdd5f84e230713588b2",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "851a7419d2a743a2006728a1802193de"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "851a7419d2a743a2006728a1802193de",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "851a7419d2a743a2006728a1802193de",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "9297c567ac45436161a1ee2bc7cc7dab"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "9297c567ac45436161a1ee2bc7cc7dab",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "9297c567ac45436161a1ee2bc7cc7dab",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "968f464420eeb5451663951587ab3541"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "968f464420eeb5451663951587ab3541",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "968f464420eeb5451663951587ab3541",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 400
+      },
+      {
+        "evidence": [
+          "edge",
+          "9cd77c0371eb8d60859530ded794c07c"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "9cd77c0371eb8d60859530ded794c07c",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "9cd77c0371eb8d60859530ded794c07c",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "a7bee6d1ede62a8181a97c8044e6d6b3"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "a7bee6d1ede62a8181a97c8044e6d6b3",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "a7bee6d1ede62a8181a97c8044e6d6b3",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "b18ea66531687367778cd1a25f88408f"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "b18ea66531687367778cd1a25f88408f",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "b18ea66531687367778cd1a25f88408f",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "b20471a29b8fab60f0ea67e5a90a0080"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "b20471a29b8fab60f0ea67e5a90a0080",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "b20471a29b8fab60f0ea67e5a90a0080",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "c27578417c86e4a8970de6855e6272ee"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "c27578417c86e4a8970de6855e6272ee",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "c27578417c86e4a8970de6855e6272ee",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "cdd4f310dad8a1a2e5a5ac6662b4f1c9"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "cdd4f310dad8a1a2e5a5ac6662b4f1c9",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "cdd4f310dad8a1a2e5a5ac6662b4f1c9",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "db2fd50175e4c2d9b8c48a6bdd7e5842"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "db2fd50175e4c2d9b8c48a6bdd7e5842",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "db2fd50175e4c2d9b8c48a6bdd7e5842",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "dd3018ed3bbbc07d2324a6ec2f14f05c"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "dd3018ed3bbbc07d2324a6ec2f14f05c",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "dd3018ed3bbbc07d2324a6ec2f14f05c",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "ea43c0361f89ce548d53e384e7849253"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "ea43c0361f89ce548d53e384e7849253",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "ea43c0361f89ce548d53e384e7849253",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "ee68eeb9b3699acb13e342101541aa4c"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "ee68eeb9b3699acb13e342101541aa4c",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "ee68eeb9b3699acb13e342101541aa4c",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 499
+      },
+      {
+        "evidence": [
+          "edge",
+          "efb478b6a1d0248cb099eb1d948fa460"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "efb478b6a1d0248cb099eb1d948fa460",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "efb478b6a1d0248cb099eb1d948fa460",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "f348471d4f8d1c785c914c6e545f93bc"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "f348471d4f8d1c785c914c6e545f93bc",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "f348471d4f8d1c785c914c6e545f93bc",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "f51628b58add8a48dc659cd637111eaf"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "f51628b58add8a48dc659cd637111eaf",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "f51628b58add8a48dc659cd637111eaf",
+        "route": "/catalog",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "fd52a629eb59f4fc19c759728669e2c7"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "fd52a629eb59f4fc19c759728669e2c7",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "fd52a629eb59f4fc19c759728669e2c7",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      },
+      {
+        "evidence": [
+          "edge",
+          "feb15e6d1483f371f928ca79565e4653"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "feb15e6d1483f371f928ca79565e4653",
+        "event_time": "2026-09-30T23:06:34Z",
+        "request_id": "feb15e6d1483f371f928ca79565e4653",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200
+      }
+    ],
+    "sources": {
+      "auth": {
+        "records": 0,
+        "distinct_client_addresses": 0,
+        "distinct_account_refs": 0,
+        "auth_outcomes": {
+          "success": 0,
+          "failure": 0,
+          "unavailable": 0
+        }
+      },
+      "edge": {
+        "records": 46,
+        "distinct_client_addresses": 1,
+        "distinct_account_refs": 0,
+        "auth_outcomes": {
+          "success": 0,
+          "failure": 0,
+          "unavailable": 0
+        }
+      }
+    },
+    "links": [],
+    "ambiguous_groups": [],
+    "unlinked": [
+      [
+        "edge",
+        "073a0186409d9a2bb5b543d2466ea1e6"
+      ],
+      [
+        "edge",
+        "0a6d138e7f1c1fb30d7a3a026ea44fbb"
+      ],
+      [
+        "edge",
+        "1399e284f1c48bf6b1292b5150e4633b"
+      ],
+      [
+        "edge",
+        "1a190157fdf80da29fc19c47fb5d10c0"
+      ],
+      [
+        "edge",
+        "1b9cc9f0787bfb3a0749dbe9058d8ca1"
+      ],
+      [
+        "edge",
+        "1fa01b17bb15f0b4148ef29c9f9878a7"
+      ],
+      [
+        "edge",
+        "27fc147076dec43426d7ed02f8c80faa"
+      ],
+      [
+        "edge",
+        "2922f2a89b9b1c4e2cf19602f951663c"
+      ],
+      [
+        "edge",
+        "2e282938b9db52387253757ac7a77826"
+      ],
+      [
+        "edge",
+        "353a6e847848d35cb3dd93bb230cac90"
+      ],
+      [
+        "edge",
+        "40a5b78f4f00298518f52b22924854c7"
+      ],
+      [
+        "edge",
+        "4360b87fe90fb1c4a580645edde85ad4"
+      ],
+      [
+        "edge",
+        "47295b7bc4d72c14e8d139068d857d93"
+      ],
+      [
+        "edge",
+        "47d0995cc7e86f73511933aec8041724"
+      ],
+      [
+        "edge",
+        "4bc532ca849e0bc3761983f79dfebaae"
+      ],
+      [
+        "edge",
+        "4c704c5b965a874c7b3a148b149ab112"
+      ],
+      [
+        "edge",
+        "4da7116a4ac8eaf56f6da3e56ee534f0"
+      ],
+      [
+        "edge",
+        "4e3da640ffb0fe240df5005cf96b4771"
+      ],
+      [
+        "edge",
+        "510dd365f0e89d3f3c40842a8bf61b53"
+      ],
+      [
+        "edge",
+        "52008feb4aa0df807e974e3dd9800762"
+      ],
+      [
+        "edge",
+        "522d311733aaabefddef1d69801ed704"
+      ],
+      [
+        "edge",
+        "618e944e8bc355f51ca6dfc66273d073"
+      ],
+      [
+        "edge",
+        "6b97327ba19ca921c38f01a194bd58ce"
+      ],
+      [
+        "edge",
+        "734ee03c19e27a8240b8b4e389dfd89f"
+      ],
+      [
+        "edge",
+        "78265aae95ddd19ef801e11fb1b3c720"
+      ],
+      [
+        "edge",
+        "7acec069f0335cd6a6b6d7a94752f729"
+      ],
+      [
+        "edge",
+        "7b811af018146f497f871381428caaf0"
+      ],
+      [
+        "edge",
+        "84522763f5f3fcdd5f84e230713588b2"
+      ],
+      [
+        "edge",
+        "851a7419d2a743a2006728a1802193de"
+      ],
+      [
+        "edge",
+        "9297c567ac45436161a1ee2bc7cc7dab"
+      ],
+      [
+        "edge",
+        "968f464420eeb5451663951587ab3541"
+      ],
+      [
+        "edge",
+        "9cd77c0371eb8d60859530ded794c07c"
+      ],
+      [
+        "edge",
+        "a7bee6d1ede62a8181a97c8044e6d6b3"
+      ],
+      [
+        "edge",
+        "b18ea66531687367778cd1a25f88408f"
+      ],
+      [
+        "edge",
+        "b20471a29b8fab60f0ea67e5a90a0080"
+      ],
+      [
+        "edge",
+        "c27578417c86e4a8970de6855e6272ee"
+      ],
+      [
+        "edge",
+        "cdd4f310dad8a1a2e5a5ac6662b4f1c9"
+      ],
+      [
+        "edge",
+        "db2fd50175e4c2d9b8c48a6bdd7e5842"
+      ],
+      [
+        "edge",
+        "dd3018ed3bbbc07d2324a6ec2f14f05c"
+      ],
+      [
+        "edge",
+        "ea43c0361f89ce548d53e384e7849253"
+      ],
+      [
+        "edge",
+        "ee68eeb9b3699acb13e342101541aa4c"
+      ],
+      [
+        "edge",
+        "efb478b6a1d0248cb099eb1d948fa460"
+      ],
+      [
+        "edge",
+        "f348471d4f8d1c785c914c6e545f93bc"
+      ],
+      [
+        "edge",
+        "f51628b58add8a48dc659cd637111eaf"
+      ],
+      [
+        "edge",
+        "fd52a629eb59f4fc19c759728669e2c7"
+      ],
+      [
+        "edge",
+        "feb15e6d1483f371f928ca79565e4653"
+      ]
+    ],
+    "gaps": [
+      "empty_source",
+      "missing_authentication_results",
+      "missing_counterpart"
+    ],
+    "limitations": [
+      "collection_completeness_unknown",
+      "clock_alignment_unverified",
+      "impact_not_established",
+      "actor_and_ai_attribution_not_established"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+INSTALL_EXIT=254
+22.2.0
+frontend/dist/frontend/browser-stats.json
+frontend/dist/frontend/browser-stats.json
+npm error command failed
+npm error command sh -c cd frontend && npm install && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-09-30T22_41_25_124Z-debug-0.log

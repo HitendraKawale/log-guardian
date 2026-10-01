@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/lg-juice-business/verify.py", line 60, in <module>
+    assert finding['evidence_ids'] and set(finding['evidence_ids']) <= set(evidence)
+           ~~~~~~~^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'

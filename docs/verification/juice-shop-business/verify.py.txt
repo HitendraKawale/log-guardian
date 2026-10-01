@@ -1,0 +1,105 @@
+"""Cross-check saved assessments against original app/gateway records without importing product code."""
+
+import hashlib
+import json
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent / 'business-results'
+EXPECT = {'normal-customer': ['success'], 'wrong-password': ['failure'], 'retry': ['failure', 'failure', 'success'], 'guest': [], 'missing-auth': []}
+total = 0
+unique = set()
+
+for name, outcomes in EXPECT.items():
+    raw = {source: (ROOT / f'{name}-{source}.jsonl').read_bytes() for source in ['edge', 'auth']}
+    records = {source: [json.loads(line) for line in value.splitlines()] for source, value in raw.items()}
+    auth = records['auth']
+    assert [row['outcome'] for row in auth] == outcomes
+    count = len(auth) + len(records['edge'])
+    total += count
+    lookup = {}
+    for source, rows in records.items():
+        for row in rows:
+            identity = row['event_id'] if source == 'auth' else row['request_id']
+            lookup[(source, identity)] = row
+            unique.add((source, identity))
+    body = json.loads((ROOT / f'{name}-input.json').read_text())
+    case = json.loads((ROOT / f'{name}-case.json').read_text())
+    assessment = json.loads((ROOT / f'{name}-assessment.json').read_text())
+    assert case['input_hashes'] == {key: hashlib.sha256(value).hexdigest() for key, value in raw.items()}
+    fingerprint = json.dumps({'owner': case['source_snapshot'], 'body': body}, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+    assert hashlib.sha256(fingerprint).hexdigest() == case['request_sha256']
+    assert len(case['report']['timeline']) == count
+    for event in case['report']['timeline']:
+        source, identity = event['evidence']
+        original = lookup[(source, identity)]
+        if source == 'auth':
+            assert event['auth_outcome'] == original['outcome']
+            assert event['account_ref'] == original['account_ref']
+        else:
+            assert event['http_status'] == int(original['status'])
+            assert event['route'] == original['route']
+        assert event['request_id'] == original['request_id']
+    for pair in case['report']['links']:
+        assert lookup[tuple(pair['gateway'])]['request_id'] == lookup[tuple(pair['authentication'])]['request_id']
+    assert len(case['report']['links']) == len(auth)
+    counts = Counter(outcomes)
+    expected_counts = {k: counts[k] for k in ['success', 'failure', 'unavailable']}
+    assert case['report']['sources']['auth']['auth_outcomes'] == expected_counts
+    assert assessment['method'] == 'deterministic' and assessment['policy_version'] == 1
+    assert assessment['report']['outcome'] == 'inconclusive'
+    coverage = assessment['coverage']
+    assert coverage['saved_records'] == coverage['reviewed_records'] == count
+    assert coverage['displayed_event_facts'] + coverage['omitted_event_facts'] == count
+    assert coverage['display_limited'] == (coverage['omitted_event_facts'] > 0)
+    assert len(assessment['report']['facts']) <= coverage['fact_limit']
+    evidence = {item['evidence_id']: item for item in assessment['evidence']}
+    assert all(isinstance(check, str) and check for check in assessment['report']['checks'])
+    for field in ['facts', 'hypotheses']:
+        for finding in assessment['report'][field]:
+            assert finding['evidence_ids'] and set(finding['evidence_ids']) <= set(evidence)
+    for finding in assessment['report']['facts']:
+        claim = finding['claim']
+        item = evidence[finding['evidence_ids'][0]]
+        content = item['content']
+        if item['kind'] == 'summary':
+            assert content['total'] == count
+            assert content['sources']['auth']['auth_outcomes'] == expected_counts
+            assert f'{count} supplied records' in claim
+            assert f'{len(auth)} authentication results' in claim
+            continue
+        source, identity = content['evidence']
+        original = lookup[(source, identity)]
+        timestamp = datetime.fromisoformat(content['event_time'].replace('Z', '+00:00'))
+        original_timestamp = datetime.fromisoformat(original.get('timestamp', original.get('time')).replace('Z', '+00:00'))
+        assert timestamp == original_timestamp
+        assert content['event_time'] in claim
+        if source == 'auth':
+            assert claim.startswith(f'Authentication service recorded {original["outcome"]} ')
+            assert original['account_ref'] in claim
+            assert 'HTTP' not in claim
+        else:
+            assert claim.startswith(f'Gateway recorded HTTP {int(original["status"])} ')
+            assert json.dumps(original['route']) in claim
+            assert json.dumps(original['remote_addr']) in claim
+            assert 'Authentication service recorded' not in claim
+    unknowns = ' '.join(assessment['report']['unknowns'])
+    assert 'business impact are not established' in unknowns
+    if not auth:
+        assert 'no authentication results were supplied' in unknowns
+    if name == 'retry':
+        assert len({row['account_ref'] for row in auth}) == 1
+    print(f'{name}: {count}/{count} saved records checked; {len(auth)} auth results; {len(case["report"]["links"])} exact-ID links; citations and claim fields match source records.')
+
+assert (ROOT / 'missing-auth-edge.jsonl').read_bytes() == (ROOT / 'normal-customer-edge.jsonl').read_bytes()
+assert (ROOT / 'missing-auth-auth.jsonl').read_bytes() == b''
+assert json.loads((ROOT / 'browser-errors.json').read_text()) == []
+header = json.loads((ROOT / 'request-id-replacement.json').read_text())
+assert header['passed'] and header['provided_id'] != header['recorded_id']
+header_auth = [json.loads(line) for line in (ROOT / 'request-id-replacement-auth.jsonl').read_text().splitlines()]
+header_edge = [json.loads(line) for line in (ROOT / 'request-id-replacement-edge.jsonl').read_text().splitlines()]
+assert len(header_auth) == 1 and header_auth[0]['outcome'] == 'failure'
+assert header_auth[0]['request_id'] == header['recorded_id']
+assert any(row['request_id'] == header['recorded_id'] for row in header_edge)
+print(f'PASS: {total} reviewed records across five cases, {len(unique)} unique source records. Missing-auth case deliberately reuses the normal gateway window. This is a bounded consistency check, not diagnosis accuracy.')

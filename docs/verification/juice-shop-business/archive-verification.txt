@@ -1,0 +1,6 @@
+normal-customer: 29/29 saved records checked; 1 auth results; 1 exact-ID links; citations and claim fields match source records.
+wrong-password: 33/33 saved records checked; 1 auth results; 1 exact-ID links; citations and claim fields match source records.
+retry: 46/46 saved records checked; 3 auth results; 3 exact-ID links; citations and claim fields match source records.
+guest: 46/46 saved records checked; 0 auth results; 0 exact-ID links; citations and claim fields match source records.
+missing-auth: 28/28 saved records checked; 0 auth results; 0 exact-ID links; citations and claim fields match source records.
+PASS: 182 reviewed records across five cases, 154 unique source records. Missing-auth case deliberately reuses the normal gateway window. This is a bounded consistency check, not diagnosis accuracy.

@@ -1,0 +1,30 @@
+"""Generate private lab inputs; equivalent to the inline setup used for this run."""
+
+import json
+import os
+import secrets
+import socket
+from pathlib import Path
+
+lab = Path('/tmp/lg-juice-business')
+os.umask(0o077)
+lab.mkdir(exist_ok=True)
+for port in [8490, 8491, 8492]:
+    with socket.socket() as sock:
+        sock.bind(('127.0.0.1', port))
+runtime = {
+    'review_key': secrets.token_urlsafe(32),
+    'log_key': secrets.token_urlsafe(32),
+    'audit_key': secrets.token_hex(32),
+    'email': f'buyer-{secrets.token_hex(4)}@example.invalid',
+    'password': secrets.token_urlsafe(18),
+    'security_answer': secrets.token_hex(12),
+    'shop_url': 'http://127.0.0.1:8490',
+    'api_url': 'http://127.0.0.1:8491',
+    'review_url': 'http://127.0.0.1:8492/security.html?api=http://127.0.0.1:8491',
+}
+with (lab / 'runtime.json').open('x') as stream:
+    json.dump(runtime, stream, indent=2)
+with (lab / 'shop.env').open('x') as stream:
+    stream.write(f'LG_AUTH_AUDIT_PATH=/juice-shop/logs/lg-auth.jsonl\nLG_AUTH_AUDIT_KEY={runtime["audit_key"]}\nOPENAI_API_KEY=\nLLM_API_KEY=\n')
+print('Created owner-only runtime files; selected loopback ports are free.')

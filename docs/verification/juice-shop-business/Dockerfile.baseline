@@ -1,0 +1,9 @@
+FROM node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+WORKDIR /juice-shop
+ENV CYPRESS_INSTALL_BINARY=0 npm_config_package_lock=true
+ADD baseline.tar /juice-shop/
+# Angular 22.2 renamed the browser metafile; keep SBOM generation enabled.
+RUN node -e 'const fs=require("node:fs"); const p="frontend/package.json"; const j=JSON.parse(fs.readFileSync(p)); j.scripts.sbom=j.scripts.sbom.replace("dist/frontend/stats.json", "dist/frontend/browser-stats.json"); fs.writeFileSync(p, JSON.stringify(j,null,2)+"\n")'
+RUN npm install
+RUN npm run build:server
+RUN mkdir -p logs

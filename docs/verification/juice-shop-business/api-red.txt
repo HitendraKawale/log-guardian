@@ -1,0 +1,29 @@
+▶ password decision audit integration
+  ✖ keeps login behavior unchanged and records decisions only when configured (125.520417ms)
+✖ password decision audit integration (1259.707959ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5155.898752
+
+✖ failing tests:
+
+test at test/api/securityAudit.api.test.ts:2:1777
+✖ keeps login behavior unchanged and records decisions only when configured (125.520417ms)
+  Error: ENOENT: no such file or directory, open '/tmp/lg-auth-api-HTCm1W/auth.jsonl'
+      at readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (/juice-shop/test/api/securityAudit.api.test.ts:48:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1905:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/tmp/lg-auth-api-HTCm1W/auth.jsonl'
+  }

@@ -1,0 +1,402 @@
+{
+  "method": "deterministic",
+  "policy_version": 1,
+  "case_version": "7c8313580124e0c08a91279f0b8e6a6f5c90d0a29d0a51f9e4554a84214b4639",
+  "report": {
+    "schema_version": 2,
+    "outcome": "inconclusive",
+    "facts": [
+      {
+        "claim": "Whole saved case contains 29 supplied records, including 1 authentication results: 0 failure, 1 success. 27 records have no confirmed request counterpart.",
+        "evidence_ids": [
+          "security-summary:7c8313580124e0c08a91279f0b8e6a6f5c90d0a29d0a51f9e4554a84214b4639"
+        ]
+      },
+      {
+        "claim": "Authentication service recorded success for account \"a101690bba98b98ec9ac1cb80f9d7865284c5f7f080855a49c04eb863b7aec92\" at 2026-09-30T23:05:31.279000Z.",
+        "evidence_ids": [
+          "security-event:871d4352fe440db7eda6e3aad805e3b35be54a95bddd0157215b5378addbe0be"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 499 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:c31433248da12d8f42e2719967f6cb15f21f2a0152bbecc69feedf21889a4668"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:9c91de75133809eb5e49680d03a29d85514d8a660ee214e71a82ab56f6630cea"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:67236e35dc8c4ea2a953e61fd76d3d33ed1c84310bdb231ae9ee64e02b553153"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:427f4e84000fe692331fb350631b966dfa774bf6e4476fd370961228e029c38a"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:2993db76e8d2e5f1b747b2f9913efc29a8e9e6798c40477e46f73801f13b56b5"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:d3eaeea70c64637db5b1f3fbfccb212a9939cbac7e19648bc80627e3b0783beb"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:20dec892a3207c8a422d11c8a8b3b00586a0341fe762026b790e45eb09f46018"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:7a4bbfc93210443a11403cbb781b001f3963d560a91698be953350ae85bd9231"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/other\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:76fc19ab3e6d6a6fcba0d62d9e5f8ebd08bd3a85427150ace6684dd80b56c854"
+        ]
+      },
+      {
+        "claim": "Gateway recorded HTTP 200 for route \"/cart\" at 2026-09-30T23:05:31Z from address \"172.27.0.1\".",
+        "evidence_ids": [
+          "security-event:63c7479ba70e247c72c56a8180e49181b3ee27cd10686cb98d1b37b06d3dc5af"
+        ]
+      }
+    ],
+    "hypotheses": [],
+    "unknowns": [
+      "Collection completeness is unknown; supplied records may be incomplete.",
+      "Clock alignment and causal order are unverified.",
+      "Real actor identity, account ownership and authorization are unestablished.",
+      "Account compromise, AI involvement and business impact are not established."
+    ],
+    "checks": [
+      "Inspect session policy and redacted activity audit records for the scoped requests; do not presume compromise or business effects."
+    ]
+  },
+  "coverage": {
+    "saved_records": 29,
+    "reviewed_records": 29,
+    "displayed_event_facts": 11,
+    "omitted_event_facts": 18,
+    "fact_limit": 12,
+    "display_limited": true
+  },
+  "evidence": [
+    {
+      "evidence_id": "security-summary:7c8313580124e0c08a91279f0b8e6a6f5c90d0a29d0a51f9e4554a84214b4639",
+      "kind": "summary",
+      "content": {
+        "case_id": "a14cad7a-dc27-4165-96e1-7108aeb65430",
+        "count_scope": "whole_saved_case",
+        "scope": {
+          "services": [
+            "gateway",
+            "authentication"
+          ],
+          "start": "2026-09-30T23:05:30Z",
+          "end": "2026-09-30T23:05:32.279000Z"
+        },
+        "source_config": [
+          {
+            "source_id": "auth",
+            "service": "authentication",
+            "event_kind": "authentication_result",
+            "request_namespace": "juice-business-lab"
+          },
+          {
+            "source_id": "edge",
+            "service": "gateway",
+            "event_kind": "gateway_request",
+            "request_namespace": "juice-business-lab"
+          }
+        ],
+        "total": 29,
+        "sources": {
+          "auth": {
+            "records": 1,
+            "distinct_client_addresses": 0,
+            "distinct_account_refs": 1,
+            "auth_outcomes": {
+              "success": 1,
+              "failure": 0,
+              "unavailable": 0
+            }
+          },
+          "edge": {
+            "records": 28,
+            "distinct_client_addresses": 1,
+            "distinct_account_refs": 0,
+            "auth_outcomes": {
+              "success": 0,
+              "failure": 0,
+              "unavailable": 0
+            }
+          }
+        },
+        "confirmed_pairs": 1,
+        "ambiguous_groups": 0,
+        "unlinked_records": 27,
+        "collection_complete": null,
+        "gaps": [
+          "missing_counterpart"
+        ],
+        "limitations": [
+          "collection_completeness_unknown",
+          "clock_alignment_unverified",
+          "impact_not_established",
+          "actor_and_ai_attribution_not_established"
+        ]
+      }
+    },
+    {
+      "evidence_id": "security-event:871d4352fe440db7eda6e3aad805e3b35be54a95bddd0157215b5378addbe0be",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "auth",
+          "260eea23-69f9-4cf3-b423-77ec47d06cca"
+        ],
+        "service": "authentication",
+        "event_kind": "authentication_result",
+        "evidence_id": "260eea23-69f9-4cf3-b423-77ec47d06cca",
+        "event_time": "2026-09-30T23:05:31.279000Z",
+        "request_id": "550169c0bb0790fc1d4e16395d07e328",
+        "account_ref": "a101690bba98b98ec9ac1cb80f9d7865284c5f7f080855a49c04eb863b7aec92",
+        "auth_outcome": "success",
+        "request_namespace": "juice-business-lab",
+        "partner": [
+          "edge",
+          "550169c0bb0790fc1d4e16395d07e328"
+        ],
+        "correlation": "confirmed_pair"
+      }
+    },
+    {
+      "evidence_id": "security-event:c31433248da12d8f42e2719967f6cb15f21f2a0152bbecc69feedf21889a4668",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "9cdf01d4cac1d53a9a7ebe25bfd3817b"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "9cdf01d4cac1d53a9a7ebe25bfd3817b",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "9cdf01d4cac1d53a9a7ebe25bfd3817b",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 499,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:9c91de75133809eb5e49680d03a29d85514d8a660ee214e71a82ab56f6630cea",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "0133d5ddafead491e7daf5b28edac2ec"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "0133d5ddafead491e7daf5b28edac2ec",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "0133d5ddafead491e7daf5b28edac2ec",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:67236e35dc8c4ea2a953e61fd76d3d33ed1c84310bdb231ae9ee64e02b553153",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "0852e6880c7c8e5fe3195707834a44e3"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "0852e6880c7c8e5fe3195707834a44e3",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "0852e6880c7c8e5fe3195707834a44e3",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:427f4e84000fe692331fb350631b966dfa774bf6e4476fd370961228e029c38a",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "0d75a3d5ad2821d24b3e70399e7b52e4"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "0d75a3d5ad2821d24b3e70399e7b52e4",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "0d75a3d5ad2821d24b3e70399e7b52e4",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:2993db76e8d2e5f1b747b2f9913efc29a8e9e6798c40477e46f73801f13b56b5",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "1056330f479cea6b067dcb8976d5db8d"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1056330f479cea6b067dcb8976d5db8d",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "1056330f479cea6b067dcb8976d5db8d",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:d3eaeea70c64637db5b1f3fbfccb212a9939cbac7e19648bc80627e3b0783beb",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "1080ad5d1d0ea072452aae957f759d36"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1080ad5d1d0ea072452aae957f759d36",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "1080ad5d1d0ea072452aae957f759d36",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:20dec892a3207c8a422d11c8a8b3b00586a0341fe762026b790e45eb09f46018",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "1d8984c9362556aa2ec77c2e85daa50b"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1d8984c9362556aa2ec77c2e85daa50b",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "1d8984c9362556aa2ec77c2e85daa50b",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:7a4bbfc93210443a11403cbb781b001f3963d560a91698be953350ae85bd9231",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "1f4f4961ecaf5e19774fd8c1fadcff81"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "1f4f4961ecaf5e19774fd8c1fadcff81",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "1f4f4961ecaf5e19774fd8c1fadcff81",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:76fc19ab3e6d6a6fcba0d62d9e5f8ebd08bd3a85427150ace6684dd80b56c854",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "306b5e5985b0b1c447281f0c2e91a73d"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "306b5e5985b0b1c447281f0c2e91a73d",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "306b5e5985b0b1c447281f0c2e91a73d",
+        "route": "/other",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    },
+    {
+      "evidence_id": "security-event:63c7479ba70e247c72c56a8180e49181b3ee27cd10686cb98d1b37b06d3dc5af",
+      "kind": "security_event",
+      "content": {
+        "evidence": [
+          "edge",
+          "4401747ed8eb0cf9bfce51fb2f1fca23"
+        ],
+        "service": "gateway",
+        "event_kind": "gateway_request",
+        "evidence_id": "4401747ed8eb0cf9bfce51fb2f1fca23",
+        "event_time": "2026-09-30T23:05:31Z",
+        "request_id": "4401747ed8eb0cf9bfce51fb2f1fca23",
+        "route": "/cart",
+        "client_address": "172.27.0.1",
+        "http_status": 200,
+        "request_namespace": "juice-business-lab",
+        "partner": null,
+        "correlation": "unlinked"
+      }
+    }
+  ]
+}

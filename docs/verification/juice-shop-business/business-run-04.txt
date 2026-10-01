@@ -1,0 +1,31 @@
+AssertionError: Traceback (most recent call last):
+  File "/tmp/lg-juice-business/run.py", line 234, in <module>
+    main()
+  File "/tmp/lg-juice-business/run.py", line 209, in main
+    page = shop_page(ctx, 'login' if attempts else 'search')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/lg-juice-business/run.py", line 94, in shop_page
+    expect(page.get_by_text(heading, exact=True)).to_be_visible()
+  File "/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/playwright/sync_api/_generated.py", line 22743, in to_be_visible
+    self._sync(
+  File "/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/playwright/_impl/_assertions.py", line 838, in to_be_visible
+    await self._expect_impl(
+  File "/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/playwright/_impl/_assertions.py", line 123, in _expect_impl
+    _record_soft_or_raise(
+  File "/Users/hitesh/log-guardian/.venv/lib/python3.11/site-packages/playwright/_impl/_assertions.py", line 60, in _record_soft_or_raise
+    raise error
+AssertionError: Locator expected to be visible
+Actual value: None
+Error: strict mode violation: get_by_text("Login", exact=True) resolved to 2 elements:
+    1) <span class="menu-text truncate" _ngcontent-ng-c1586896698=""> Login </span> aka get_by_label("Go to login page").get_by_text("Login")
+    2) <h1 class="mat-headline-medium" _ngcontent-ng-c3099251276="">Login</h1> aka get_by_role("heading", name="Login")
+ 
+Call log:
+  - Expect "to_be_visible" with timeout 5000ms
+  - waiting for get_by_text("Login", exact=True)
+
+
+BUSINESS_EXIT=1

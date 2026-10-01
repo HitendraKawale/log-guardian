@@ -1,0 +1,42 @@
+{
+  "log_guardian_revision": "d150fac52414cf0ede06bc20443dc199dd094df6",
+  "juice_shop_revision": "5658473cf8814459bf89000ce373b20ed0b4eb37",
+  "juice_shop_tag": "v20.2.0",
+  "platform": "linux/arm64 in Docker Desktop on macOS",
+  "source_sha256": {
+    "routes/login.ts": "39a671b4ef89638e6d2462935baa9b94a9d3efdfc6ecd0a8bd9b8733b3a168da",
+    "lib/securityAudit.ts": "6faf3dd28766f4ac2f7f5b6cae2e818e49da75df0fddf03787648f9ca70bed60",
+    "test/server/securityAudit.unit.test.ts": "cfae3766f8030e256d2888bfd6177f56b68973eb21ea3a7876b10467c47cfb37"
+  },
+  "images": {
+    "lg-juice-baseline:20.2.0": "sha256:eca0add03316942ddedad041b6edea3f7ab84b77e8aa8234f56e117e49c3c18c",
+    "lg-juice-instrumented:20.2.0": "sha256:0f61bc6ee818abde53f2b33ee7bcab151661acf46cb1898ee69ab570708f2bf6",
+    "lg-juice-business:20.2.0": "sha256:3acd31d048eaece01972652aba765038b9c189556608a7a7301072de27190b02",
+    "nginx:stable-alpine": "sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94"
+  },
+  "copied_log_sha256": {
+    "api-red.log": "6eae43811d068aeb5d4e6742bc3154411951651ec3911c4ebbad040f4d219ed2",
+    "baseline-build-install.log": "4f32a52a2456ded62daef213fcb8a2dc574171779d7ed802c626e4c57148527f",
+    "baseline-build-metafile.log": "64520f94d09278e58047f9af582be43eee3ee64c2442d18be33e7fbefd2ce1fc",
+    "baseline-build.log": "085363044344770e7ef25bfd9a14b832a4a5905fee091223702ed8c38958d367",
+    "baseline-checks.log": "342a0cdb65ff495a74a548facebb7cb5bd147e5b15355e73d369fefbb9990734",
+    "baseline-verified.log": "7bc8a0ea8f771e386349c43f5dc525289e22c3346a72b1a6557af003ccc067cf",
+    "browser-wait-diagnosis.log": "3c2cb3bc858c59c2966ed1a03f98e3eba829e436a319624b83a931513ca9b62f",
+    "build-diagnosis.log": "7a7fb5c886f1c27350ca11d5aa63931d555b61ef3e25c77d10c3e8de62ff9066",
+    "business-run-02.log": "b96c4832d64fe85b7beaf56fc7ca340b9617567f3180e9a3075a795f1a3fd99d",
+    "business-run-03.log": "f2d46346d00e95521a02d6423119ecd956bb74c19d656c39d968e7268ca35932",
+    "business-run-04.log": "ad4566fafec0d1172cd15b1a6ade58382161bb055008f734ad423cf1eb309ba3",
+    "business-run-05.log": "ded5143ade8094dc4474dca21210bdd9d1560df651c4a37c98f25529f7b5dc12",
+    "business-run.log": "eb86b83fdc27fc51580b92c8544b522c3da05ca1ee01dd270345da8d239dfd31",
+    "independent-verification-red.log": "258bc08cdade8f531b67b242d4d30966e436da227d0b3fe95b467f65200e54f7",
+    "independent-verification.log": "99957cbf77ef0e912172b6c627b09a28fcc746ec79b6d609f8fd7a398f69fc8d",
+    "instrumented-build.log": "1efd45f28c0b6076e9b2ebf9694c2602a4dec49eee3baf6ac1269b523d06ba24",
+    "instrumented-checks.log": "b42028d06a107176052515795edff2bbc692f38b42533963eb4aaada1f6f267e",
+    "lg-verification.log": "10d671a314ee3d9217db85d830e3b022710ea70066af2a18aeaa9e8013175017",
+    "postchecks.log": "027998a00d3f9b975af2bfafbb4dd701868b170d8030514dbb8e8f36a29fc9ec",
+    "recorder-coverage.log": "999bc7592e07f5139b91111f26c2b8344e069ba2d55ee8e3dc08dc121058fc08",
+    "recorder-red.log": "4d57adaffb36421d7dae66036bb77d770dc62d5f2c514211b7164171775c0b8d",
+    "request-id-check.log": "51dc13f7b538be150bc2e4b134ee1b6c795236db9a92a4d89b735be094573769",
+    "runtime-build.log": "282c91d2431e870d6ff3e4d43a12596a1ae8f33a0e7193b6f01dde91885a27a1"
+  }
+}

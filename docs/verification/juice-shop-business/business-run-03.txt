@@ -1,0 +1,11 @@
+AssertionError: Traceback (most recent call last):
+  File "/tmp/lg-juice-business/run.py", line 232, in <module>
+    main()
+  File "/tmp/lg-juice-business/run.py", line 199, in main
+    add_cart(page, True)
+  File "/tmp/lg-juice-business/run.py", line 119, in add_cart
+    assert response.value.status == 201
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+BUSINESS_EXIT=1

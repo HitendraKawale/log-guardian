@@ -1,0 +1,61 @@
+{
+  "database": {
+    "security_cases": 6,
+    "security_evidence": 183,
+    "investigations": 0,
+    "investigation_events": 0
+  },
+  "history_reload": true,
+  "network_observation": [
+    {
+      "path": "/socket.io/",
+      "websocket_error": "handshake 400"
+    }
+  ],
+  "shop_console_error_count": 1,
+  "page_errors": [],
+  "isolation": {
+    "shop_user": "65532",
+    "shop_published_ports": [],
+    "shop_networks": [
+      "lg-juice-business_lab"
+    ],
+    "gateway_binding": {
+      "8080/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "8490"
+        }
+      ]
+    },
+    "provider_keys_present": false,
+    "audit_write_failure": false
+  },
+  "http_status_counts": {
+    "normal-customer": {
+      "200": 27,
+      "499": 1
+    },
+    "wrong-password": {
+      "200": 29,
+      "400": 1,
+      "401": 1,
+      "499": 1
+    },
+    "retry": {
+      "200": 36,
+      "400": 1,
+      "401": 2,
+      "499": 4
+    },
+    "guest": {
+      "200": 44,
+      "400": 1,
+      "499": 1
+    },
+    "missing-auth": {
+      "200": 27,
+      "499": 1
+    }
+  }
+}

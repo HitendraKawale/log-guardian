@@ -1,0 +1,244 @@
+"""Exercise real shop actions, then import independently emitted logs without a model."""
+
+import json
+import os
+import subprocess
+import sys
+import time
+import traceback
+from collections import Counter
+from datetime import datetime, timedelta
+from pathlib import Path
+from urllib.parse import urlsplit
+
+import httpx
+from playwright.sync_api import expect, sync_playwright
+
+LAB = Path('/tmp/lg-juice-business')
+R = json.loads((LAB / 'runtime.json').read_text())
+OUT = LAB / 'business-results'
+OUT.mkdir(exist_ok=True)
+os.umask(0o077)
+observations = []
+blocked = []
+errors = []
+
+
+def save(name, value):
+    (OUT / name).write_text(json.dumps(value, indent=2) + '\n')
+
+
+def source_logs():
+    result = {}
+    for source, container, path in [
+        ('edge', 'lg-juice-business-gateway-1', '/var/log/nginx/security-review.jsonl'),
+        ('auth', 'lg-juice-business-shop-1', '/juice-shop/logs/lg-auth.jsonl'),
+    ]:
+        target = LAB / f'current-{source}.jsonl'
+        copied = subprocess.run(['docker', 'cp', f'{container}:{path}', str(target)], capture_output=True)
+        if copied.returncode:
+            assert source == 'auth' and b'Could not find' in copied.stderr, copied.stderr.decode()
+            result[source] = b''
+        else:
+            result[source] = target.read_bytes()
+        assert len(result[source]) < 2 * 1024 * 1024
+    return result
+
+
+def cut(name, before, expected):
+    deadline = time.monotonic() + 10
+    while True:
+        after = source_logs()
+        assert all(after[key].startswith(before[key]) for key in before), 'Source log changed or rotated'
+        raw = {key: after[key][len(before[key]):] for key in before}
+        rows = {key: [json.loads(line) for line in value.splitlines()] for key, value in raw.items()}
+        if len(rows['auth']) == len(expected) and all(row['request_id'] in {e['request_id'] for e in rows['edge']} for row in rows['auth']):
+            break
+        assert time.monotonic() < deadline, 'Recorded decisions or matching gateway completions missing'
+        time.sleep(.1)
+    assert [r['outcome'] for r in rows['auth']] == expected
+    assert len(rows['edge']) + len(rows['auth']) <= 1000
+    assert sum(map(len, raw.values())) <= 1024 * 1024
+    assert rows['edge']
+    assert all(len(line) <= 16384 for value in raw.values() for line in value.splitlines())
+    for key, value in raw.items():
+        (OUT / f'{name}-{key}.jsonl').write_bytes(value)
+    return raw, rows
+
+
+def restrict(route):
+    parsed = urlsplit(route.request.url)
+    if parsed.hostname == '127.0.0.1' and parsed.port in {8490, 8491, 8492}:
+        route.continue_()
+    else:
+        blocked.append({'scheme': parsed.scheme, 'host': parsed.hostname})
+        route.abort()
+
+
+def context(browser):
+    ctx = browser.new_context(viewport={'width': 1280, 'height': 900}, service_workers='block')
+    ctx.route('**/*', restrict)
+    ctx.add_init_script('window.RTCPeerConnection = undefined; window.webkitRTCPeerConnection = undefined;')
+    ctx.on('page', lambda page: page.on('pageerror', lambda error: errors.append(str(error))))
+    return ctx
+
+
+def shop_page(ctx, fragment):
+    page = ctx.new_page()
+    page.goto(R['shop_url'] + '/#/' + fragment)
+    welcome = page.get_by_role('button', name='Close Welcome Banner', exact=True)
+    expect(welcome).to_be_visible()
+    welcome.click()
+    expect(welcome).not_to_be_visible()
+    heading = {'register': 'User Registration', 'login': 'Login', 'search': 'All Products'}[fragment]
+    target = page.get_by_text(heading, exact=True) if fragment == 'search' else page.get_by_role('heading', name=heading, exact=True)
+    expect(target).to_be_visible()
+    cookie = page.get_by_role('button', name='dismiss cookie message', exact=True)
+    if cookie.is_visible():
+        cookie.click()
+    return page
+
+
+def login(page, password, success):
+    page.get_by_role('textbox', name='Text field for the login email', exact=True).fill(R['email'])
+    page.get_by_role('textbox', name='Text field for the login password', exact=True).fill(password)
+    with page.expect_response(lambda response: urlsplit(response.url).path == '/rest/user/login' and response.request.method == 'POST') as response:
+        page.get_by_role('button', name='Login', exact=True).click()
+    assert response.value.status == (200 if success else 401)
+    if success:
+        expect(page.get_by_text('All Products', exact=True)).to_be_visible()
+        assert page.evaluate('Boolean(localStorage.getItem("token"))')
+    else:
+        expect(page.get_by_text('Invalid email or password.', exact=True)).to_be_visible()
+        assert not page.evaluate('Boolean(localStorage.getItem("token"))')
+
+
+def add_cart(page, authenticated):
+    if authenticated:
+        with page.expect_response(lambda response: urlsplit(response.url).path.rstrip('/') == '/api/BasketItems' and response.request.method == 'POST') as response:
+            page.get_by_role('button', name='Add to Basket', exact=True).first.click()
+        assert response.value.status == 200
+        added = response.value.json()
+        assert added['status'] == 'success' and added['data']['quantity'] == 1
+    else:
+        page.get_by_role('button', name='Add to Basket', exact=True).first.click()
+        page.wait_for_function('JSON.parse(sessionStorage.getItem("guestBasket") || "[]").some(x => x.quantity > 0)')
+    expect(page.get_by_role('button', name='Show the shopping cart', exact=True)).to_contain_text('1')
+
+
+def import_review(browser, name, raw, rows):
+    times = [datetime.fromisoformat(row['time']) for row in rows['edge']]
+    times += [datetime.fromisoformat(row['timestamp'].replace('Z', '+00:00')) for row in rows['auth']]
+    start = (min(times) - timedelta(seconds=1)).isoformat()
+    end = (max(times) + timedelta(seconds=1)).isoformat()
+    assert datetime.fromisoformat(end) - datetime.fromisoformat(start) <= timedelta(hours=1)
+    body = {'scope': {'services': ['gateway', 'authentication'], 'start': start, 'end': end}, 'logs': {key: value.decode() for key, value in raw.items()}}
+    save(f'{name}-input.json', body)
+    ctx = context(browser)
+    try:
+        page = ctx.new_page()
+        page.goto(R['review_url'])
+        page.get_by_label('Security API key', exact=True).fill(R['review_key'])
+        page.get_by_role('button', name='Connect', exact=True).click()
+        expect(page.get_by_label('edge log file')).to_be_visible()
+        page.get_by_label('From (UTC)', exact=True).fill(start)
+        page.get_by_label('To (UTC)', exact=True).fill(end)
+        for source in ['edge', 'auth']:
+            page.get_by_label(f'{source} log file').set_input_files(OUT / f'{name}-{source}.jsonl')
+        with page.expect_response(lambda r: r.request.method == 'POST' and urlsplit(r.url).path == '/security/cases') as response:
+            page.get_by_role('button', name='Save review', exact=True).click()
+        assert response.value.status == 201, f'Import status {response.value.status}'
+        case = response.value.json()
+        save(f'{name}-case.json', case)
+        expect(page.locator('#security-assessment-status')).to_contain_text('No model call')
+        with httpx.Client(trust_env=False) as client:
+            reply = client.get(f'{R["api_url"]}/security/cases/{case["id"]}/assessment', headers={'X-API-Key': R['review_key']})
+            assert reply.status_code == 200
+            assessment = reply.json()
+        save(f'{name}-assessment.json', assessment)
+        counts = Counter(row['outcome'] for row in rows['auth'])
+        assert case['report']['sources']['auth']['auth_outcomes'] == {outcome: counts[outcome] for outcome in ['success', 'failure', 'unavailable']}
+        assert len(case['report']['links']) == len(rows['auth'])
+        assert assessment['method'] == 'deterministic'
+        assert assessment['coverage']['reviewed_records'] == len(rows['edge']) + len(rows['auth'])
+        assert assessment['report']['outcome'] == 'inconclusive'
+        expect(page.get_by_label('Investigation API key', exact=True)).to_have_value('')
+        assert page.evaluate('JSON.stringify(localStorage)+JSON.stringify(sessionStorage)') == '{}{}'
+        citation = page.locator('#security-assessment-report .citation').first
+        citation.focus()
+        page.keyboard.press('Enter')
+        expect(page.locator('#security-assessment-evidence details[open] pre')).to_be_visible()
+        if not rows['auth']:
+            expect(page.locator('#security-assessment-report')).to_contain_text('no authentication results were supplied')
+            expect(page.locator('#security-assessment-report')).not_to_contain_text('Authentication service recorded success')
+        page.screenshot(path=str(OUT / f'{name}-review-desktop.png'), full_page=True)
+        page.set_viewport_size({'width': 390, 'height': 844})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(OUT / f'{name}-review-mobile.png'), full_page=True)
+        observations.append({'case': name, 'case_id': case['id'], 'gateway_records': len(rows['edge']), 'auth_outcomes': dict(counts), 'links': len(case['report']['links']), 'coverage': assessment['coverage'], 'browser_review': 'passed'})
+        save('observations.json', observations)
+    finally:
+        ctx.close()
+
+
+def main():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        try:
+            ctx = context(browser)
+            page = shop_page(ctx, 'register')
+            page.get_by_role('textbox', name='Email address field', exact=True).fill(R['email'])
+            page.get_by_role('textbox', name='Field for the password', exact=True).fill(R['password'])
+            page.get_by_role('textbox', name='Field to confirm the password', exact=True).fill(R['password'])
+            question = page.get_by_role('combobox', name='Selection list for the security question', exact=True)
+            question.focus()
+            question.press('ArrowDown')
+            expect(question).to_contain_text('Your eldest siblings middle name?')
+            page.get_by_role('textbox', name='Field for the answer to the security question', exact=True).fill(R['security_answer'])
+            page.get_by_role('button', name='Button to complete the registration', exact=True).click()
+            expect(page.get_by_role('heading', name='Login', exact=True)).to_be_visible()
+            before = source_logs()
+            login(page, R['password'], True)
+            add_cart(page, True)
+            page.screenshot(path=str(OUT / 'normal-customer-shop.png'))
+            ctx.close()
+            normal_raw, normal_rows = cut('normal-customer', before, ['success'])
+            import_review(browser, 'normal-customer', normal_raw, normal_rows)
+            for name, attempts in [('wrong-password', [False]), ('retry', [False, False, True]), ('guest', [])]:
+                before = source_logs()
+                ctx = context(browser)
+                page = shop_page(ctx, 'login' if attempts else 'search')
+                for success in attempts:
+                    login(page, R['password'] if success else 'Deliberately-Wrong-Lab-Password', success)
+                if not attempts:
+                    add_cart(page, False)
+                    assert not page.evaluate('Boolean(localStorage.getItem("token"))')
+                page.screenshot(path=str(OUT / f'{name}-shop.png'), mask=[page.get_by_role('textbox', name='Text field for the login email', exact=True), page.get_by_role('textbox', name='Text field for the login password', exact=True)])
+                ctx.close()
+                expected = ['success' if ok else 'failure' for ok in attempts]
+                raw, rows = cut(name, before, expected)
+                import_review(browser, name, raw, rows)
+            missing_raw = {'edge': normal_raw['edge'], 'auth': b''}
+            for key, value in missing_raw.items():
+                (OUT / f'missing-auth-{key}.jsonl').write_bytes(value)
+            import_review(browser, 'missing-auth', missing_raw, {'edge': normal_rows['edge'], 'auth': []})
+        finally:
+            browser.close()
+    save('browser-errors.json', errors)
+    save('blocked-network.json', blocked)
+    assert not errors, 'Browser page errors occurred; see browser-errors.json'
+    print('PASS: five real-business log reviews; no model calls or invented authentication records.')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as error:
+        message = traceback.format_exc()
+        for key in ['review_key', 'log_key', 'audit_key', 'email', 'password', 'security_answer']:
+            message = message.replace(R[key], '[redacted]')
+        save('failure.json', {'type': type(error).__name__, 'message': message})
+        save('browser-errors.json', errors)
+        save('blocked-network.json', blocked)
+        print(type(error).__name__ + ': ' + message)
+        sys.exit(1)

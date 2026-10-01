@@ -1,0 +1,38 @@
+node:internal/modules/cjs/loader:1564
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '../../lib/securityAudit'
+Require stack:
+- /juice-shop/test/server/securityAudit.unit.test.ts
+    at node:internal/modules/cjs/loader:1564:15
+    at nextResolveSimple (/juice-shop/node_modules/tsx/dist/register-B1c7OH6V.cjs:23:1010)
+    at /juice-shop/node_modules/tsx/dist/register-B1c7OH6V.cjs:22:4512
+    at /juice-shop/node_modules/tsx/dist/register-B1c7OH6V.cjs:22:2830
+    at resolveTsPaths (/juice-shop/node_modules/tsx/dist/register-B1c7OH6V.cjs:23:762)
+    at /juice-shop/node_modules/tsx/dist/register-B1c7OH6V.cjs:23:1203
+    at j._resolveFilename (file:///juice-shop/node_modules/tsx/dist/register-nyXW-TH3.mjs:2:18825)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at defaultResolve (node:internal/modules/cjs/loader:1199:20) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/juice-shop/test/server/securityAudit.unit.test.ts' ]
+}
+
+Node.js v24.21.0
+✖ test/server/securityAudit.unit.test.ts (103.424875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 108.615125
+
+✖ failing tests:
+
+test at test/server/securityAudit.unit.test.ts:1:1
+✖ test/server/securityAudit.unit.test.ts (103.424875ms)
+  'test failed'
+RECORDER_RED_EXIT=1

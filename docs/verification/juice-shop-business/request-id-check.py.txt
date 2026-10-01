@@ -1,0 +1,19 @@
+"""The header replacement check, originally executed as an inline Python command."""
+
+import sys
+import re
+import httpx
+
+sys.path.insert(0, '/tmp/lg-juice-business')
+import run
+
+before = run.source_logs()
+with httpx.Client(trust_env=False) as client:
+    response = client.post(run.R['shop_url'] + '/rest/user/login', headers={'X-Request-ID': 'caller-chosen-id'}, json={'email': run.R['email'], 'password': 'Wrong-For-Header-Test'})
+    assert response.status_code == 401
+raw, rows = run.cut('request-id-replacement', before, ['failure'])
+identity = rows['auth'][0]['request_id']
+assert identity != 'caller-chosen-id' and re.fullmatch('[0-9a-f]{32}', identity)
+assert identity in {row['request_id'] for row in rows['edge']}
+run.save('request-id-replacement.json', {'passed': True, 'provided_id': 'caller-chosen-id', 'recorded_id': identity, 'gateway_records': len(rows['edge']), 'auth_records': len(rows['auth'])})
+print('PASS: nginx replaced the caller-selected request ID; gateway and actual auth decision share the generated ID.')

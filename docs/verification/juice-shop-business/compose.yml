@@ -1,0 +1,19 @@
+name: lg-juice-business
+services:
+  shop:
+    image: lg-juice-business:20.2.0
+    env_file: shop.env
+    networks: [lab]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  gateway:
+    image: nginx:stable-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+    ports: ["127.0.0.1:8490:8080"]
+    volumes: ["./nginx.conf:/etc/nginx/nginx.conf:ro"]
+    networks: [lab, front]
+    depends_on: [shop]
+    security_opt: [no-new-privileges:true]
+networks:
+  lab:
+    internal: true
+  front: {}

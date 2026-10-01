@@ -1,0 +1,1 @@
+{"sources":[{"source_id":"edge","service":"gateway","event_kind":"gateway_request","request_namespace":"juice-business-lab","format":"nginx_json"},{"source_id":"auth","service":"authentication","event_kind":"authentication_result","request_namespace":"juice-business-lab","format":"application_auth_json"}]}
