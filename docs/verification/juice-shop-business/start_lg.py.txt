@@ -1,0 +1,32 @@
+"""Start an isolated evidence store without inheriting provider or execution credentials."""
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+LAB = Path('/tmp/lg-juice-business')
+ROOT = Path('/Users/hitesh/log-guardian-worktrees/48-juice-business')
+PY = str(ROOT / '.venv/bin/python')
+os.umask(0o077)
+runtime = json.loads((LAB / 'runtime.json').read_text())
+env = {
+    **os.environ,
+    'DATABASE_URL': f'sqlite+aiosqlite:///{LAB}/lg.sqlite',
+    'SECURITY_API_KEY': runtime['review_key'],
+    'API_KEY': runtime['log_key'],
+    'SECURITY_SOURCES_PATH': str(LAB / 'sources.json'),
+    'INVESTIGATION_API_KEY': '',
+    'OPENAI_API_KEY': '',
+    'OTEL_CONSOLE': '',
+    'OTEL_EXPORTER_OTLP_ENDPOINT': '',
+    'KAFKA_ENABLED': 'false',
+    'CORS_ALLOW_ORIGINS': 'http://127.0.0.1:8492',
+}
+subprocess.run([PY, '-m', 'alembic', 'upgrade', 'head'], cwd=ROOT / 'services/ingestion-service', env=env, check=True)
+api = subprocess.Popen([PY, '-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8491'], cwd=ROOT / 'services/ingestion-service', env=env, stdout=(LAB / 'lg-api.log').open('w'), stderr=subprocess.STDOUT, start_new_session=True)
+frontend = subprocess.Popen([PY, '-m', 'http.server', '8492', '--bind', '127.0.0.1', '--directory', str(ROOT / 'frontend')], env=env, stdout=(LAB / 'lg-frontend.log').open('w'), stderr=subprocess.STDOUT, start_new_session=True)
+runtime.update(api_pid=api.pid, frontend_pid=frontend.pid)
+(LAB / 'runtime.json').write_text(json.dumps(runtime, indent=2) + '\n')
+print('Started local API and frontend on ports 8491 and 8492; runtime credentials remain private.')

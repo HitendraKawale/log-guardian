@@ -1,0 +1,177 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.baseline
+#1 transferring dockerfile: 645B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#2 DONE 0.8s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/7] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 resolve docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 36B done
+#5 DONE 0.0s
+
+#6 [2/7] WORKDIR /juice-shop
+#6 CACHED
+
+#7 [3/7] ADD baseline.tar /juice-shop/
+#7 CACHED
+
+#8 [4/7] RUN node -e 'const fs=require("node:fs"); const p="frontend/package.json"; const j=JSON.parse(fs.readFileSync(p)); j.scripts.sbom=j.scripts.sbom.replace("dist/frontend/stats.json", "dist/frontend/browser-stats.json"); fs.writeFileSync(p, JSON.stringify(j,null,2)+"\n")'
+#8 DONE 0.2s
+
+#9 [5/7] RUN npm install
+#9 39.09 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+#9 39.11 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+#9 39.12 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+#9 39.12 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#9 39.28 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+#9 39.68 npm warn deprecated dottie@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+#9 40.01 npm warn deprecated crypto-js@3.3.0: Active development of CryptoJS has been discontinued. This library is no longer maintained.
+#9 40.49 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+#9 40.80 npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+#9 40.81 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#9 40.83 npm warn deprecated jws@0.2.6: Security update: Versions below 3.0.0 are deprecated.
+#9 41.00 npm warn deprecated messageformat@2.3.0: Package renamed as '@messageformat/core', see messageformat.github.io for more details. 'messageformat@4' will eventually provide a polyfill for Intl.MessageFormat, once it's been defined by Unicode & ECMA.
+#9 42.21 npm warn deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
+#9 42.24 npm warn deprecated notevil@1.3.3: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+#9 42.25 npm warn deprecated jsonwebtoken@0.4.0: Critical vulnerability fix in v5.0.0. See https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
+#9 42.58 npm warn deprecated prom-client@15.1.3: prom-client has been replaced by @prometheus-io/client
+#9 42.92 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 42.95 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 43.49 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 43.56 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 43.77 npm warn deprecated jsonwebtoken@0.1.0: Critical vulnerability fix in v5.0.0. See https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
+#9 43.86 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 43.99 npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 45.69 npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#9 49.78 
+#9 49.78 > juice-shop@20.2.0 postinstall
+#9 49.78 > cd frontend && npm install && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)
+#9 49.78 
+#9 79.03 npm warn deprecated @angular/animations@22.2.1: @angular/animations is deprecated. Use `animate.enter` and `animate.leave` instead. For more information see: https://v22.angular.dev/guide/animations.
+#9 81.35 npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#9 89.53 
+#9 89.53 added 696 packages, and audited 697 packages in 40s
+#9 89.53 
+#9 89.53 184 packages are looking for funding
+#9 89.53   run `npm fund` for details
+#9 89.55 
+#9 89.55 19 vulnerabilities (12 low, 3 moderate, 4 high)
+#9 89.55 
+#9 89.55 To address issues that do not require attention, run:
+#9 89.55   npm audit fix
+#9 89.55 
+#9 89.55 To address all issues (including breaking changes), run:
+#9 89.55   npm audit fix --force
+#9 89.55 
+#9 89.55 Run `npm audit` for details.
+#9 89.55 npm warn install-scripts 3 packages have install scripts not yet covered by allowScripts:
+#9 89.55 npm warn install-scripts   @parcel/watcher@2.6.0 (install: node scripts/build-from-source.js)
+#9 89.55 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#9 89.55 npm warn install-scripts   lmdb@3.5.6 (install: node-gyp-build-optional-packages)
+#9 89.55 npm warn install-scripts
+#9 89.55 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#9 89.68 
+#9 89.68 > juice-shop@20.2.0 build:frontend
+#9 89.68 > cd frontend && npm run build
+#9 89.68 
+#9 89.76 
+#9 89.76 > frontend@20.2.0 build
+#9 89.76 > ng build --configuration production && npm run sbom
+#9 89.76 
+#9 90.20 ❯ Building...
+#9 100.2 ✔ Building...
+#9 100.2 Initial chunk files                         | Names                           |  Raw size | Estimated transfer size
+#9 100.2 main.js                                     | main                            |   1.21 MB |               228.38 kB
+#9 100.2 chunk-BuYR23IU.js                           | -                               | 367.42 kB |                92.81 kB
+#9 100.2 styles.css                                  | styles                          | 154.15 kB |                17.09 kB
+#9 100.2 chunk-BsuJpzq0.js                           | -                               | 148.43 kB |                34.50 kB
+#9 100.2 polyfills.js                                | polyfills                       |  34.59 kB |                11.33 kB
+#9 100.2 scripts.js                                  | scripts                         |  20.70 kB |                 6.09 kB
+#9 100.2 chunk-DBPdFzgj.js                           | -                               |   2.46 kB |                 1.09 kB
+#9 100.2 rolldown-runtime-BoHGiXSq.js                | -                               | 250 bytes |               250 bytes
+#9 100.2 
+#9 100.2                                             | Initial total                   |   1.94 MB |               391.54 kB
+#9 100.2 
+#9 100.2 Lazy chunk files                            | Names                           |  Raw size | Estimated transfer size
+#9 100.2 chunk-CmW7Sr8l.js                           | -                               | 520.98 kB |               149.63 kB
+#9 100.2 chunk-efcD3uPo.js                           | -                               | 481.05 kB |               133.20 kB
+#9 100.2 recycle.component-DuDOPCTF.js               | recycle-component               | 100.28 kB |                19.35 kB
+#9 100.2 about.component-DmmlS7n0.js                 | about-component                 |  90.73 kB |                19.32 kB
+#9 100.2 coding-challenge-page.component-oAmOcEb5.js | coding-challenge-page-component |  45.20 kB |                13.44 kB
+#9 100.2 hacking-instructor-Dj9tjwgl.js              | index                           |  36.68 kB |                 9.26 kB
+#9 100.2 web3-sandbox.module-aThS5-NO.js             | web3-sandbox-module             |  17.65 kB |                 5.57 kB
+#9 100.2 faucet.module-dbsvztzY.js                   | faucet-module                   |  12.52 kB |                 3.92 kB
+#9 100.2 confetti-CBIxuiwe.js                        | index                           |  11.21 kB |                 4.09 kB
+#9 100.2 chunk-LgKEbQmx.js                           | -                               |   9.28 kB |               870 bytes
+#9 100.2 wallet-web3.module-D7JAznLF.js              | wallet-web3-module              |   7.50 kB |                 2.78 kB
+#9 100.2 
+#9 100.2 Application bundle generation complete. [9.952 seconds] - 2026-09-30T22:45:57.786Z
+#9 100.2 
+#9 100.2 Output location: /juice-shop/frontend/dist/frontend
+#9 100.2 
+#9 100.5 
+#9 100.5 > frontend@20.2.0 sbom
+#9 100.5 > cyclonedx-esbuild --output-reproducible --output-file dist/bom/bom.json dist/frontend/browser-stats.json
+#9 100.5 
+#9 101.2 LOG   | writing BOM to: dist/bom/bom.json
+#9 106.7 
+#9 106.7 added 1313 packages, and audited 1314 packages in 2m
+#9 106.7 
+#9 106.7 249 packages are looking for funding
+#9 106.7   run `npm fund` for details
+#9 106.7 
+#9 106.7 43 vulnerabilities (3 low, 14 moderate, 19 high, 7 critical)
+#9 106.7 
+#9 106.7 To address all issues possible (including breaking changes), run:
+#9 106.7   npm audit fix --force
+#9 106.7 
+#9 106.7 Some issues need review, and may require choosing
+#9 106.7 a different dependency.
+#9 106.7 
+#9 106.7 Run `npm audit` for details.
+#9 106.7 npm warn install-scripts 3 packages have install scripts not yet covered by allowScripts:
+#9 106.7 npm warn install-scripts   cypress@15.21.1 (postinstall: node dist/index.js --exec install)
+#9 106.7 npm warn install-scripts   libxmljs2@0.37.0 (install: prebuild-install || node-gyp rebuild)
+#9 106.7 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#9 106.7 npm warn install-scripts
+#9 106.7 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#9 106.7 npm notice
+#9 106.7 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+#9 106.7 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#9 106.7 npm notice To update run: npm install -g npm@12.2.0
+#9 106.7 npm notice
+#9 DONE 107.4s
+
+#10 [6/7] RUN npm run build:server
+#10 0.726 
+#10 0.726 > juice-shop@20.2.0 build:server
+#10 0.726 > tsc
+#10 0.726 
+#10 DONE 5.7s
+
+#11 [7/7] RUN mkdir -p logs
+#11 DONE 0.2s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 29.8s done
+#12 exporting manifest sha256:2e6262abe61b9f8e7a432af515c13c20b5186ed474a76ea076684fa35ad046b9 done
+#12 exporting config sha256:3997749b137464162f8c12b5ec8027f0702478e44bcadd0f7a18f8ee730859ee done
+#12 exporting attestation manifest sha256:40c3714fd59fa41af808231dd9a424690d713bdb8e649fefc096a586c05b65f8 done
+#12 exporting manifest list sha256:eca0add03316942ddedad041b6edea3f7ab84b77e8aa8234f56e117e49c3c18c done
+#12 naming to docker.io/library/lg-juice-baseline:20.2.0 done
+#12 unpacking to docker.io/library/lg-juice-baseline:20.2.0
+#12 unpacking to docker.io/library/lg-juice-baseline:20.2.0 10.1s done
+#12 DONE 40.0s
+BASELINE_BUILD_EXIT=0
+BASELINE_VERIFY_FINISHED=0

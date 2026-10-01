@@ -1,0 +1,6 @@
+FROM lg-juice-baseline:20.2.0
+COPY overlay/login.ts routes/login.ts
+COPY overlay/securityAudit.ts lib/securityAudit.ts
+COPY overlay/securityAudit.unit.test.ts test/server/securityAudit.unit.test.ts
+COPY securityAudit.api.test.ts test/api/securityAudit.api.test.ts
+RUN npm run build:server

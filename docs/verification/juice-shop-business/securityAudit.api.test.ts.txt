@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * SPDX-License-Identifier: MIT
+ */
+
+import { before, after, describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { mkdtempSync, readFileSync, existsSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import request from 'supertest'
+import type { Express } from 'express'
+import config from 'config'
+import { createTestApp } from './helpers/setup'
+
+let app: Express
+const auditPath = join(mkdtempSync(join(tmpdir(), 'lg-auth-api-')), 'auth.jsonl')
+const email = 'audit-buyer@example.invalid'
+const password = 'Only-A-Synthetic-Test-42'
+
+before(async () => {
+  app = (await createTestApp()).app
+  await request(app).post('/api/Users').send({ email, password }).expect(201)
+}, { timeout: 60000 })
+
+after(() => {
+  delete process.env.LG_AUTH_AUDIT_PATH
+  delete process.env.LG_AUTH_AUDIT_KEY
+})
+
+void describe('password decision audit integration', () => {
+  void it('keeps login behavior unchanged and records decisions only when configured', async () => {
+    delete process.env.LG_AUTH_AUDIT_PATH
+    delete process.env.LG_AUTH_AUDIT_KEY
+    await request(app).post('/rest/user/login').send({ email, password }).expect(200)
+    assert.equal(existsSync(auditPath), false)
+
+    process.env.LG_AUTH_AUDIT_PATH = auditPath
+    process.env.LG_AUTH_AUDIT_KEY = 'api-test-only-not-a-runtime-key'
+    const id = 'd'.repeat(32)
+    await request(app).post('/rest/user/login').set('X-Request-ID', id)
+      .send({ email, password: 'Wrong-Synthetic-Password' }).expect(401)
+    const success = await request(app).post('/rest/user/login').set('X-Request-ID', id)
+      .send({ email, password }).expect(200)
+    assert.equal(typeof success.body.authentication.token, 'string')
+    await request(app).post('/rest/user/login').set('X-Request-ID', id)
+      .send({ email: 'wurstbrot@' + config.get<string>('application.domain'), password: 'EinBelegtesBrotMitSchinkenSCHINKEN!' }).expect(401)
+    const raw = readFileSync(auditPath, 'utf8')
+    const rows = raw.trim().split('\n').map(line => JSON.parse(line))
+    assert.deepEqual(rows.map(row => row.outcome), ['failure', 'success', 'unavailable'])
+    assert.equal(rows[0].account_ref, rows[1].account_ref)
+    assert.ok(rows.every(row => row.request_id === id))
+    assert.equal(raw.includes(email), false)
+    assert.equal(raw.includes(password), false)
+    assert.equal(raw.includes(success.body.authentication.token), false)
+  })
+})

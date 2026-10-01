@@ -1,0 +1,179 @@
+diff --git a/routes/login.ts b/routes/login.ts
+index fb9fce3..bb93bc3 100644
+--- a/routes/login.ts
++++ b/routes/login.ts
+@@ -13,6 +13,7 @@ import { UserModel } from '../models/user'
+ import * as models from '../models/index'
+ import { type User } from '../data/types'
+ import * as utils from '../lib/utils'
++import { auditAuth } from '../lib/securityAudit'
+ 
+ // vuln-code-snippet start loginAdminChallenge loginBenderChallenge loginJimChallenge
+ export function login () {
+@@ -23,6 +24,7 @@ export function login () {
+         const authenticatedUser = { data: user, bid: basket.id } // keep track of original basket
+         const token = security.authorize(authenticatedUser)
+         security.authenticatedUsers.put(token, authenticatedUser)
++        auditAuth(res.req, 'success', user.email) // vuln-code-snippet hide-line
+         res.json({ authentication: { token, bid: basket.id, umail: user.email } })
+       }).catch((error: Error) => {
+         next(error)
+@@ -35,6 +37,7 @@ export function login () {
+       .then((authenticatedUser) => { // vuln-code-snippet neutral-line loginAdminChallenge loginBenderChallenge loginJimChallenge
+         const user = utils.queryResultToJson(authenticatedUser)
+         if (user.data?.id && user.data.totpSecret !== '') {
++          auditAuth(req, 'unavailable', user.data.email) // vuln-code-snippet hide-line
+           res.status(401).json({
+             status: 'totp_token_required',
+             data: {
+@@ -47,6 +50,7 @@ export function login () {
+         } else if (user.data?.id) {
+           afterLogin(user.data, res, next)
+         } else {
++          auditAuth(req, 'failure', req.body.email) // vuln-code-snippet hide-line
+           res.status(401).send(res.__('Invalid email or password.'))
+         }
+       }).catch((error: Error) => {
+diff --git a/lib/securityAudit.ts b/lib/securityAudit.ts
+new file mode 100644
+index 0000000..9093c5e
+--- /dev/null
++++ b/lib/securityAudit.ts
+@@ -0,0 +1,32 @@
++/*
++ * Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
++ * SPDX-License-Identifier: MIT
++ */
++
++// Opt-in lab evidence comes from auth decisions, never HTTP status inference.
++import { createHmac, randomUUID } from 'node:crypto'
++import { appendFileSync } from 'node:fs'
++import { type IncomingHttpHeaders } from 'node:http'
++
++export function auditAuth (req: { headers: IncomingHttpHeaders }, outcome: 'success' | 'failure' | 'unavailable', account: unknown): void {
++  const path = process.env.LG_AUTH_AUDIT_PATH
++  if (!path) return
++  try {
++    const key = process.env.LG_AUTH_AUDIT_KEY
++    if (!key) throw new Error('Missing audit key')
++    const requestId = req.headers['x-request-id']
++    const event = {
++      event_id: randomUUID(),
++      timestamp: new Date().toISOString(),
++      request_id: typeof requestId === 'string' && /^[0-9a-f]{32}$/.test(requestId) ? requestId : null,
++      account_ref: typeof account === 'string' && account.length > 0 && account.length <= 254
++        ? createHmac('sha256', key).update(account).digest('hex')
++        : null,
++      outcome
++    }
++    // ponytail: synchronous lab-only writes; use a bounded async writer for sustained traffic.
++    appendFileSync(path, JSON.stringify(event) + '\n', { mode: 0o600 })
++  } catch {
++    console.error('LG_AUTH_AUDIT_FAILED')
++  }
++}
+diff --git a/test/server/securityAudit.unit.test.ts b/test/server/securityAudit.unit.test.ts
+new file mode 100644
+index 0000000..fe7e64b
+--- /dev/null
++++ b/test/server/securityAudit.unit.test.ts
+@@ -0,0 +1,99 @@
++/*
++ * Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
++ * SPDX-License-Identifier: MIT
++ */
++
++import { afterEach, beforeEach, describe, it, mock } from 'node:test'
++import assert from 'node:assert/strict'
++import { mkdtempSync, readFileSync, existsSync, statSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import { join } from 'node:path'
++import { auditAuth } from '../../lib/securityAudit'
++
++void describe('securityAudit', () => {
++  let path: string
++  const originalPath = process.env.LG_AUTH_AUDIT_PATH
++  const originalKey = process.env.LG_AUTH_AUDIT_KEY
++  const req = { headers: { 'x-request-id': 'a'.repeat(32) } }
++
++  beforeEach(() => {
++    path = join(mkdtempSync(join(tmpdir(), 'lg-audit-test-')), 'auth.jsonl')
++    process.env.LG_AUTH_AUDIT_PATH = path
++    process.env.LG_AUTH_AUDIT_KEY = 'unit-test-only-not-a-runtime-key'
++  })
++
++  afterEach(() => {
++    if (originalPath === undefined) delete process.env.LG_AUTH_AUDIT_PATH
++    else process.env.LG_AUTH_AUDIT_PATH = originalPath
++    if (originalKey === undefined) delete process.env.LG_AUTH_AUDIT_KEY
++    else process.env.LG_AUTH_AUDIT_KEY = originalKey
++    mock.restoreAll()
++  })
++
++  void it('writes typed decisions without identity or credential material', () => {
++    for (const outcome of ['failure', 'success', 'unavailable'] as const) {
++      auditAuth(req, outcome, 'buyer@example.invalid')
++    }
++    const raw = readFileSync(path, 'utf8')
++    const rows: Array<Record<string, unknown>> = raw.trim().split('\n').map(line => JSON.parse(line))
++    assert.deepEqual(rows.map(row => row.outcome), ['failure', 'success', 'unavailable'])
++    assert.equal(new Set(rows.map(row => row.event_id)).size, 3)
++    assert.equal(new Set(rows.map(row => row.account_ref)).size, 1)
++    for (const row of rows) {
++      assert.deepEqual(Object.keys(row).sort(), ['account_ref', 'event_id', 'outcome', 'request_id', 'timestamp'])
++      assert.equal(row.request_id, req.headers['x-request-id'])
++      assert.equal(typeof row.event_id, 'string')
++      assert.match(String(row.event_id), /^[0-9a-f-]{36}$/)
++      assert.match(String(row.timestamp), /^\d{4}-\d\d-\d\dT.+Z$/)
++      assert.match(String(row.account_ref), /^[0-9a-f]{64}$/)
++    }
++    assert.equal(raw.includes('buyer@example.invalid'), false)
++    assert.equal(raw.includes(process.env.LG_AUTH_AUDIT_KEY ?? ''), false)
++    assert.equal(statSync(path).mode & 0o777, 0o600)
++  })
++
++  void it('does not conflate distinct case-sensitive account identifiers', () => {
++    auditAuth(req, 'failure', 'Buyer@example.invalid')
++    auditAuth(req, 'success', 'buyer@example.invalid')
++    const rows = readFileSync(path, 'utf8').trim().split('\n').map(line => JSON.parse(line))
++    assert.notEqual(rows[0].account_ref, rows[1].account_ref)
++  })
++
++  void it('leaves invalid account references unavailable without stringifying objects', () => {
++    for (const account of [undefined, null, {}, '', 'x'.repeat(255)]) {
++      auditAuth(req, 'failure', account)
++    }
++    const rows = readFileSync(path, 'utf8').trim().split('\n').map(line => JSON.parse(line))
++    assert.ok(rows.every(row => row.account_ref === null))
++  })
++
++  void it('does not trust malformed or multi-valued request IDs', () => {
++    for (const value of [undefined, '', 'caller-selected', ['a'.repeat(32)], 'b'.repeat(33)]) {
++      auditAuth({ headers: { 'x-request-id': value } }, 'failure', null)
++    }
++    const rows = readFileSync(path, 'utf8').trim().split('\n').map(line => JSON.parse(line))
++    assert.ok(rows.every(row => row.request_id === null))
++  })
++
++  void it('stays disabled when no audit path is configured', () => {
++    delete process.env.LG_AUTH_AUDIT_PATH
++    auditAuth(req, 'success', 'buyer@example.invalid')
++    assert.equal(existsSync(path), false)
++  })
++
++  void it('reports incomplete configuration without leaking account data', () => {
++    delete process.env.LG_AUTH_AUDIT_KEY
++    const error = mock.method(console, 'error', () => {})
++    assert.doesNotThrow(() => auditAuth(req, 'success', 'buyer@example.invalid'))
++    assert.equal(existsSync(path), false)
++    assert.deepEqual(error.mock.calls.map(call => call.arguments), [['LG_AUTH_AUDIT_FAILED']])
++  })
++
++  void it('reports write failure without changing authentication or exposing an exception', () => {
++    process.env.LG_AUTH_AUDIT_PATH = join(path, 'missing-parent', 'auth.jsonl')
++    const error = mock.method(console, 'error', () => {})
++    assert.doesNotThrow(() => auditAuth(req, 'success', 'buyer@example.invalid'))
++    assert.equal(existsSync(path), false)
++    assert.deepEqual(error.mock.calls.map(call => call.arguments), [['LG_AUTH_AUDIT_FAILED']])
++  })
++})

@@ -1,0 +1,1808 @@
+
+> juice-shop@20.2.0 test:server
+> node --import ./test/server/helpers/test-env.mjs --import tsx --test --test-force-exit "test/server/**/*.unit.test.ts"
+
+▶ accuracy
+  ✔ should calculate accuracy as 1.0 when solved on first attempt (8.33825ms)
+  ✔ should calculate accuracy as 0.5 when solved on second attempt (0.494ms)
+  ✔ should calculate accuracy as 0.3333333333333333 when solved on third attempt (0.155709ms)
+  ✔ should not increase attempts after challenge is solved (0.174125ms)
+  ✔ should calculate fix it accuracy independently (0.185ms)
+  ✔ should return 0 attempts for unknown challenge (0.11825ms)
+  ✔ should return 0 accuracy for unsolved challenge (0.176791ms)
+  ✔ should calculate total accuracy for multiple solved challenges (1.839208ms)
+  ✔ should return NaN for total accuracy when no challenges are solved (0.447417ms)
+  ✔ should calculate accuracy as 0.2 for solved on fifth attempt (6.622917ms)
+✔ accuracy (24.199958ms)
+▶ angular
+  ✔ should serve index.html for any URL (9.337375ms)
+  ✔ should raise error for /api endpoint URL (0.390958ms)
+  ✔ should raise error for /rest endpoint URL (0.257958ms)
+✔ angular (16.567375ms)
+▶ antiCheat
+  ▶ calculateCheatScore
+    ✔ should return cheat score of 0 if challenge is tightly coupled to the previously solved one (1533.336459ms)
+    ✔ should return cheat score of 0 if challenge is loosely coupled to the previously solved one (3.882833ms)
+    ✔ should return cheat score of 0 if challenge is loosely coupled to one in the past (4.354ms)
+    ✔ should assume cheating if two unrelated challenges are solved after each other (2.573375ms)
+  ✔ calculateCheatScore (1548.62375ms)
+  ▶ totalCheatScore
+    ✔ should return 0 if no challenges are solved (1.568417ms)
+    ✔ should return the median cheat score of all solves (2.372541ms)
+  ✔ totalCheatScore (4.144417ms)
+  ▶ checkForPreSolveInteractions
+    ✔ should mark interaction as true if URL matches a fragment (107.081ms)
+  ✔ checkForPreSolveInteractions (107.711416ms)
+  ▶ checkForSourceFileOverlap
+    ✔ should not flag short submissions as cheating (15.740541ms)
+    ✔ should not flag submissions for challenges without source file mapping (11.88ms)
+    ✔ should flag 1:1 copy-paste of package.json.bak as cheating (1.88525ms)
+    ✔ should not flag a partial submission from package.json.bak (5.896583ms)
+    ✔ should not flag a minimal correct answer (1.227541ms)
+    ✔ should flag 1:1 copy-paste of docker-compose.yml as cheating (2.04475ms)
+    ✔ should use cache when loading same source file again (8.318625ms)
+  ✔ checkForSourceFileOverlap (47.650876ms)
+  ▶ calculateCheatScore
+    ✔ should return cheat score of 1 if isCheating is true (9.030458ms)
+  ✔ calculateCheatScore (9.195291ms)
+  ▶ calculateFindItCheatScore
+    ✔ should return 0 if no code snippet exists for challenge (457.284417ms)
+    ✔ should return cheat score for challenge with code snippet (3.988125ms)
+  ✔ calculateFindItCheatScore (461.572167ms)
+  ▶ calculateFixItCheatScore
+    ✔ should return cheat score for challenge with fixes (7.702625ms)
+  ✔ calculateFixItCheatScore (7.871958ms)
+  ▶ checkForIdenticalSolvedChallenge
+    ✔ should return false if challenge is not a coding challenge (3.288834ms)
+    ✔ should detect identical solved challenge and reduce time factor in calculateFindItCheatScore (2.348167ms)
+    ✔ should return false if coding challenge has no snippet (1.277417ms)
+  ✔ checkForIdenticalSolvedChallenge (7.225625ms)
+  ▶ loadSourceFile
+    ✔ should return empty string if source file cannot be read (1.014459ms)
+  ✔ loadSourceFile (1.361709ms)
+  ▶ reset
+    ✔ should reset solves and interactions (2.943167ms)
+  ✔ reset (3.142ms)
+✔ antiCheat (2200.382668ms)
+▶ appConfiguration
+  ✔ should return configuration object (5.602334ms)
+  ✔ should not expose chatBot.llmApiUrl (0.483708ms)
+✔ appConfiguration (6.860959ms)
+▶ appVersion
+  ✔ <anonymous> (7.489167ms)
+✔ appVersion (8.86425ms)
+▶ b2bOrder
+  ﹣ infinite loop payload does not succeed but solves "rceChallenge" (4.729875ms) # SKIP
+  ﹣ timeout after 2 seconds solves "rceOccupyChallenge" (0.255208ms) # SKIP
+  ✔ deserializing JSON as documented in Swagger should not solve "rceChallenge" (21.755458ms)
+  ✔ deserializing arbitrary JSON should not solve "rceChallenge" (4.822125ms)
+  ✔ deserializing broken JSON should not solve "rceChallenge" (4.051416ms)
+✔ b2bOrder (38.880334ms)
+▶ blueprint
+  ▶ checkExifData
+    ✔ should contain properties from exifForBlueprintChallenge (32.476333ms)
+  ✔ checkExifData (33.878042ms)
+✔ blueprint (34.43ms)
+▶ challengeCountryMapping
+  ✔ should have a country mapping for every challenge (10.907084ms)
+  ✔ should have unique country codes in every mapping (34.169791ms)
+✔ challengeCountryMapping (143.986958ms)
+▶ Challenge Tags
+  ✔ should be present in en.json (0.786583ms)
+✔ Challenge Tags (2.318792ms)
+▶ challengeTutorialSequence
+  ✔ should have unique tutorial orders (0.596ms)
+✔ challengeTutorialSequence (73.106ms)
+▶ challengeUtils
+  ▶ findChallengeByName
+    ✔ returns undefined for non-existing challenge (6.957125ms)
+    ✔ returns existing challenge (1.176458ms)
+  ✔ findChallengeByName (10.074792ms)
+  ▶ findChallengeById
+    ✔ returns undefined for non-existing challenge (3.727042ms)
+    ✔ returns existing challenge (1.714875ms)
+  ✔ findChallengeById (6.472084ms)
+  ▶ notSolved
+    ✔ returns true for unsolved challenge (2.949ms)
+    ✔ returns false for solved challenge (0.43175ms)
+    ✔ returns falsy for null challenge (2.09575ms)
+  ✔ notSolved (6.662959ms)
+  ▶ solve
+    ✔ should mark challenge as solved and save it (9.556709ms)
+    ✔ should not calculate cheat score if it is a restore (1.117125ms)
+    ✔ should log error if webhook notification fails (67.10975ms)
+  ✔ solve (79.417084ms)
+  ▶ solveIf
+    ✔ should solve challenge if criteria is met and not yet solved (4.191541ms)
+  ✔ solveIf (4.553542ms)
+  ▶ sendCodingChallengeNotification
+    ✔ should emit "code challenge solved" event via socket.io (0.263875ms)
+  ✔ sendCodingChallengeNotification (0.35775ms)
+  ▶ solveFindIt
+    ✔ should update status and calculate accuracy/cheat score (721.730542ms)
+    ✔ should not calculate accuracy/cheat score if it is a restore (0.360375ms)
+  ✔ solveFindIt (722.267001ms)
+  ▶ solveFixIt
+    ✔ should update status and calculate accuracy/cheat score (0.751041ms)
+    ✔ should not calculate accuracy/cheat score if it is a restore (0.162875ms)
+  ✔ solveFixIt (0.999958ms)
+  ▶ sendNotification
+    ✔ should return early if challenge is not solved (0.130084ms)
+    ✔ should push notification to datacache and emit via socket.io (0.36225ms)
+    ✔ should handle missing fullChallenge (0.126416ms)
+    ✔ should respect showSolvedNotifications config (0.140584ms)
+    ✔ should handle codingChallengesEnabled set to "never" (0.13675ms)
+  ✔ sendNotification (1.068208ms)
+✔ challengeUtils (834.217ms)
+▶ chat
+  ▶ summarizeLlmError
+    ✔ should handle non-Error objects (0.487958ms)
+    ✔ should return reachable message for connection errors (0.640375ms)
+    ✔ should return status code if available (0.247916ms)
+    ✔ should return first line of message otherwise (0.361375ms)
+  ✔ summarizeLlmError (3.492083ms)
+  ▶ buildSystemPrompt
+    ✔ should include user name if provided (0.614875ms)
+    ✔ should not include user name if not provided (0.573333ms)
+  ✔ buildSystemPrompt (2.342333ms)
+  ▶ getUserId
+    ✔ should return undefined if no token is present (5.585625ms)
+    ✔ should return user ID from decoded token (4.089208ms)
+  ✔ getUserId (10.180708ms)
+  ▶ getUserNameFromToken
+    ✔ should return undefined if no user ID is found (0.335917ms)
+    ✔ should return username from database (1.379417ms)
+  ✔ getUserNameFromToken (2.208416ms)
+✔ chat (19.500666ms)
+▶ vulnCodeSnippet
+  ✔ should assert single correctly selected vuln line as correct (0.733ms)
+  ✔ should assert multiple correctly selected vuln lines as correct in any order (0.120084ms)
+  ✔ should ignore selected neutral lines during correct assertion (0.104875ms)
+  ✔ should assert missing vuln lines as wrong (1.306625ms)
+  ✔ should assert additionally selected lines as wrong (0.108792ms)
+  ✔ should assert lack of selected lines as wrong (0.573875ms)
+  ✔ should assert empty edge case as correct (0.437583ms)
+✔ vulnCodeSnippet (4.408958ms)
+▶ codingChallengeFixes
+  ✔ should have a correct fix for each coding challenge (5.870958ms)
+  ✔ should have a total of three or more fix options for each coding challenge (0.194208ms)
+  ✔ should have an info YAML file for each coding challenge (0.422166ms)
+✔ codingChallengeFixes (243.43225ms)
+▶ codingChallenges
+  ✔ should find files with code challenges in the project structure (106.461875ms)
+  ✔ should log warning and continue if a path does not exist (4.828041ms)
+  ✔ should successfully retrieve coding challenges map (752.459958ms)
+  ✔ BrokenBoundary error should have correct properties (0.243625ms)
+  ✔ should throw BrokenBoundary error if snippet boundaries are broken (2.565209ms)
+✔ codingChallenges (868.209125ms)
+▶ configValidation
+  ▶ checkUnambiguousMandatorySpecialProducts
+    ✔ should accept a valid config (0.739167ms)
+    ✔ should fail if multiple products are configured for the same challenge (1.471958ms)
+    ✔ should fail if a required challenge product is missing (0.15425ms)
+  ✔ checkUnambiguousMandatorySpecialProducts (4.668167ms)
+  ▶ checkNecessaryExtraKeysOnSpecialProducts
+    ✔ should accept a valid config (0.655958ms)
+    ✔ should fail if product has no exifForBlueprintChallenge (0.151625ms)
+  ✔ checkNecessaryExtraKeysOnSpecialProducts (0.947875ms)
+  ▶ checkUniqueSpecialOnProducts
+    ✔ should accept a valid config (0.294208ms)
+    ✔ should fail if a product is configured for multiple challenges (0.399542ms)
+  ✔ checkUniqueSpecialOnProducts (0.982416ms)
+  ▶ checkMinimumRequiredNumberOfProducts
+    ✔ should accept a valid config (0.429458ms)
+    ✔ should fail if less than 4 products are configured (0.19475ms)
+  ✔ checkMinimumRequiredNumberOfProducts (0.737208ms)
+  ▶ checkUnambiguousMandatorySpecialMemories
+    ✔ should accept a valid config (0.202041ms)
+    ✔ should fail if multiple memories are configured for the same challenge (0.393792ms)
+    ✔ should fail if a required challenge memory is missing (0.531792ms)
+    ✔ should fail if memories have mixed up the required challenge keys (0.253709ms)
+  ✔ checkUnambiguousMandatorySpecialMemories (1.525708ms)
+  ▶ checkThatThereIsOnlyOneMemoryPerSpecial
+    ✔ should accept a valid config (0.148208ms)
+    ✔ should fail if a memory is configured for multiple challenges (0.090542ms)
+  ✔ checkThatThereIsOnlyOneMemoryPerSpecial (0.339125ms)
+  ▶ checkSpecialMemoriesHaveNoUserAssociated
+    ✔ should accept a valid config (0.155083ms)
+    ✔ should accept a config where the default users are associated (0.082542ms)
+    ✔ should fail if a memory is linked to another user (0.247ms)
+  ✔ checkSpecialMemoriesHaveNoUserAssociated (0.603916ms)
+  ▶ checkMinimumRequiredNumberOfMemories
+    ✔ should accept a valid config (0.123459ms)
+    ✔ should fail if less than 2 memories are configured (0.069166ms)
+  ✔ checkMinimumRequiredNumberOfMemories (0.266541ms)
+  ✔ should accept the active config from config/test.yml (12.502958ms)
+  ✔ should fail if the config is invalid (2.28975ms)
+  ✔ should accept a config with valid schema (0.221208ms)
+  ✔ should accept a config that blanks out arbitrary fields with null (0.164041ms)
+  ✔ should fail for a config with schema errors (0.654042ms)
+  ▶ checkForIllogicalCombos
+    ✔ should accept a config without systemWideNotifications set (0.110625ms)
+    ✔ should accept a config with systemWideNotifications url and pollFrequencySeconds set (0.062709ms)
+    ✔ should fail if systemWideNotifications url is set but pollFrequencySeconds is missing (0.069375ms)
+    ✔ should fail if systemWideNotifications url is set but pollFrequencySeconds is zero (0.09225ms)
+    ✔ should fail if systemWideNotifications url is set but pollFrequencySeconds is negative (0.263166ms)
+  ✔ checkForIllogicalCombos (0.765583ms)
+✔ configValidation (28.28675ms)
+▶ continueCode
+  ✔ should be empty when no challenges are solved (2.905042ms)
+  ✔ should be hashid value of IDs of solved challenges (0.464583ms)
+✔ continueCode (5.003333ms)
+▶ countryMapping
+  ✔ should return configured country mappings (10.031541ms)
+  ✔ should return server error when configuration has no country mappings (7.884291ms)
+  ✔ should return server error for active configuration from config/test.yml (0.30425ms)
+✔ countryMapping (22.297875ms)
+▶ currentUser
+  ✔ should return neither ID nor email if no cookie was present in the request headers (1.418125ms)
+  ✔ should return ID and email of user belonging to cookie from the request (3.507833ms)
+✔ currentUser (5.629ms)
+▶ dataExport
+  ✔ should call next with error if user is not authenticated (1.320084ms)
+  ✔ should call next with error if MemoryModel.findAll fails (0.482625ms)
+  ✔ should call next with error if ordersCollection.find fails (0.352917ms)
+  ✔ should call next with error if reviewsCollection.find fails (0.475125ms)
+✔ dataExport (3.732709ms)
+▶ easterEgg
+  ✔ should serve /frontend/dist/frontend/assets/private/threejs-demo.html (0.894333ms)
+  ✔ should solve "easterEggLevelTwoChallenge" (0.328792ms)
+✔ easterEgg (1.976792ms)
+▶ fileServer
+  ✔ should serve PDF files from folder /ftp (2.446125ms)
+  ✔ should serve Markdown files from folder /ftp (0.252958ms)
+  ✔ should serve incident-support.kdbx files from folder /ftp (0.186583ms)
+  ✔ should raise error for slashes in filename (0.521ms)
+  ✔ should raise error for disallowed file type (0.547125ms)
+  ✔ should solve "directoryListingChallenge" when requesting acquisitions.md (0.733375ms)
+  ✔ should solve "easterEggLevelOneChallenge" when requesting eastere.gg with Poison Null Byte attack (0.303042ms)
+  ✔ should solve "forgottenDevBackupChallenge" when requesting package.json.bak with Poison Null Byte attack (0.518125ms)
+  ✔ should solve "forgottenBackupChallenge" when requesting coupons_2013.md.bak with Poison Null Byte attack (0.371959ms)
+  ✔ should solve "misplacedSignatureFileChallenge" when requesting suspicious_errors.yml with Poison Null Byte attack (0.52425ms)
+✔ fileServer (7.590375ms)
+▶ fileUpload
+  ▶ should not solve "uploadSizeChallenge" when file size is
+    ✔ 0 bytes (0.853209ms)
+    ✔ 1 bytes (0.15425ms)
+    ✔ 100 bytes (0.262083ms)
+    ✔ 1000 bytes (0.328583ms)
+    ✔ 10000 bytes (0.4425ms)
+    ✔ 99999 bytes (0.5885ms)
+    ✔ 100000 bytes (0.258916ms)
+  ✔ should not solve "uploadSizeChallenge" when file size is (4.009125ms)
+  ✔ should solve "uploadSizeChallenge" when file size exceeds 100000 bytes (0.671583ms)
+  ✔ should solve "uploadTypeChallenge" when file type is not PDF (0.4715ms)
+  ✔ should not solve "uploadTypeChallenge" when file type is PDF (0.141542ms)
+✔ fileUpload (6.113375ms)
+▶ insecurity
+  ▶ cutOffPoisonNullByte
+    ✔ returns string unchanged if it contains no null byte (1.000958ms)
+    ✔ returns string up to null byte (0.202042ms)
+  ✔ cutOffPoisonNullByte (1.792375ms)
+  ▶ userEmailFrom
+    ✔ returns content of "x-user-email" header if present (0.330875ms)
+    ✔ returns undefined if header "x-user-email" is not present (0.077ms)
+  ✔ userEmailFrom (0.604709ms)
+  ▶ generateCoupon
+    ✔ returns base85-encoded month, year and discount as coupon code (0.828667ms)
+    ✔ uses current month and year if not specified (0.093958ms)
+    ✔ does not encode day of month or time into coupon code (0.302375ms)
+  ✔ generateCoupon (2.445542ms)
+  ▶ discountFromCoupon
+    ✔ returns undefined when not passing in a coupon code (0.251084ms)
+    ✔ returns undefined for malformed coupon code (0.105ms)
+    ✔ returns undefined for coupon code not according to expected pattern (0.294ms)
+    ✔ returns undefined for expired coupon code (0.087541ms)
+    ✔ returns discount from valid coupon code (0.0925ms)
+  ✔ discountFromCoupon (1.021166ms)
+  ▶ authenticatedUsers
+    ✔ returns user by associated token (0.542625ms)
+    ✔ returns undefined if no token is passed in (0.0895ms)
+    ✔ returns token by associated user (0.072459ms)
+    ✔ returns user by associated token from request (0.123625ms)
+    ✔ returns undefined if no token is present in request (0.056667ms)
+  ✔ authenticatedUsers (1.43475ms)
+  ▶ sanitizeHtml
+    ✔ handles empty inputs by returning their string representation (0.465875ms)
+    ✔ returns input unchanged for plain text input (2.280041ms)
+    ✔ returns input unchanged for HTML input with only harmless text formatting (0.382458ms)
+    ✔ returns input unchanged for HTML input with only harmless links (3.142ms)
+    ✔ removes all Javascript from HTML input (0.432584ms)
+    ✔ can be bypassed by exploiting lack of recursive sanitization (0.101042ms)
+  ✔ sanitizeHtml (7.092833ms)
+  ▶ sanitizeLegacy
+    ✔ returns empty string for undefined input (0.14225ms)
+    ✔ returns input unchanged for plain text input (0.048417ms)
+    ✔ removes all opening tags and subsequent character from HTML input (0.048875ms)
+    ✔ can be bypassed to allow working HTML payload to be returned (0.045916ms)
+  ✔ sanitizeLegacy (0.38825ms)
+  ▶ sanitizeSecure
+    ✔ handles empty inputs by returning their string representation (0.254875ms)
+    ✔ returns input unchanged for plain text input (0.218959ms)
+    ✔ returns input unchanged for HTML input with only harmless text formatting (0.208666ms)
+    ✔ returns input unchanged for HTML input with only harmless links (0.26675ms)
+    ✔ removes all Javascript from HTML input (0.318625ms)
+    ✔ cannot be bypassed by exploiting lack of recursive sanitization (0.209ms)
+  ✔ sanitizeSecure (1.651417ms)
+  ▶ hash
+    ✔ returns MD5 hash for any input string (0.183333ms)
+  ✔ hash (0.262542ms)
+  ▶ hmac
+    ✔ returns SHA-256 HMAC with "pa4qacea4VK9t9nGv7yZtwmj" as salt any input string (0.414458ms)
+  ✔ hmac (0.547709ms)
+  ▶ deluxeToken
+    ✔ returns SHA-256 HMAC with private key as salt for email and deluxe role (0.40575ms)
+  ✔ deluxeToken (0.462041ms)
+  ▶ isCustomer
+    ✔ returns true if decoded token has customer role (1.916125ms)
+    ✔ returns false if decoded token has other role (0.728875ms)
+    ✔ returns false if no token is present (0.083291ms)
+  ✔ isCustomer (2.828666ms)
+  ▶ isDeluxe
+    ✔ returns true if decoded token has deluxe role and valid deluxe token (0.660875ms)
+    ✔ returns false if decoded token has deluxe role but invalid deluxe token (0.599875ms)
+    ✔ returns false if decoded token has other role (0.531041ms)
+  ✔ isDeluxe (1.888709ms)
+  ▶ isRedirectAllowed
+    ✔ returns true for allowed URLs (0.142958ms)
+    ✔ returns true for URLs containing allowed URLs (0.049ms)
+    ✔ returns false for disallowed URLs (0.042541ms)
+  ✔ isRedirectAllowed (0.49675ms)
+  ▶ sanitizeFilename
+    ✔ returns sanitized filename (0.379334ms)
+  ✔ sanitizeFilename (0.417834ms)
+  ▶ authenticatedUsers.updateFrom
+    ✔ updates user in token map (0.106583ms)
+  ✔ authenticatedUsers.updateFrom (0.14825ms)
+  ▶ middlewares
+    ✔ isAccounting should allow next() for accounting role (0.678208ms)
+    ✔ isAccounting should return 403 for other roles (0.429625ms)
+    ✔ appendUserId should append user id to req.body (0.136375ms)
+    ✔ appendUserId should return 401 if token is invalid or missing (0.116375ms)
+    ✔ updateAuthenticatedUsers should call next() (0.086208ms)
+    ✔ isAuthorized returns a middleware (0.061542ms)
+    ✔ denyAll returns a middleware (0.053166ms)
+  ✔ middlewares (1.710958ms)
+✔ insecurity (26.568708ms)
+▶ isDocker
+  ✔ should return false if no docker markers are present (9.69425ms)
+  ✔ should return true if /.dockerenv exists (2.937458ms)
+  ✔ should return true if /proc/self/cgroup contains "docker" (1.9325ms)
+  ✔ should return true if /proc/self/mountinfo contains "/docker/containers/" (13.546125ms)
+✔ isDocker (30.010166ms)
+▶ keyServer
+  ✔ should serve requested file from folder /encryptionkeys (1.095792ms)
+  ✔ should raise error for slashes in filename (0.382292ms)
+✔ keyServer (2.417916ms)
+▶ noUpdate
+  ✔ should throw an error when trying to update a non-updatable key (1.133708ms)
+  ✔ should not throw when the non-updatable key is not changed (0.165166ms)
+  ✔ should not throw when isNewRecord is true (0.10425ms)
+  ✔ should not throw when validate option is false (0.185791ms)
+  ✔ should not throw when there are no changed keys (0.108ms)
+  ✔ should not throw when previous value is null or undefined (0.212541ms)
+✔ noUpdate (2.731958ms)
+▶ order
+  ✔ should call next with error if basket does not exist (1.7475ms)
+  ✔ should call next with error if QuantityModel.findOne fails (339.584834ms)
+  ✔ should call next with error if QuantityModel.update fails (9.701916ms)
+  ✔ should call next with error if WalletModel.decrement fails (11.975292ms)
+  ✔ should call next with error if WalletModel.increment fails (17.265791ms)
+  ✔ should call next with error if DeliveryModel.findOne fails (8.392833ms)
+  ✔ should call next with error if ordersCollection.insert fails (13.693791ms)
+  ✔ should call next with error if BasketItemModel.destroy fails (47.798125ms)
+  ✔ should handle base64 coupon data in calculateApplicableDiscount (20.4535ms)
+  ✔ should call next with error if wallet balance is insufficient (14.0165ms)
+✔ order (486.423917ms)
+▶ preconditionValidation
+  ▶ checkIfRunningOnSupportedNodeVersion
+    ✔ should define the supported semver range as 22 - 26 (11.375333ms)
+    ✔ should accept a supported version (3.478292ms)
+    ✔ should fail for an unsupported version (0.697875ms)
+  ✔ checkIfRunningOnSupportedNodeVersion (20.570917ms)
+  ▶ checkIfPortIsAvailable
+    ✔ should resolve when port 3000 is closed (20.246916ms)
+    ▶ open a server before running the test
+      ✔ should reject when port 3000 is open (6.538083ms)
+    ✔ open a server before running the test (17.867625ms)
+  ✔ checkIfPortIsAvailable (39.272542ms)
+  ▶ checkIfEnvironmentVariableExists
+    ✔ should return true if environment variable is present (0.303958ms)
+    ✔ should return false if environment variable is not present (0.152292ms)
+    ✔ should return false if a non-existing environment variable is checked (0.272416ms)
+  ✔ checkIfEnvironmentVariableExists (1.301875ms)
+  ▶ isOllamaUrl
+    ✔ should detect URL with Ollama default port 11434 (0.261791ms)
+    ✔ should detect URL with ollama hostname (0.093ms)
+    ✔ should detect URL with /ollama path prefix (0.054625ms)
+    ✔ should not flag non-Ollama URLs (0.051375ms)
+    ✔ should handle invalid URLs gracefully (0.08775ms)
+  ✔ isOllamaUrl (0.69325ms)
+  ▶ checkIfOllamaModelAvailable
+    ✔ should succeed when model is listed in Ollama response (0.77475ms)
+    ✔ should warn when configured model tag does not match pulled model tag (0.203959ms)
+    ✔ should warn when model is not in the available list (0.28425ms)
+    ✔ should handle empty model list (0.327417ms)
+    ✔ should handle non-ok response gracefully (0.143959ms)
+    ✔ should handle fetch error gracefully (0.173375ms)
+  ✔ checkIfOllamaModelAvailable (2.085333ms)
+  ▶ checkIfDomainReachable
+    ✔ should return true if domain is reachable (0.350875ms)
+    ✔ should return false and log warnings if domain is not reachable (0.194333ms)
+  ✔ checkIfDomainReachable (0.620625ms)
+✔ preconditionValidation (65.850584ms)
+▶ premiumReward
+  ✔ should serve /frontend/dist/frontend/assets/private/JuiceShop_Wallpaper_1920x1080_VR.jpg (0.924917ms)
+  ✔ should solve "premiumPaywallChallenge" (0.386417ms)
+✔ premiumReward (2.070625ms)
+▶ redirect
+  ▶ should be performed for all allowlisted URLs
+    ✔ https://github.com/juice-shop/juice-shop (9.234292ms)
+    ✔ https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm (15.794833ms)
+    ✔ https://explorer.dash.org/address/Xr556RzuwX6hg5EGpkybbv5RanJoZN17kW (0.367625ms)
+    ✔ https://etherscan.io/address/0x0f933ab9fcaaa782d0279c300d73750e1311eae6 (2.467667ms)
+    ✔ http://shop.spreadshirt.com/juiceshop (0.51125ms)
+    ✔ http://shop.spreadshirt.de/juiceshop (0.180042ms)
+    ✔ https://www.stickeryou.com/products/owasp-juice-shop/794 (1.957583ms)
+    ✔ http://leanpub.com/juice-shop (0.856292ms)
+  ✔ should be performed for all allowlisted URLs (35.101208ms)
+  ✔ should raise error for URL not on allowlist (0.480333ms)
+  ✔ redirecting to https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm should solve the "redirectCryptoCurrencyChallenge" (0.362333ms)
+  ✔ redirecting to https://explorer.dash.org/address/Xr556RzuwX6hg5EGpkybbv5RanJoZN17kW should solve the "redirectCryptoCurrencyChallenge" (0.22525ms)
+  ✔ redirecting to https://etherscan.io/address/0x0f933ab9fcaaa782d0279c300d73750e1311eae6 should solve the "redirectCryptoCurrencyChallenge" (1.185084ms)
+  ✔ tricking the allowlist should solve "redirectChallenge" (1.50225ms)
+✔ redirect (58.901125ms)
+▶ rsnUtil
+  ▶ filterString
+    ✔ should remove carriage return characters (1.895416ms)
+    ✔ should leave unix line endings intact (0.730917ms)
+    ✔ should handle empty string (0.210125ms)
+    ✔ should handle string with only carriage returns (0.324333ms)
+  ✔ filterString (5.5435ms)
+  ▶ findChangedFiles
+    ✔ should return empty array when no changes (1.879834ms)
+    ✔ should detect changed added lines (0.790667ms)
+    ✔ should detect changed removed lines (0.174042ms)
+    ✔ should detect new files not in cache (0.406083ms)
+    ✔ should detect length changes in added lines (0.454584ms)
+    ✔ should detect length changes in removed lines (0.182666ms)
+    ✔ should return multiple changed files (0.139458ms)
+    ✔ should compare correctly regardless of array order (0.110541ms)
+  ✔ findChangedFiles (5.175ms)
+  ▶ getFixExplanation
+    ✔ should return explanation for standard filename (0.306917ms)
+    ✔ should return explanation for correct fix filename (0.124709ms)
+    ✔ should return null when fix id not found in info (0.091708ms)
+    ✔ should return null when info is null (0.07175ms)
+    ✔ should return null when filename has no id pattern (0.155541ms)
+  ✔ getFixExplanation (0.947042ms)
+  ▶ loadChallengeInfo
+    ✔ should return null when info file does not exist (0.862ms)
+    ✔ should parse and return challenge info from yml file (0.989ms)
+  ✔ loadChallengeInfo (2.093583ms)
+✔ rsnUtil (15.206834ms)
+▶ saveLoginIp
+  ✔ should return 401 if user is not authenticated (1.064542ms)
+  ✔ should use the first element if true-client-ip header is an array (8.880875ms)
+  ✔ should call next with error if update fails (1.324791ms)
+✔ saveLoginIp (12.9785ms)
+▶ checkSystemPromptSimilarity
+  ✔ returns true for verbatim system prompt (score ~1.0) (1.231334ms)
+  ✔ returns true for near-verbatim submission with minor rewording (score > 0.25) (0.556792ms)
+  ✔ returns false for verbatim confidential section only (score ~0.22, below 0.25 threshold) (1.206ms)
+  ✔ returns true for German translation containing same technical terms (score > 0.25) (1.140417ms)
+  ✔ returns true for a scrambled version of 100% of the prompt (score > 0.5) (1.217666ms)
+  ✔ returns false for submission without courtesy discount mention (score ~0.06) (2.506292ms)
+  ✔ returns false for submission with wrong discount percentage (score ~0.07) (1.015292ms)
+  ✔ returns false for keyword stuffing without coherent context (score ~0.13) (0.819084ms)
+  ✔ returns false for completely unrelated text (score ~0.03) (3.832708ms)
+  ✔ returns false for empty string (score 0) (0.359958ms)
+  ✔ treats comparison as case-insensitive (UPPER CASE equals lowercase) (0.817333ms)
+  ✔ respects a custom threshold when provided (0.953833ms)
+  ✔ returns false for null message (0.739542ms)
+  ✔ returns false for undefined message (0.130416ms)
+  ✔ returns false for whitespace only (0.076542ms)
+  ✔ returns false at threshold boundary (random text score << 0.15) (0.167334ms)
+  ✔ handles very long submissions (prompt repeated 3x) (0.736416ms)
+✔ checkSystemPromptSimilarity (23.446ms)
+✔ returns false when submitting a very long random string (0.265208ms)
+▶ similarity scoring precision
+  ✔ scores exactly 1.0 for identical strings (0.098667ms)
+  ✔ scores >= 0.6 when submitting ~60% of system prompt (0.316167ms)
+  ✔ scores >= 0.8 when submitting ~80% of system prompt (0.372833ms)
+  ✔ scores >= 0.9 when submitting ~90% of system prompt (0.371542ms)
+  ✔ scores < 0.20 when submitting only 10% of system prompt (0.18225ms)
+✔ similarity scoring precision (1.510083ms)
+▶ utils
+  ▶ toSimpleIpAddress
+    ✔ returns ipv6 address unchanged (0.508583ms)
+    ✔ returns ipv4 address fully specified as ipv6 unchanged (0.430834ms)
+    ✔ returns ipv6 loopback address as ipv4 address (0.118458ms)
+    ✔ returns ipv4-mapped address as ipv4 address (0.096792ms)
+  ✔ toSimpleIpAddress (2.548333ms)
+  ▶ queryResultToJson
+    ✔ returns object with status success and passed data by default (3.124584ms)
+    ✔ returns object with passed status and passed data (0.375292ms)
+  ✔ queryResultToJson (3.684417ms)
+  ▶ extractFilename
+    ✔ returns standalone filename unchanged (0.252458ms)
+    ✔ returns filename from http:// URL (0.091458ms)
+    ✔ ignores query part of http:// URL (0.249583ms)
+    ✔ also works for file:// URLs (0.297375ms)
+  ✔ extractFilename (1.252375ms)
+  ▶ matchesSystemIniFile
+    ✔ fails on plain input string (0.173ms)
+    ✔ passes on Windows 10 system.ini file content (0.062208ms)
+  ✔ matchesSystemIniFile (0.384625ms)
+  ▶ matchesEtcPasswdFile
+    ✔ fails on plain input string (0.143459ms)
+    ✔ passes on Arch Linux passwd file content (0.560666ms)
+  ✔ matchesEtcPasswdFile (0.885875ms)
+  ▶ getChallengeEnablementStatus
+    ✔ challenges without disabledEnv are enabled with safetyMode set to enabled (0.590125ms)
+    ✔ challenges without disabledEnv are enabled with safetyMode set to disabled (0.067375ms)
+    ✔ challenges without disabledEnv are enabled with safetyMode set to auto (0.046583ms)
+    ✔ safetyMode: 'enabled': challenge with disabledOnEnv Docker should be marked as disabled (0.086209ms)
+    ✔ safetyMode: 'auto': challenge with disabledOnEnv Docker should be marked as disabled (0.143875ms)
+    ✔ safetyMode: 'disabled': challenge with disabledOnEnv Docker should be marked as enabled (0.063916ms)
+    ✔ safetyMode: 'enabled': challenge with disabledOnEnv Heroku should be marked as disabled (0.168917ms)
+    ✔ safetyMode: 'auto': challenge with disabledOnEnv Heroku should be marked as disabled (0.155ms)
+    ✔ safetyMode: 'disabled': challenge with disabledOnEnv Heroku should be marked as enabled (0.1195ms)
+    ✔ safetyMode: 'enabled': challenge with disabledOnEnv Windows should be marked as disabled (0.102667ms)
+    ✔ safetyMode: 'auto': challenge with disabledOnEnv Windows should be marked as disabled (0.049084ms)
+    ✔ safetyMode: 'disabled': challenge with disabledOnEnv Windows should be marked as enabled (0.046ms)
+  ✔ getChallengeEnablementStatus (2.114541ms)
+  ▶ toISO8601
+    ✔ converts date to ISO 8601 representation (0.25975ms)
+    ✔ prepends single-digit months with a zero (0.106375ms)
+    ✔ prepends single-digit days with a zero (0.12675ms)
+  ✔ toISO8601 (0.62625ms)
+  ▶ parseJsonCustom
+    ✔ parses a simple JSON object (1.257666ms)
+    ✔ parses a nested JSON object (0.361375ms)
+  ✔ parseJsonCustom (2.045458ms)
+  ▶ containsOrEscaped
+    ✔ returns true if string contains element (0.106667ms)
+    ✔ returns true if string contains escaped element (0.068917ms)
+    ✔ returns false if string contains neither element nor escaped element (0.052291ms)
+  ✔ containsOrEscaped (0.355ms)
+▶ verify
+  ▶ "forgedFeedbackChallenge"
+    ✔ is not solved when an authenticated user passes his own ID when writing feedback (1.088625ms)
+    ✔ is not solved when an authenticated user passes no ID when writing feedback (0.280709ms)
+    ✔ is solved when an authenticated user passes someone elses ID when writing feedback (0.349792ms)
+    ✔ is solved when an unauthenticated user passes someones ID when writing feedback (0.223959ms)
+  ✔ "forgedFeedbackChallenge" (2.575667ms)
+  ▶ accessControlChallenges
+    ✔ "scoreBoardChallenge" is solved when the 1px.png transpixel is requested (0.39725ms)
+    ✔ "adminSectionChallenge" is solved when the 19px.png transpixel is requested (0.152875ms)
+    ✔ "tokenSaleChallenge" is solved when the 56px.png transpixel is requested (0.119ms)
+    ✔ "extraLanguageChallenge" is solved when the Klingon translation file is requested (0.129375ms)
+    ✔ "retrieveBlueprintChallenge" is solved when the blueprint file is requested (0.162667ms)
+    ✔ "missingEncodingChallenge" is solved when the crazy cat photo is requested (0.225875ms)
+    ✔ "accessLogDisclosureChallenge" is solved when any server access log file is requested (0.179958ms)
+    ✔ "misplacedIacFiles" is solved when a Terraform .tf file under /infrastructure is requested (0.116708ms)
+    ✔ "misplacedIacFiles" is solved when a Dockerfile under /infrastructure is requested (0.118125ms)
+    ✔ "misplacedIacFiles" is solved when a docker-compose.yml under /infrastructure is requested (0.108458ms)
+  ✔ accessControlChallenges (2.0565ms)
+  ▶ "errorHandlingChallenge"
+    ✔ is solved when an error occurs on a response with OK 200 status code (0.217792ms)
+    ▶ is solved when an error occurs on a response with error
+      ✔ 402 status code (0.2615ms)
+      ✔ 403 status code (0.115209ms)
+      ✔ 404 status code (0.093959ms)
+      ✔ 500 status code (0.095875ms)
+    ✔ is solved when an error occurs on a response with error (0.894417ms)
+    ✔ is not solved when no error occurs on a response with OK 200 status code (0.147167ms)
+    ▶ is not solved when no error occurs on a response with error
+      ✔ 401 status code (0.159542ms)
+      ✔ 402 status code (0.095375ms)
+      ✔ 404 status code (0.131958ms)
+      ✔ 500 status code (0.104125ms)
+    ✔ is not solved when no error occurs on a response with error (0.604625ms)
+    ✔ should pass occurred error on to next route (0.131167ms)
+  ✔ "errorHandlingChallenge" (2.133583ms)
+  ▶ databaseRelatedChallenges
+    ▶ "changeProductChallenge"
+      ✔ is solved when the link in the O-Saft product goes to https://owasp.slack.com (0.338917ms)
+      ✔ is not solved when the link in the O-Saft product is changed to an arbitrary URL (0.1055ms)
+      ✔ is not solved when the link in the O-Saft product remained unchanged (0.10925ms)
+    ✔ "changeProductChallenge" (0.631708ms)
+  ✔ databaseRelatedChallenges (0.692542ms)
+  ▶ jwtChallenges
+    ✔ "jwtUnsignedChallenge" is solved when forged unsigned token has email jwtn3d@juice-sh.op in the payload (1.170875ms)
+    ✔ "jwtUnsignedChallenge" is solved when forged unsigned token has string "jwtn3d@" in the payload (0.433666ms)
+    ✔ "jwtUnsignedChallenge" is not solved via regularly signed token even with email jwtn3d@juice-sh.op in the payload (1.747625ms)
+    ✔ "jwtForgedChallenge" is solved when forged token HMAC-signed with public RSA-key has email rsa_lord@juice-sh.op in the payload (0.514417ms)
+    ✔ "jwtForgedChallenge" is solved when forged token HMAC-signed with public RSA-key has string "rsa_lord@" in the payload (0.399375ms)
+    ✔ "jwtForgedChallenge" is not solved when token regularly signed with private RSA-key has email rsa_lord@juice-sh.op in the payload (0.943708ms)
+    ✔ "iacLeakedKeyChallenge" is solved when RS256-signed token has email cloud-admin@juice-sh.op in the payload (1.074458ms)
+    ✔ "iacLeakedKeyChallenge" is solved when RS256-signed token has string "cloud-admin@" in the payload (0.813417ms)
+    ✔ "iacLeakedKeyChallenge" is not solved when token has wrong email (0.72975ms)
+  ✔ jwtChallenges (8.090125ms)
+  ▶ checkSystemPromptSimilarity
+    ✔ should return true if similarity is above threshold (0.209666ms)
+    ✔ should return false if similarity is below threshold (0.085791ms)
+  ✔ checkSystemPromptSimilarity (0.361ms)
+✔ verify (16.427583ms)
+▶ webhook
+  ▶ notify
+    ✔ ignores errors where no webhook URL is provided via environment variable (0.537167ms)
+    ✔ fails when supplied webhook is not a valid URL (14.390167ms)
+    ✔ submits POST with payload to existing URL (33.644833ms)
+  ✔ notify (49.52675ms)
+✔ webhook (49.849375ms)
+▶ xml
+  ✔ should parse a simple XML string (402.474334ms)
+  ✔ should expand internal entities (2.684958ms)
+  ✔ should throw error on malformed XML (8.847083ms)
+  ✔ should timeout on entity expansion bomb (3.845458ms)
+✔ xml (419.591376ms)
+ℹ tests 395
+ℹ suites 120
+ℹ pass 393
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+ℹ todo 0
+ℹ duration_ms 6962.236336
+SERVER_EXIT=0
+
+> juice-shop@20.2.0 test:api
+> node --import ./test/api/helpers/test-env.mjs --import tsx --test --test-force-exit "test/api/**/*.test.ts"
+
+▶ /rest/2fa/verify
+  ✔ POST should return a valid authentication when a valid tmp token is passed (99.346167ms)
+  ✔ POST should fail if a invalid totp token is used (38.258708ms)
+  ✔ POST should fail if a unsigned tmp token is used (9.209333ms)
+  ✔ POST should fail if the token type is invalid (23.476375ms)
+  ✔ POST should fail if the user doesn't exist (11.68025ms)
+✔ /rest/2fa/verify (1878.004626ms)
+▶ /rest/2fa/status
+  ✔ GET should indicate 2fa is setup for 2fa enabled users (205.368625ms)
+  ✔ GET should indicate 2fa is not setup for users with 2fa disabled (74.446833ms)
+  ✔ GET should return 401 when not logged in (4.920084ms)
+✔ /rest/2fa/status (286.165792ms)
+▶ /rest/2fa/setup
+  ✔ POST should be able to setup 2fa for accounts without 2fa enabled (154.916958ms)
+  ✔ POST should fail if the password doesnt match (216.173708ms)
+  ✔ POST should fail if the initial token is incorrect (343.006ms)
+  ✔ POST should fail if the token is of the wrong type (217.9005ms)
+  ✔ POST should fail if the account has already set up 2fa (35.681458ms)
+  ✔ POST should fail if the user doesn't exist (20.907708ms)
+✔ /rest/2fa/setup (989.400792ms)
+▶ /rest/2fa/disable
+  ✔ POST should be able to disable 2fa for account with 2fa enabled (130.795083ms)
+  ✔ POST should not be possible to disable 2fa without the correct password (104.915584ms)
+  ✔ POST should fail if the user doesn't exist (4.221625ms)
+✔ /rest/2fa/disable (240.22125ms)
+▶ /api/Addresss
+  ✔ GET all addresses is forbidden via public API (16.0425ms)
+  ✔ GET all addresses (17.050459ms)
+  ✔ POST new address with all valid fields (45.860584ms)
+  ✔ POST new address with invalid pin code (59.105583ms)
+  ✔ POST new address with invalid mobile number (18.096125ms)
+  ✔ POST new address is forbidden via public API (3.059459ms)
+✔ /api/Addresss (2191.28125ms)
+▶ /api/Addresss/:id
+  ✔ GET address by id is forbidden via public API (9.536042ms)
+  ✔ PUT update address is forbidden via public API (4.920667ms)
+  ✔ DELETE address by id is forbidden via public API (2.721625ms)
+  ✔ GET address by id (10.438ms)
+  ✔ GET address by non-existing id returns 400 for authorized user (25.428834ms)
+  ✔ PUT update address by id (58.899834ms)
+  ✔ PUT update address by id with invalid mobile number is forbidden (46.779417ms)
+  ✔ PUT update address by id with invalid pin code is forbidden (84.444ms)
+  ✔ DELETE address by id (7.58325ms)
+  ✔ DELETE address by id again returns 400 for authorized user (9.629167ms)
+✔ /api/Addresss/:id (454.347709ms)
+▶ /rest/admin/application-version
+  ✔ GET application version from package.json (70.683208ms)
+✔ /rest/admin/application-version (1597.237209ms)
+▶ /rest/admin/application-configuration
+  ✔ GET application configuration (42.389708ms)
+✔ /rest/admin/application-configuration (42.966417ms)
+▶ /api
+  ✔ GET main.js contains Cryptocurrency URLs (116.518458ms)
+  ✔ GET main.js contains password hint for support team (86.721125ms)
+✔ /api (2902.356875ms)
+▶ /api
+  ✔ GET error when query /api without actual resource (96.922042ms)
+✔ /api (2227.42325ms)
+▶ /rest
+  ✔ GET error message with information leakage when calling unrecognized path with /rest in it (45.812625ms)
+✔ /rest (46.383833ms)
+▶ /rest/user/authentication-details
+  ✔ GET all users with password replaced by asterisks (150.948417ms)
+  ✔ GET returns lastLoginTime for users with active sessions (305.565708ms)
+✔ /rest/user/authentication-details (3192.034918ms)
+▶ /b2b/v2/orders
+  ✖ POST endless loop exploit in "orderLinesData" will raise explicit error (78.372084ms)
+  ✖ POST busy spinning regex attack does not raise an error (21.030166ms)
+  ✖ POST sandbox breakout attack in "orderLinesData" will raise error (23.206083ms)
+  ✔ POST new B2B order is forbidden without authorization token (16.482125ms)
+  ✔ POST new B2B order accepts arbitrary valid JSON (14.866208ms)
+  ✔ POST new B2B order has passed "cid" in response (20.2715ms)
+✖ /b2b/v2/orders (2438.688417ms)
+▶ /api/BasketItems
+  ✔ GET all basket items is forbidden via public API (13.488542ms)
+  ✔ POST new basket item is forbidden via public API (8.0315ms)
+  ✔ GET all basket items (48.002917ms)
+  ✔ POST new basket item (8.661458ms)
+  ✔ POST new basket item with more than available quantity is forbidden (11.159708ms)
+  ✔ POST new basket item with more than allowed quantity is forbidden (22.143167ms)
+  ✔ POST new basket item with invalid basket ID is forbidden (11.131792ms)
+  ✔ POST new basket item with non-existent product ID is forbidden (16.201375ms)
+✔ /api/BasketItems (1182.687834ms)
+▶ /api/BasketItems/:id
+  ✔ GET basket item by id is forbidden via public API (8.36275ms)
+  ✔ PUT update basket item is forbidden via public API (6.060167ms)
+  ✔ DELETE basket item is forbidden via public API (13.787792ms)
+  ✔ GET newly created basket item by id (97.592625ms)
+  ✔ PUT update newly created basket item (97.023458ms)
+  ✔ PUT update basket ID of basket item is forbidden (79.80275ms)
+  ✔ PUT update basket ID of basket item without basket ID (73.368792ms)
+  ✔ PUT update product ID of basket item is forbidden (104.333667ms)
+  ✔ PUT update newly created basket item with more than available quantity is forbidden (13.195833ms)
+  ✔ PUT update basket item with more than allowed quantity is forbidden (18.298459ms)
+  ✔ DELETE newly created basket item (58.2065ms)
+  ✔ PUT update non-existent basket item (10.503958ms)
+✔ /api/BasketItems/:id (583.159ms)
+▶ /rest/basket/:id
+  ✔ GET existing basket by id is not allowed via public API (18.26325ms)
+  ✔ GET empty basket when requesting non-existing basket id (121.662459ms)
+  ✔ GET existing basket with contained products by id (132.961542ms)
+  ✔ GET basket should accept forged JWTs (80.865042ms)
+✔ /rest/basket/:id (2657.893626ms)
+▶ /api/Baskets
+  ✔ POST new basket is not part of API (30.478417ms)
+  ✔ GET all baskets is not part of API (44.434042ms)
+✔ /api/Baskets (75.470209ms)
+▶ /api/Baskets/:id
+  ✔ GET existing basket is not part of API (54.942959ms)
+  ✔ PUT update existing basket is not part of API (78.607667ms)
+  ✔ DELETE existing basket is not part of API (32.664125ms)
+✔ /api/Baskets/:id (167.031958ms)
+▶ /rest/basket/:id
+  ✔ GET existing basket of another user (299.789959ms)
+✔ /rest/basket/:id (300.012834ms)
+▶ /rest/basket/:id/checkout
+  ✔ POST placing an order for a basket is not allowed via public API (3.76475ms)
+  ✔ POST placing an order for an existing basket returns orderId (359.712459ms)
+  ✔ POST placing an order for a non-existing basket fails (126.57325ms)
+  ✔ POST placing an order for a basket with a negative total cost is possible (185.747625ms)
+  ✔ POST placing an order for a basket with 99% discount is possible (212.8105ms)
+  ▶ error cases
+    ✔ should return 500 if QuantityModel.findOne fails during checkout (206.41875ms)
+    ✔ should return 500 if WalletModel.findOne fails during checkout (264.6175ms)
+    ✔ should return 500 if ordersCollection.insert fails during checkout (365.239459ms)
+  ✔ error cases (836.778167ms)
+✔ /rest/basket/:id/checkout (1726.672376ms)
+▶ /rest/basket/:id/coupon/:coupon
+  ✔ PUT apply valid coupon to existing basket (89.587083ms)
+  ✔ PUT apply invalid coupon is not accepted (75.652208ms)
+  ✔ PUT apply outdated coupon is not accepted (26.020625ms)
+  ✔ PUT apply valid coupon to non-existing basket throws error (39.933416ms)
+✔ /rest/basket/:id/coupon/:coupon (234.436167ms)
+▶ /api/Challenges
+  ✔ GET all challenges (167.400459ms)
+  ✔ POST new challenge is forbidden via public API even when authenticated (36.313042ms)
+✔ /api/Challenges (2166.898543ms)
+▶ /api/Challenges/:id
+  ✔ GET existing challenge by id is forbidden via public API even when authenticated (21.239583ms)
+  ✔ PUT update existing challenge is forbidden via public API even when authenticated (8.19675ms)
+  ✔ DELETE existing challenge is forbidden via public API even when authenticated (13.276375ms)
+✔ /api/Challenges/:id (43.475208ms)
+▶ /rest/continue-code
+  ✔ GET can retrieve continue code for currently solved challenges (49.49075ms)
+  ✔ PUT invalid continue code is rejected (alphanumeric) (17.902833ms)
+  ✔ PUT invalid continue code is rejected (non-alphanumeric) (15.918875ms)
+  ✔ PUT continue code for more than one challenge is accepted (26.520334ms)
+  ✔ PUT continue code for non-existent challenge #999 is accepted (26.307375ms)
+✔ /rest/continue-code (137.231ms)
+▶ /rest/continue-code-findIt
+  ✔ GET can retrieve continue code for currently solved challenges (449.319542ms)
+  ✔ PUT invalid continue code is rejected (alphanumeric) (51.663667ms)
+  ✔ PUT completely invalid continue code is rejected (non-alphanumeric) (59.627667ms)
+  ✔ PUT continue code for more than one challenge is accepted (125.747833ms)
+✔ /rest/continue-code-findIt (687.209917ms)
+▶ /rest/continue-code-fixIt
+  ✔ GET can retrieve continue code for currently solved challenges (78.498875ms)
+  ✔ PUT invalid continue code is rejected (alphanumeric) (13.3825ms)
+  ✔ PUT completely invalid continue code is rejected (non-alphanumeric) (35.076083ms)
+  ✔ PUT continue code for more than one challenge is accepted (126.243542ms)
+✔ /rest/continue-code-fixIt (253.840791ms)
+▶ /rest/chat
+  ✔ POST returns streamed text content as SSE events (98.007541ms)
+  ✔ POST sets correct SSE response headers (38.380292ms)
+  ✔ POST includes system prompt and user messages in LLM request (29.945959ms)
+  ✔ POST sends searchProducts tool definition to LLM (49.827625ms)
+  ✔ POST handles searchProducts tool call and returns follow-up response (270.149375ms)
+  ✔ POST handles LLM API error gracefully (57.129875ms)
+  ✔ POST with empty messages returns error SSE stream (31.289042ms)
+  ✔ POST includes authenticated user name in system prompt (137.784625ms)
+  ✔ POST handles getProductReviews tool call by returning matching reviews (58.261917ms)
+  ✔ POST handles getOrderById tool call by reporting unauthenticated customer (50.688334ms)
+  ✔ POST handles getOrderById tool call by reporting order not found for authenticated customer (166.02975ms)
+  ✔ POST handles generateCoupon tool call and includes coupon code in tool response (49.404458ms)
+  ✔ POST response SSE data lines contain valid JSON (17.888917ms)
+✔ /rest/chat (2733.436793ms)
+▶ Web3 Key Derivation & NFT Unlock
+  ▶ /rest/web3/submitKey
+    ✔ POST missing key in request body gets rejected as non-Ethereum key (476.602334ms)
+    ✔ POST arbitrary string in request body gets rejected as non-Ethereum key (38.385584ms)
+    ✔ POST public wallet key in request body gets rejected as such (38.521167ms)
+    ✔ POST wallet address in request body gets rejected as such (34.038583ms)
+    ✔ POST private key in request body gets accepted (23.357958ms)
+  ✔ /rest/web3/submitKey (612.567709ms)
+  ▶ /rest/web3/nftUnlocked
+    ✔ GET solution status of "Unlock NFT" challenge (22.591792ms)
+  ✔ /rest/web3/nftUnlocked (23.007125ms)
+✔ Web3 Key Derivation & NFT Unlock (2616.609376ms)
+▶ /api/Complaints
+  ✔ POST new complaint (143.910834ms)
+  ✔ GET all complaints is forbidden via public API (15.138667ms)
+  ✔ GET all complaints (55.0385ms)
+✔ /api/Complaints (1605.244876ms)
+▶ /api/Complaints/:id
+  ✔ GET existing complaint by id is forbidden (8.621709ms)
+  ✔ PUT update existing complaint is forbidden (5.374083ms)
+  ✔ DELETE existing complaint is forbidden (6.331833ms)
+✔ /api/Complaints/:id (20.791958ms)
+▶ /rest/country-mapping
+  ✔ GET no country mapping present in default configuration (53.266417ms)
+✔ /rest/country-mapping (2154.839209ms)
+▶ /rest/user/data-export
+  ✔ Export data without authentication is rejected (132.80175ms)
+  ✔ Export data with invalid bearer token is rejected (52.623459ms)
+  ✔ Export data with empty bearer token is rejected (26.553625ms)
+  ✔ Export data with empty JSON body but valid token still succeeds without CAPTCHA (321.001042ms)
+  ✔ CAPTCHA cannot be requested without authentication (175.318958ms)
+  ✔ Export data without use of CAPTCHA (433.417709ms)
+  ✔ Export data when CAPTCHA requested need right answer (702.805667ms)
+  ✔ Export data using right answer to CAPTCHA (269.927875ms)
+  ✔ Export data including orders without use of CAPTCHA (675.348792ms)
+  ✔ Export data including reviews without use of CAPTCHA (205.426083ms)
+  ✔ Export data including memories without use of CAPTCHA (254.937ms)
+  ✔ Export data including orders with use of CAPTCHA (628.427ms)
+  ✔ Export data including reviews with use of CAPTCHA (411.972084ms)
+  ✔ Export data including memories with use of CAPTCHA (500.1975ms)
+  ▶ error cases
+    ✔ should return 500 if MemoryModel.findAll fails (220.659125ms)
+    ✔ should return 500 if ordersCollection.find fails (257.228208ms)
+    ✔ should return 500 if reviewsCollection.find fails (401.497375ms)
+  ✔ error cases (882.107751ms)
+✔ /rest/user/data-export (8896.685087ms)
+▶ /api/Deliverys
+  ▶ for regular customer
+    ✔ GET delivery methods (30.054083ms)
+  ✔ for regular customer (320.512791ms)
+  ▶ for deluxe customer
+    ✔ GET delivery methods (31.590125ms)
+  ✔ for deluxe customer (202.464375ms)
+✔ /api/Deliverys (2961.204294ms)
+▶ /api/Deliverys/:id
+  ▶ for regular customer
+    ✔ GET delivery method (22.980875ms)
+    ✔ GET non-existing delivery method returns 400 (15.267916ms)
+  ✔ for regular customer (207.551958ms)
+  ▶ for deluxe customer
+    ✔ GET delivery method (14.915375ms)
+  ✔ for deluxe customer (127.039041ms)
+✔ /api/Deliverys/:id (334.93775ms)
+▶ /rest/deluxe-membership
+  ✔ GET deluxe membership status for customers (321.2235ms)
+  ✔ GET deluxe membership status for deluxe members throws error (267.351334ms)
+  ✔ GET deluxe membership status for admin throws error (142.00575ms)
+  ✔ GET deluxe membership status for accountant throws error (53.643042ms)
+  ✔ POST upgrade deluxe membership status for customers with card payment (135.781625ms)
+  ✔ POST upgrade deluxe membership status for customers with wallet payment (140.216417ms)
+  ✔ POST upgrade deluxe membership fails for customers with insufficient wallet balance (193.2835ms)
+  ✔ POST deluxe membership status with wrong card id throws error (350.862292ms)
+  ✔ POST deluxe membership status for deluxe members throws error (258.433375ms)
+  ✔ POST deluxe membership status for admin throws error (230.763375ms)
+  ✔ POST deluxe membership status for accountant throws error (354.398ms)
+✔ /rest/deluxe-membership (6571.045878ms)
+▶ /dataerasure
+  ✔ GET erasure form for logged-in users includes their email and security question (541.022875ms)
+  ✔ GET erasure form rendering fails for users without assigned security answer (314.261584ms)
+  ✔ GET erasure form rendering fails on unauthenticated access (52.343958ms)
+  ✔ POST erasure request does not actually delete the user (275.371209ms)
+  ✔ POST erasure form  fails on unauthenticated access (58.954417ms)
+  ✔ POST erasure request with empty layout parameter returns (155.007334ms)
+  ✔ POST erasure request with non-existing file path as layout parameter throws error (78.6435ms)
+  ✖ POST erasure request with existing file path as layout parameter returns content truncated (151.527417ms)
+✖ /dataerasure (3475.302418ms)
+▶ /api/Feedbacks
+  ✔ GET all feedback (131.630375ms)
+  ✔ POST sanitizes unsafe HTML from comment (193.75575ms)
+  ✖ POST fails to sanitize masked XSS-attack by not applying sanitization recursively (127.263584ms)
+  ✔ POST feedback in another users name as anonymous user (187.340125ms)
+  ✔ POST feedback in a non-existing users name as anonymous user fails with constraint error (252.104667ms)
+  ✔ POST feedback is associated with current user (470.222458ms)
+  ✔ POST feedback is associated with any passed user ID (357.309167ms)
+  ✔ POST feedback can be created without actually supplying comment (105.91375ms)
+  ✔ POST feedback cannot be created without actually supplying rating (64.543084ms)
+  ✔ POST feedback cannot be created with wrong CAPTCHA answer (127.7985ms)
+  ✔ POST feedback cannot be created with invalid CAPTCHA id (78.818583ms)
+✖ /api/Feedbacks (3773.234001ms)
+▶ /api/Feedbacks/:id
+  ✔ GET existing feedback by id is forbidden via public API (28.06675ms)
+  ✔ GET existing feedback by id (80.004792ms)
+  ✔ PUT update existing feedback is forbidden via public API (11.72625ms)
+  ✔ PUT update existing feedback (13.842167ms)
+  ✔ DELETE existing feedback is forbidden via public API (16.805666ms)
+  ✔ DELETE existing feedback (230.851416ms)
+✔ /api/Feedbacks/:id (384.173792ms)
+▶ Server
+  ✔ GET responds with index.html when visiting application URL (49.67225ms)
+  ✔ GET responds with index.html when visiting application URL with any path (94.944833ms)
+  ✔ GET a restricted file directly from file system path on server via URL-encoded Directory Traversal attack loads index.html instead (58.387375ms)
+  ✔ GET serves a security.txt file (21.051625ms)
+  ✔ GET serves a security.txt file under well-known subfolder (3.100209ms)
+  ✔ GET serves a robots.txt file (2.549083ms)
+  ✔ GET serves a csaf provider-metadata.json (7.461708ms)
+  ✔ GET serves a csaf index.txt (25.016208ms)
+  ✔ GET serves a csaf changes.csv (58.757375ms)
+  ✔ GET serves a csaf juice-shop-sa-20200513-express-jwt.json (16.758416ms)
+✔ Server (2956.194376ms)
+▶ /public/images/padding
+  ✔ GET tracking image for "Score Board" page access challenge (7.860667ms)
+  ✔ GET tracking image for "Administration" page access challenge (16.130209ms)
+  ✔ GET tracking image for "Token Sale" page access challenge (20.715958ms)
+  ✔ GET tracking image for "Privacy Policy" page access challenge (23.463083ms)
+✔ /public/images/padding (70.285708ms)
+▶ /encryptionkeys
+  ✔ GET serves a directory listing (204.985292ms)
+  ✔ GET a non-existing file in will return a 404 error (29.088416ms)
+  ✔ GET the Premium Content AES key (4.315ms)
+  ✔ GET a key file whose name contains a "/" fails with a 403 error (18.947958ms)
+✔ /encryptionkeys (259.992ms)
+▶ Hidden URL
+  ✔ GET the second easter egg by visiting the Base64>ROT13-decrypted URL (47.575708ms)
+  ✔ GET the premium content by visiting the AES decrypted URL (41.521042ms)
+  ✔ GET the missing "Thank you!" image for assembling the URL hidden in the Privacy Policy (58.677375ms)
+  ✔ GET Klingon translation file for "Extra Language" challenge (40.51925ms)
+  ✔ GET blueprint file for "Retrieve Blueprint" challenge (28.483125ms)
+  ✔ GET crazy cat photo for "Missing Encoding" challenge (32.57825ms)
+  ✔ GET folder containing access log files for "Access Log" challenge (33.888ms)
+✔ Hidden URL (284.123375ms)
+▶ /file-upload
+  ✔ POST file valid PDF for client and API (170.999916ms)
+  ✔ POST file too large for client validation but valid for API (20.886917ms)
+  ✔ POST file with illegal type for client validation but valid for API (86.999375ms)
+  ✔ POST file type XML deprecated for API (62.107041ms)
+  ✔ POST large XML file near upload size limit (73.80175ms)
+  ✔ POST file type XML with XXE attack against Windows (49.500459ms)
+  ✔ POST file type XML with XXE attack against Linux (18.320708ms)
+  ✖ POST file type XML with Billion Laughs attack is caught by parser (58.013083ms)
+  ✔ POST file type XML with Quadratic Blowup attack (66.836459ms)
+  ✔ POST file type XML with dev/random attack (39.745125ms)
+  ✔ POST file type YAML with Billion Laughs-style attack (25.218083ms)
+  ✔ POST file too large for API (67.159958ms)
+  ✔ POST zip file with directory traversal payload (10.613459ms)
+  ✖ POST zip file with password protection (11.343708ms)
+  ﹣ POST valid file with tampered content length (1.921708ms) # Fails on CI/CD pipeline
+✖ /file-upload (4454.416419ms)
+▶ /ftp
+  ✔ GET serves a directory listing (112.995876ms)
+  ✔ GET a non-existing Markdown file in /ftp will return a 404 error (42.920417ms)
+  ✔ GET a non-existing PDF file in /ftp will return a 404 error (14.621959ms)
+  ✔ GET a non-existing file in /ftp will return a 403 error for invalid file type (20.891125ms)
+  ✔ GET an existing file in /ftp will return a 403 error for invalid file type .gg (14.027875ms)
+  ✔ GET existing file /ftp/coupons_2013.md.bak will return a 403 error for invalid file type .bak (8.341833ms)
+  ✔ GET existing file /ftp/package.json.bak will return a 403 error for invalid file type .bak (14.100959ms)
+  ✔ GET existing file /ftp/suspicious_errors.yml will return a 403 error for invalid file type .yml (15.086792ms)
+  ✔ GET the confidential file in /ftp (7.014083ms)
+  ✔ GET the KeePass database in /ftp (12.926666ms)
+  ✔ GET the easter egg file by using Poison Null Byte attack with .pdf suffix (4.904792ms)
+  ✔ GET the easter egg file by using Poison Null Byte attack with .md suffix (7.061292ms)
+  ✔ GET the SIEM signature file by using Poison Null Byte attack with .pdf suffix (4.689625ms)
+  ✔ GET the SIEM signature file by using Poison Null Byte attack with .md suffix (12.174417ms)
+  ✔ GET the 2013 coupon code file by using Poison Null Byte attack with .pdf suffix (6.980333ms)
+  ✔ GET the 2013 coupon code file by using an Poison Null Byte attack with .md suffix (17.237542ms)
+  ✔ GET the package.json.bak file by using Poison Null Byte attack with .pdf suffix (31.900834ms)
+  ✔ GET the package.json.bak file by using Poison Null Byte attack with .md suffix (17.854541ms)
+  ✔ GET a restricted file directly from file system path on server by tricking route definitions fails with 403 error (9.111709ms)
+  ✔ GET a restricted file directly from file system path on server by appending URL parameter fails with 403 error (10.749333ms)
+  ✔ GET a file whose name contains a "/" fails with a 403 error (8.537167ms)
+  ✔ GET an accessible file directly from file system path on server (12.316459ms)
+  ✔ GET a non-existing file via direct server file path /ftp will return a 404 error (11.944625ms)
+  ✔ GET the package.json.bak file contains a dependency on epilogue-js for "Typosquatting" challenge (8.835833ms)
+  ✔ GET file /ftp/quarantine/juicy_malware_linux_amd_64.url (3.516625ms)
+  ✔ GET file /ftp/quarantine/juicy_malware_linux_arm_64.url (7.506375ms)
+  ✔ GET existing file /ftp/quarantine/juicy_malware_macos_64.url (5.576917ms)
+  ✔ GET existing file /ftp/quarantine/juicy_malware_windows_64.exe.url (8.600542ms)
+✔ /ftp (4084.70221ms)
+▶ HTTP
+  ✔ response must contain CORS header allowing all origins (80.994041ms)
+  ✔ response must contain sameorigin frameguard header (26.638667ms)
+  ✔ response must contain CORS header allowing all origins (14.080666ms)
+  ✔ response must not contain recruiting header (15.075834ms)
+  ✔ response must not contain XSS protection header (15.224875ms)
+  ✔ unexpected path under known sub-path caught by generic error handler (234.34725ms)
+✔ HTTP (4167.469335ms)
+▶ Required Internet resource
+  ▶ PasteBin paste for "Leaked Unsafe Product" challenge available
+    ✖ for default configuration (https://pastebin.com/90dUgd7s) (115.109583ms)
+    ✖ for 7MS configuration (https://pastebin.com/8SMbWPxc) (3.734834ms)
+    ✖ for BodgeIt Store configuration (https://pastebin.com/G47LrDr0) (6.870375ms)
+    ✖ for Mozilla configuration (https://pastebin.com/t8jqE1y7) (6.082417ms)
+    ✖ for All Day DevOps configuration (https://pastebin.com/RXrihEMS) (23.997584ms)
+  ✖ PasteBin paste for "Leaked Unsafe Product" challenge available (158.626791ms)
+  ✖ Comment on "Top 10 Fruits you probably dont know" blog post with PasteBin paste URL spoiler available (9.253125ms)
+  ✖ PasteBin paste (https://pastebin.com/4U1V1UjU) for "Leaked Access Logs" challenge available (7.757208ms)
+  ﹣ StackOverflow question "Less verbose access logs using expressjs/morgan" with log snippet and PasteBin paste URL spoiler available (2.506459ms) # FIXME StackOverflow blocking with 403 error
+  ✖ GitHub issue (https://github.com/apostrophecms/sanitize-html/issues/29) for "Server-side XSS Protection" challenge available (29.875209ms)
+✖ Required Internet resource (214.495792ms)
+▶ /rest/languages
+  ✔ GET all languages (682.714167ms)
+✔ /rest/languages (3600.12796ms)
+▶ /support/logs/:file
+  ✔ GET access log file for the current day (65.995375ms)
+  ✔ GET log file whose name contains a forward slash fails with a 403 error (24.72875ms)
+✔ /support/logs/:file (3034.506751ms)
+▶ /rest/user/login
+  ✔ POST login newly created user (628.0675ms)
+  ✔ POST login non-existing user (105.004ms)
+  ✔ POST login without credentials (157.360291ms)
+  ✔ POST login with admin credentials (304.850042ms)
+  ✔ POST login with support-team credentials (151.77475ms)
+  ✔ POST login with MC SafeSearch credentials (107.572ms)
+  ✔ POST login with Amy credentials (350.623251ms)
+  ✔ POST login with wurstbrot credentials expects 2FA token (223.406334ms)
+  ✔ POST login as bjoern.kimminich@gmail.com with known password (168.395791ms)
+  ✔ POST login with WHERE-clause disabling SQL injection attack (163.063792ms)
+  ✔ POST login with known email "admin@juice-sh.op" in SQL injection attack (121.125625ms)
+  ✔ POST login with known email "jim@juice-sh.op" in SQL injection attack (188.991042ms)
+  ✔ POST login with known email "bender@juice-sh.op" in SQL injection attack (147.793875ms)
+  ✔ POST login with non-existing email "acc0unt4nt@juice-sh.op" via UNION SELECT injection attack (108.81875ms)
+  ✔ POST login with query-breaking SQL Injection attack (41.215125ms)
+✔ /rest/user/login (6113.888336ms)
+▶ /rest/saveLoginIp
+  ✔ GET last login IP will be saved as True-Client-IP header value (603.149209ms)
+  ✖ GET last login IP will be saved as remote IP when True-Client-IP is not present (271.151958ms)
+  ✔ GET last login IP returns 401 Unauthorized when no token is provided (247.739375ms)
+✖ /rest/saveLoginIp (1126.694292ms)
+▶ /rest/memories
+  ✔ GET memories via public API (229.254667ms)
+  ✔ GET memories via a valid authorization token (397.247541ms)
+  ✔ POST new memory is forbidden via public API (39.621791ms)
+  ✔ POST new memory image file invalid type (188.367709ms)
+  ✔ POST new memory image file is not passed - 1 (306.317333ms)
+  ✔ POST new memory image file is not passed - 2 (251.283709ms)
+  ✔ POST new memory with valid for JPG format image (295.031125ms)
+  ✔ Should not crash the node-js server when sending invalid content like described in CVE-2022-24434 (39.263417ms)
+✔ /rest/memories (4929.212503ms)
+▶ /metrics
+  ▶ challenge tracking
+    ✔ GET with an ignored scraper user agent does not solve exposedMetricsChallenge (188.434542ms)
+    ✔ GET with a regular browser user agent solves exposedMetricsChallenge (136.252125ms)
+  ✔ challenge tracking (330.195626ms)
+  ▶ response format
+    ✔ GET returns 200 with text/plain content type (135.034417ms)
+  ✔ response format (135.351417ms)
+  ▶ update loop
+    ✔ GET includes version info gauge after update loop runs (130.719709ms)
+    ✔ GET includes per-difficulty and per-category challenge solved/total gauges (156.148792ms)
+    ✔ GET includes cheat score gauge (116.15ms)
+    ✔ GET includes coding challenge progress gauges for all three phases (78.653542ms)
+    ✔ GET includes registered user counts from update loop (138.617292ms)
+    ✔ GET includes http request counter incremented by the request middleware (184.320958ms)
+  ✔ update loop (806.069792ms)
+  ▶ file upload metrics
+    ✔ GET includes file upload success counter after a valid upload (289.558583ms)
+    ✔ GET includes file upload error counter after an upload that triggers a downstream error (78.619792ms)
+  ✔ file upload metrics (370.627292ms)
+✔ /metrics (5097.210794ms)
+▶ Web3 NFT Minting
+  ﹣ /rest/web3/nftMintListen (2.12ms) # ALCHEMY_API_KEY not set
+error: WebSocket error (NFT Mint Listener): getaddrinfo EAI_AGAIN eth-sepolia.g.alchemy.com
+  ▶ /rest/web3/nftMintListen (error cases)
+    ✔ GET call returns 500 error if listener creation fails (820.104209ms)
+  ✔ /rest/web3/nftMintListen (error cases) (820.669001ms)
+  ▶ /rest/web3/walletNFTVerify
+    ✔ POST missing wallet address fails to solve minting challenge (116.816292ms)
+    ✔ POST invalid wallet address fails to solve minting challenge (58.256458ms)
+    ✔ POST minted wallet address successfully solves minting challenge (112.956541ms)
+    ✔ POST leads to 500 error if check fails (83.960292ms)
+  ✔ /rest/web3/walletNFTVerify (373.831042ms)
+✔ Web3 NFT Minting (5280.950794ms)
+▶ /rest/order-history
+  ✔ GET own previous orders (475.270167ms)
+✔ /rest/order-history (4406.316501ms)
+▶ /rest/order-history/orders
+  ✔ GET all orders is forbidden for customers (572.491626ms)
+  ✔ GET all orders is forbidden for admin (531.403126ms)
+  ✔ GET all orders for accountant (376.413334ms)
+✔ /rest/order-history/orders (1485.703334ms)
+▶ /rest/order-history/:id/delivery-status
+  ✔ PUT delivery status is forbidden for admin (333.563458ms)
+  ✔ PUT delivery status is forbidden for customer (381.47875ms)
+  ✔ PUT delivery status is allowed for accountant (283.441542ms)
+✔ /rest/order-history/:id/delivery-status (1009.732167ms)
+▶ /rest/user/change-password
+  ✔ GET password change for newly created user with recognized token as Authorization header (604.174542ms)
+  ✔ GET password change with passing wrong current password (119.05975ms)
+  ✔ GET password change without passing any passwords (28.453459ms)
+  ✔ GET password change with passing wrong repeated password (82.536958ms)
+  ✔ GET password change without passing an authorization token (57.08ms)
+  ✔ GET password change with passing unrecognized authorization token (93.182167ms)
+  ✔ GET password change for Bender without current password using GET request (828.611708ms)
+✔ /rest/user/change-password (4623.49371ms)
+▶ /rest/user/reset-password
+  ✔ POST password reset for Jim with correct answer to his security question (179.113167ms)
+  ✔ POST password reset for Bender with correct answer to his security question (137.049417ms)
+  ✔ POST password reset for Bjoern´s internal account with correct answer to his security question (128.532541ms)
+  ✔ POST password reset for Bjoern´s OWASP account with correct answer to his security question (133.547292ms)
+  ✔ POST password reset for Morty with correct answer to his security question (168.812875ms)
+  ✔ POST password reset with wrong answer to security question (112.603125ms)
+  ✔ POST password reset without any data is blocked (187.875459ms)
+  ✔ POST password reset without new password throws a 401 error (74.317166ms)
+  ✔ POST password reset with mismatching passwords throws a 401 error (165.841792ms)
+  ✔ POST password reset with no email address throws a 412 error (80.000083ms)
+  ✔ POST password reset with no answer to the security question throws a 412 error (97.084ms)
+✔ /rest/user/reset-password (1470.39875ms)
+▶ /api/Cards
+  ✔ GET all cards is forbidden via public API (31.715333ms)
+  ✔ GET all cards (19.025459ms)
+  ✔ POST new card is forbidden via public API (18.021125ms)
+  ✔ POST new card with all valid fields (99.676416ms)
+  ✔ GET all cards returns masked card numbers (32.032792ms)
+  ✔ POST new card with invalid card number (171.243834ms)
+  ✔ POST new card with invalid expMonth (132.358458ms)
+  ✔ POST new card with invalid expYear (57.885375ms)
+✔ /api/Cards (3639.589877ms)
+▶ /api/Cards/:id
+  ✔ GET card by id is forbidden via public API (13.293458ms)
+  ✔ PUT update card is forbidden via public API (5.828833ms)
+  ✔ DELETE card by id is forbidden via public API (12.714834ms)
+  ✔ GET card by id (18.101625ms)
+  ✔ GET card by id returns masked card number (6.304167ms)
+  ✔ GET card by non-existing id returns 400 for authorized user (5.2575ms)
+  ✔ PUT update card by id is forbidden via authorized API call (20.530834ms)
+  ✔ DELETE card by id (10.873833ms)
+  ✔ DELETE card by id again returns 400 for authorized user (36.59725ms)
+✔ /api/Cards/:id (292.882084ms)
+▶ /api/PrivacyRequests
+  ✔ POST new complaint (249.393125ms)
+  ✔ GET all privacy requests is forbidden via public API (20.221334ms)
+✔ /api/PrivacyRequests (3614.385168ms)
+▶ /api/PrivacyRequests/:id
+  ✔ GET all privacy requests is forbidden (39.495542ms)
+  ✔ GET existing privacy request by id is forbidden (23.061917ms)
+  ✔ PUT update existing privacy request is forbidden (19.917792ms)
+  ✔ DELETE existing privacy request is forbidden (7.834709ms)
+✔ /api/PrivacyRequests/:id (90.849209ms)
+▶ /rest/products/:id/reviews
+  ✔ GET product reviews by product id (288.882292ms)
+  ✔ GET product reviews attack by injecting a mongoDB sleep command (91.938583ms)
+  ﹣ GET product reviews by alphanumeric non-mongoDB-command product id (0.407708ms) # SKIP
+  ✔ PUT single product review can be created (228.9595ms)
+✔ /rest/products/:id/reviews (5905.875045ms)
+▶ /rest/products/reviews
+  ✔ PATCH single product review can be edited (183.258292ms)
+  ✔ PATCH single product review editing need an authenticated user (132.091417ms)
+  ✔ POST non-existing product review cannot be liked (842.187375ms)
+  ✔ POST single product review can be liked (501.515416ms)
+  ✔ PATCH multiple product review via injection (174.543334ms)
+✔ /rest/products/reviews (1991.937418ms)
+▶ /api/Products
+  ✔ GET all products (609.216167ms)
+  ✔ POST new product is forbidden via public API (190.793834ms)
+  ✖ POST new product does not filter XSS attacks (387.179167ms)
+✖ /api/Products (6023.364378ms)
+▶ /api/Products/:id
+  ✔ GET existing product by id (245.753375ms)
+  ✔ GET non-existing product by id (232.59925ms)
+  ✔ PUT update existing product is possible due to Missing Function-Level Access Control vulnerability (175.170167ms)
+  ✔ DELETE existing product is forbidden via public API (17.935042ms)
+  ✔ DELETE existing product is forbidden via API even when authenticated (17.529375ms)
+✔ /api/Products/:id (691.715125ms)
+▶ /profile/image/file
+  ✔ POST profile image file valid for JPG format (371.473125ms)
+  ✔ POST profile image file invalid type (214.336792ms)
+  ✔ POST profile image file forbidden for anonymous user (24.065667ms)
+  ✔ POST profile image file rejected for unrecognizable file content (102.571792ms)
+✔ /profile/image/file (6406.655961ms)
+▶ /profile/image/url
+  ✔ POST profile image URL valid for image available online (99.336791ms)
+  ✔ POST profile image URL redirects even for invalid image URL (243.483375ms)
+  ﹣ POST profile image URL forbidden for anonymous user (0.837833ms) # FIXME runs into "socket hang up"
+  ﹣ POST valid image with tampered content length (0.141875ms) # Fails on CI/CD pipeline
+✔ /profile/image/url (349.989209ms)
+▶ /profile/image/url (with local mock server)
+  ✔ POST with non-OK response falls back to storing URL as profile image (81.926667ms)
+  ✔ POST with empty-body response (204) falls back to storing URL as profile image (47.157291ms)
+  ✔ POST with valid response writes file and redirects to profile (89.129583ms)
+  ✔ POST with PNG URL extension saves file using PNG extension (24.507125ms)
+  ✔ POST with unrecognised URL extension defaults to JPG extension (80.810209ms)
+✔ /profile/image/url (with local mock server) (549.990667ms)
+▶ /promotion
+  ✔ GET promotion video page is publicly accessible (2407.344751ms)
+  ✔ GET promotion video page contains embedded video (218.313166ms)
+  ✔ GET promotion video page contains subtitles as <script> (172.0585ms)
+✔ /promotion (7842.966296ms)
+▶ /video
+  ✔ GET promotion video is publicly accessible (231.486084ms)
+✔ /video (231.918167ms)
+▶ /api/Quantitys
+  ✔ GET quantity of all items for customers (737.131542ms)
+  ✔ GET quantity of all items for admin (396.517709ms)
+  ✔ GET quantity of all items for accounting users (441.008459ms)
+  ✔ POST quantity is forbidden for customers (126.155292ms)
+  ✔ POST quantity forbidden for admin (233.326167ms)
+  ✔ POST quantity is forbidden for accounting users (274.954875ms)
+✔ /api/Quantitys (6336.655545ms)
+▶ /api/Quantitys/:ids
+  ✔ GET quantity of all items is forbidden for customers (173.789167ms)
+  ✔ GET quantity of all items is forbidden for admin (163.34975ms)
+Access denied to IP address: ::ffff:127.0.0.1
+  ✔ GET quantity of all items for accounting users blocked by IP filter (240.647083ms)
+  ﹣ GET quantity of all items for accounting users from IP 123.456.789 (0.225292ms) # SKIP
+  ✔ PUT quantity is forbidden for customers (238.850125ms)
+  ✔ PUT quantity is forbidden for admin (251.268542ms)
+Access denied to IP address: ::ffff:127.0.0.1
+  ✔ PUT quantity as accounting user blocked by IP filter (150.345792ms)
+  ﹣ PUT quantity as accounting user from IP 123.456.789 (2.652209ms) # SKIP
+  ✔ DELETE quantity is forbidden for accountant (220.781125ms)
+  ✔ DELETE quantity is forbidden for admin (173.208917ms)
+  ✔ DELETE quantity is forbidden for users (163.065334ms)
+✔ /api/Quantitys/:ids (1781.992542ms)
+▶ /ftp/quarantine/:file
+  ✔ GET serves a known quarantined file (64.263375ms)
+  ✔ GET responds with 403 when filename contains a forward slash (82.238875ms)
+✔ /ftp/quarantine/:file (5052.826752ms)
+▶ /api/Recycles
+  ✔ POST new recycle (444.539625ms)
+  ✔ Will prevent GET all recycles from this endpoint (23.641042ms)
+  ✔ Will GET existing recycle from this endpoint (133.697417ms)
+  ✔ PUT update existing recycle is forbidden (84.322875ms)
+  ✔ DELETE existing recycle is forbidden (35.193041ms)
+✔ /api/Recycles (4809.874294ms)
+▶ /redirect
+  ✔ GET redirected to https://github.com/juice-shop/juice-shop when this URL is passed as "to" parameter (84.220041ms)
+  ✔ GET redirected to https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm when this URL is passed as "to" parameter (59.70025ms)
+  ✔ GET redirected to http://shop.spreadshirt.com/juiceshop when this URL is passed as "to" parameter (67.324541ms)
+  ✔ GET redirected to http://shop.spreadshirt.de/juiceshop when this URL is passed as "to" parameter (53.66075ms)
+  ✔ GET redirected to https://www.stickeryou.com/products/owasp-juice-shop/794 when this URL is passed as "to" parameter (108.540916ms)
+  ✔ GET redirected to https://explorer.dash.org/address/Xr556RzuwX6hg5EGpkybbv5RanJoZN17kW when this URL is passed as "to" parameter (65.609167ms)
+  ✔ GET redirected to https://etherscan.io/address/0x0f933ab9fcaaa782d0279c300d73750e1311eae6 when this URL is passed as "to" parameter (58.818334ms)
+  ✔ GET error message with information leakage when calling /redirect without query parameter (164.216708ms)
+  ✔ GET error message with information leakage when calling /redirect with unrecognized query parameter (103.22075ms)
+  ✔ GET error message hinting at allowlist validation when calling /redirect with an unrecognized "to" target (64.682209ms)
+  ✔ GET redirected to target URL in "to" parameter when a allow-listed URL is part of the query string (343.359ms)
+✔ /redirect (6761.642212ms)
+▶ /rest/repeat-notification
+  ✔ GET triggers repeating notification without passing a challenge (145.409375ms)
+  ✔ GET triggers repeating notification passing an unsolved challenge (78.689667ms)
+  ✔ GET triggers repeating notification passing a solved challenge (86.583459ms)
+✔ /rest/repeat-notification (5330.633252ms)
+▶ /rest/products/search
+  ✔ GET product search with no matches returns no products (177.481083ms)
+  ✔ GET product search with one match returns found product (50.068583ms)
+  ✔ GET product search fails with error message that exposes ins SQL Injection vulnerability (94.590167ms)
+  ✔ GET product search SQL Injection fails from two missing closing parenthesis (83.884ms)
+  ✔ GET product search SQL Injection fails from one missing closing parenthesis (140.457042ms)
+  ✔ GET product search SQL Injection fails for SELECT * FROM attack due to wrong number of returned columns (157.588542ms)
+  ✔ GET product search can create UNION SELECT with Users table and fixed columns (189.087ms)
+  ✔ GET product search can create UNION SELECT with Users table and required columns (242.67175ms)
+  ✔ GET product search can create UNION SELECT with sqlite_master table and required column (162.318334ms)
+  ✔ GET product search cannot select logically deleted christmas special by default (148.742667ms)
+  ✔ GET product search by description cannot select logically deleted christmas special due to forced early where-clause termination (239.702416ms)
+  ✔ GET product search can select logically deleted christmas special by forcibly commenting out the remainder of where clause (157.958875ms)
+  ✔ GET product search can select logically deleted unsafe product by forcibly commenting out the remainder of where clause (177.572917ms)
+  ✔ GET product search with empty search parameter returns all products (345.3115ms)
+  ✔ GET product search without search parameter returns all products (298.253792ms)
+✔ /rest/products/search (7353.448337ms)
+▶ /api/SecurityAnswers
+  ✔ GET all security answers is forbidden via public API even when authenticated (74.813917ms)
+  ✔ POST new security answer for existing user fails from unique constraint (359.156708ms)
+✔ /api/SecurityAnswers (5180.229878ms)
+▶ /api/SecurityAnswers/:id
+  ✔ GET existing security answer by id is forbidden via public API even when authenticated (37.120666ms)
+  ✔ POST security answer for a newly registered user (656.801458ms)
+  ✔ PUT update existing security answer is forbidden via public API even when authenticated (46.656917ms)
+  ✔ DELETE existing security answer is forbidden via public API even when authenticated (25.141167ms)
+✔ /api/SecurityAnswers/:id (767.478ms)
+▶ /api/SecurityQuestions
+  ✔ GET all security questions  (228.732917ms)
+  ✔ POST new security question is forbidden via public API even when authenticated (105.999167ms)
+✔ /api/SecurityQuestions (5012.756752ms)
+▶ /api/SecurityQuestions/:id
+  ✔ GET existing security question by id is forbidden via public API even when authenticated (39.17725ms)
+  ✔ PUT update existing security question is forbidden via public API even when authenticated (23.01675ms)
+  ✔ DELETE existing security question is forbidden via public API even when authenticated (32.44225ms)
+✔ /api/SecurityQuestions/:id (95.715083ms)
+▶ /rest/user/security-question
+  ✔ GET security question for an existing user's email address (137.410708ms)
+  ✔ GET security question returns nothing for an unknown email address (180.471292ms)
+  ✔ GET security question throws error for missing email address (84.881917ms)
+  ✔ GET security question is not susceptible to SQL Injection attacks (151.145333ms)
+✔ /rest/user/security-question (555.108334ms)
+▶ WebSocket
+  ✔ server handles confirmation messages for emitted challenge resolutions (87.035083ms)
+  ✔ server handles confirmation message for a non-existent challenge (73.248833ms)
+  ✔ server handles empty confirmation message (134.08375ms)
+✔ WebSocket (2453.276376ms)
+▶ /rest/track-order/:id
+  ✔ GET tracking results for the order id (157.094792ms)
+  ✖ GET all orders by injecting into orderId (68.916459ms)
+✖ /rest/track-order/:id (4762.39171ms)
+▶ /profile
+  ✔ GET user profile is forbidden for unauthenticated user (154.977459ms)
+  ✔ GET user profile of authenticated user (847.684042ms)
+  ✔ GET user profile contains role and deluxe membership link if user is customer (294.180333ms)
+  ✔ GET user profile contains role but NO deluxe membership link if user is already deluxe (404.810209ms)
+  ✔ POST update username of authenticated user (155.56875ms)
+  ✔ POST update profile is forbidden for unauthenticated user (42.37175ms)
+  ✖ GET user profile renders evaluated SSTI payload for username containing valid expression (444.855126ms)
+  ✔ GET user profile falls back gracefully when SSTI payload throws (450.316459ms)
+  ✖ GET user profile still evaluates SSTI payload when #{} is NOT at the start of the username (302.107541ms)
+  ✔ GET user profile does NOT evaluate SSTI payload in safe mode (292.459125ms)
+  ✔ should be solved when origin header matches configured CSRF URL (90.146751ms)
+  ✔ should have the configured CSRF URL in the challenge description (0.286667ms)
+  ✔ should NOT be solved when origin header does NOT match configured CSRF URL (70.141458ms)
+✖ /profile (5932.280961ms)
+▶ /api/Users
+  ✔ GET all users is forbidden via public API (124.278083ms)
+  ✔ GET all users (388.671376ms)
+  ✔ GET all users doesnt include passwords (209.6635ms)
+  ✔ POST new user (375.060334ms)
+  ✔ POST new admin (157.160042ms)
+  ✔ POST new blank user (71.238834ms)
+  ✔ POST same blank user in database (79.368709ms)
+  ✔ POST whitespaces user (75.769958ms)
+  ✔ POST new deluxe user (76.138084ms)
+  ✔ POST new accounting user (88.088834ms)
+  ✔ POST user not belonging to customer, deluxe, accounting, admin is forbidden (29.099125ms)
+  ✖ POST new user with XSS attack in email address (114.340917ms)
+✖ /api/Users (6520.681962ms)
+▶ /api/Users/:id
+  ✔ GET existing user by id is forbidden via public API (22.261375ms)
+  ✔ PUT update existing user is forbidden via public API (11.152625ms)
+  ✔ DELETE existing user is forbidden via public API (6.593375ms)
+  ✔ GET existing user by id (61.24675ms)
+  ✔ PUT update existing user is forbidden via API even when authenticated (24.144292ms)
+  ✔ DELETE existing user is forbidden via API even when authenticated (5.585958ms)
+✔ /api/Users/:id (131.997667ms)
+▶ /rest/user/whoami
+  ✔ GET own user id and email on who-am-i request (82.013292ms)
+  ✔ GET who-am-i request returns nothing on missing auth token (44.54475ms)
+  ✔ GET who-am-i request returns nothing on invalid auth token (19.645208ms)
+  ✔ GET who-am-i request returns nothing on broken auth token (22.591083ms)
+  ✔ GET who-am-i request returns nothing on expired auth token (20.76875ms)
+  ✔ GET who-am-i with fields parameter returns only requested fields (143.894ms)
+  ✔ GET who-am-i with fields parameter does not return password by default (109.172917ms)
+  ✔ GET who-am-i with fields parameter can be tricked into returning password (264.754958ms)
+✔ /rest/user/whoami (708.867333ms)
+▶ /snippets/fixes/:key
+  ✔ GET fixes for unknown challenge key throws error (111.638792ms)
+  ✔ GET fixes for existing challenge key (48.894542ms)
+✔ /snippets/fixes/:key (2948.1145ms)
+▶ /snippets/fixes
+  ✔ POST fix for non-existing challenge key throws error (75.308042ms)
+  ✔ POST wrong fix for existing challenge key gives negative verdict and explanation (41.943417ms)
+  ✔ POST non-existing fix for existing challenge key gives negative verdict and no explanation (46.394084ms)
+  ✔ POST correct fix for existing challenge key gives positive verdict and explanation (223.779334ms)
+✔ /snippets/fixes (388.965042ms)
+▶ /snippets/:challenge
+  ✔ GET code snippet retrieval for unknown challenge key throws error (66.875ms)
+  ✔ GET code snippet retrieval for challenge without code snippet throws error (39.506834ms)
+  ✔ GET code snippet retrieval for challenge with code snippet (33.246875ms)
+✔ /snippets/:challenge (1864.78325ms)
+▶ snippets/verdict
+  ✔ should check for the incorrect lines (61.947208ms)
+  ✔ should check for the correct lines (198.025667ms)
+  ✔ POST with unknown challenge key returns 404 (77.809541ms)
+  ✔ POST without selectedLines returns false verdict (67.324916ms)
+  ✔ POST with empty selectedLines array returns false verdict (56.9605ms)
+✔ snippets/verdict (463.314292ms)
+▶ snippets/verdict (hint progression for loginAdminChallenge)
+  ✔ returns no hint on the first wrong attempt (17.433708ms)
+  ✔ returns the first hint text on the second wrong attempt (17.539334ms)
+  ✔ returns a line-number hint after all text hints are exhausted (52.5325ms)
+✔ snippets/verdict (hint progression for loginAdminChallenge) (88.275334ms)
+▶ /api/Wallets
+  ✔ GET wallet is forbidden via public API (24.821458ms)
+  ✔ GET wallet retrieves wallet amount of requesting user (123.712375ms)
+  ✔ PUT wallet is forbidden via public API (17.727917ms)
+  ✔ PUT charge wallet from credit card of requesting user (146.482125ms)
+  ✔ PUT charge wallet from foreign credit card is forbidden (65.670875ms)
+  ✔ PUT charge wallet without credit card is forbidden (36.198584ms)
+  ✔ GET wallet balance for user without a wallet returns 404 (253.817792ms)
+✔ /api/Wallets (2502.992167ms)
+﹣ /rest/web3/walletExploitAddress (3.087625ms) # ALCHEMY_API_KEY not set
+ℹ tests 537
+ℹ suites 112
+ℹ pass 509
+ℹ fail 21
+ℹ cancelled 0
+ℹ skipped 7
+ℹ todo 0
+ℹ duration_ms 67890.113906
+
+✖ failing tests:
+
+test at test/api/b2b-order.test.ts:2:1563
+✖ POST endless loop exploit in "orderLinesData" will raise explicit error (78.372084ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 500
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/b2b-order.test.ts:33:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1905:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 500,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/b2b-order.test.ts:2:1965
+✖ POST busy spinning regex attack does not raise an error (21.030166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 503
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/b2b-order.test.ts:45:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 503,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/b2b-order.test.ts:2:2269
+✖ POST sandbox breakout attack in "orderLinesData" will raise error (23.206083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 500
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/b2b-order.test.ts:56:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 500,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/erasure-request.test.ts:2:4610
+✖ POST erasure request with existing file path as layout parameter returns content truncated (151.527417ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(res.text.includes('......'))
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/erasure-request.test.ts:115:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/api/feedback.test.ts:2:2494
+✖ POST fails to sanitize masked XSS-attack by not applying sanitization recursively (127.263584ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'The sanitize-html module up to at least version 1.4.2 has this issue: '
+  - 'The sanitize-html module up to at least version 1.4.2 has this issue: <iframe src="javascript:alert(`xss`)">'
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/feedback.test.ts:68:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'The sanitize-html module up to at least version 1.4.2 has this issue: ',
+    expected: 'The sanitize-html module up to at least version 1.4.2 has this issue: <iframe src="javascript:alert(`xss`)">',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/file-upload.test.ts:2:3676
+✖ POST file type XML with Billion Laughs attack is caught by parser (58.013083ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(res.text.includes('Maximum entity amplification factor exceeded'))
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/file-upload.test.ts:86:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/api/file-upload.test.ts:2:5696
+✖ POST zip file with password protection (11.343708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  204 !== 500
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/file-upload.test.ts:137:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 204,
+    expected: 500,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/internet-resources.test.ts:2:1060
+✖ for default configuration (https://pastebin.com/90dUgd7s) (115.109583ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:1444
+✖ for 7MS configuration (https://pastebin.com/8SMbWPxc) (3.734834ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:1992
+✖ for BodgeIt Store configuration (https://pastebin.com/G47LrDr0) (6.870375ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:2663
+✖ for Mozilla configuration (https://pastebin.com/t8jqE1y7) (6.082417ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:3377
+✖ for All Day DevOps configuration (https://pastebin.com/RXrihEMS) (23.997584ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:3865
+✖ Comment on "Top 10 Fruits you probably dont know" blog post with PasteBin paste URL spoiler available (9.253125ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN listverse.disqus.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'listverse.disqus.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:4327
+✖ PasteBin paste (https://pastebin.com/4U1V1UjU) for "Leaked Access Logs" challenge available (7.757208ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN pastebin.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'pastebin.com'
+    }
+  }
+
+test at test/api/internet-resources.test.ts:2:5310
+✖ GitHub issue (https://github.com/apostrophecms/sanitize-html/issues/29) for "Server-side XSS Protection" challenge available (29.875209ms)
+  [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN github.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:123:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'github.com'
+    }
+  }
+
+test at test/api/login.test.ts:2:9586
+✖ GET last login IP will be saved as remote IP when True-Client-IP is not present (271.151958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '' !== '127.0.0.1'
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/login.test.ts:279:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: '127.0.0.1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/product.test.ts:2:2736
+✖ POST new product does not filter XSS attacks (387.179167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + ''
+  - '<iframe src="javascript:alert(`xss`)">'
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/product.test.ts:69:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: '<iframe src="javascript:alert(`xss`)">',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/track-result.test.ts:2:1394
+✖ GET all orders by injecting into orderId (68.916459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'string'
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/track-result.test.ts:34:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'string',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/api/user-profile.test.ts:2:4044
+✖ GET user profile renders evaluated SSTI payload for username containing valid expression (444.855126ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(res.text.includes('>49<'))
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/user-profile.test.ts:102:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/api/user-profile.test.ts:2:5102
+✖ GET user profile still evaluates SSTI payload when #{} is NOT at the start of the username (302.107541ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(res.text.includes('A49'))
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/user-profile.test.ts:136:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/api/user.test.ts:2:7043
+✖ POST new user with XSS attack in email address (114.340917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + ''
+  - '<iframe src="javascript:alert(`xss`)">'
+  
+      at TestContext.<anonymous> (/juice-shop/test/api/user.test.ts:193:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: '<iframe src="javascript:alert(`xss`)">',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+API_EXIT=1
+
+> juice-shop@20.2.0 lint
+> eslint *.ts data lib models routes test/**/*.ts views && npm run lint:config && cd frontend && npm run lint && npm run lint:scss && cd ..
+
+
+> juice-shop@20.2.0 lint:config
+> tsx lib/scripts/lintConfig.ts
+
+Config schema validation of /juice-shop/config/7ms.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/addo.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/bodgeit.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/ctf.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/default.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/defcon33.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/fbctf.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/juicebox.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/mozilla.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/oss.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/quiet.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/test.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/tutorial.yml passed (SUCCESS)
+Config schema validation of /juice-shop/config/unsafe.yml passed (SUCCESS)
+
+> frontend@20.2.0 lint
+> ng lint
+
+
+Linting "frontend"...
+
+All files pass linting.
+
+
+> frontend@20.2.0 lint:scss
+> npx stylelint "**/*.scss"
+
+LINT_EXIT=0
+
+> juice-shop@20.2.0 rsn
+> tsx rsn/rsn.ts
+
+All codefix files match the locked state. No action required.
+RSN_EXIT=0

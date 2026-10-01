@@ -1,9 +1,43 @@
 # Log Guardian
 
-Investigate suspicious activity against a business or product using gateway and
-application authentication logs. Import a bounded log window, inspect linked requests
-and explicit auth outcomes, then optionally ask an AI investigator to review that saved
-evidence. The result is a draft with citations and gaps, not an automated attack verdict.
+Evidence-based security log review, with deterministic facts first and optional AI.
+
+Import gateway and application authentication logs, link requests, and inspect recorded
+outcomes with citations. The factual assessment runs without a model key or worker.
+It shows what the supplied logs establish and what remains unknown, rather than turning
+HTTP success into login success or a successful login into a compromise claim.
+
+**Status: working prototype, alpha release.** Tested against a running, locally instrumented
+OWASP Juice Shop. Not a validated attack detector or a production-ready hosted service.
+
+[Release notes](docs/releases/v0.1.0-alpha.1.md) ·
+[Local setup](docs/security-log-review.md#local-setup) ·
+[Real-application test and evidence](docs/verification/juice-shop-business/README.md)
+
+## What is verified
+
+Five final browser-driven cases passed through the real import API and review UI:
+
+| Case | Recorded auth outcome | What the review preserves |
+| --- | --- | --- |
+| Normal login and cart | One success | Explicit auth result, not an inferred purchase |
+| Wrong password | One failure | Rejection without a compromise claim |
+| Two failures, then success | Two failures, one success | Same pseudonymous account and exact request links |
+| Guest browsing and cart UI | No auth results | No invented login success |
+| Successful browser login, auth export omitted | No supplied auth results | Authentication remains unknown despite HTTP success |
+
+The five reviews cover **182 records, representing 154 unique source records**. The
+missing-auth case deliberately reuses the normal customer's gateway window. Every saved
+record was reviewed; the UI disclosed its 12-fact display limit. A separate check verified
+that nginx replaces caller-supplied request IDs. No model calls or Investigation rows were
+created by the business test.
+
+These were real browser actions and application-emitted logs in a synthetic shop, not
+customer traffic or an independent accuracy evaluation. The archive retains four earlier
+driver failures, 21 unchanged upstream API-test failures and a WebSocket proxy limitation.
+See the [method, source records, screenshots and runnable verifier](docs/verification/juice-shop-business/README.md).
+
+## Recorded walkthrough
 
 [![Recorded security-review workflow. Synthetic logs and a scripted provider, not a real model evaluation.](frontend/media/security-review-poster.png)](frontend/media/security-review.webm)
 
@@ -29,12 +63,17 @@ compromise. Addresses are not people, and similar timing does not establish coor
 or AI involvement. Collection completeness and clock alignment remain unknown.
 
 ```text
-[Owner source registry] -> [Gateway + auth import] -> [Saved timeline and gaps]
-                                                            |
-                                                  explicit execution key
-                                                            v
-[Human review] <--------- [Cited, unverified draft] <- [Case-only read tool]
+[Owner registry + logs] -> [Saved case] -> [Deterministic facts + coverage]
+                               |                        |
+                  consent + execution key               v
+                               +-> [Optional AI] -> [Human review]
 ```
+
+The baseline scans the complete bounded saved case and derives facts from typed fields.
+Optional AI can select delivered evidence and allowed explanation/check codes; the server
+validates the selection and renders the report. It cannot replace baseline facts with
+model-written prose. A rejected AI selection stays failed and leaves the baseline intact.
+Historical model-written reports remain labeled as unverified drafts.
 
 ## Try it without a model key
 
@@ -52,7 +91,9 @@ The export's index retains the older operational-investigator recordings.
 To use the real importer, follow [local security-review setup](docs/security-log-review.md#local-setup).
 It needs SECURITY_SOURCES_PATH, SECURITY_API_KEY and a database migrated to head.
 The guide includes prescribed nginx JSON and application-auth JSONL formats and the
-six-record example. Arbitrary nginx combined logs are not supported.
+six-record example. Opening a saved case produces cited facts, explicit unknowns and
+reviewed/displayed record counts without calling a provider. Arbitrary nginx combined
+logs are not supported.
 
 Import and review use SECURITY_API_KEY. AI execution needs a distinct
 INVESTIGATION_API_KEY, provider-sharing consent in the UI and a separately configured
@@ -68,14 +109,16 @@ Do not start a live worker against queued cases without current spending authori
 ## Implemented and unproven
 
 The repository has authenticated imports, duplicate/conflict handling, SQLite/PostgreSQL
-migrations, deterministic correlation, browser review and explicit case-bound execution.
-The connection has scripted-provider verification, not a live security-diagnosis result.
+migrations, deterministic correlation and assessment, browser citations/history, and
+separate case-bound AI execution. The no-model path has real-application integration
+verification. A [four-case live typed-selection experiment](evals/results/2026-09-27-typed-business-live/README.md)
+completed two cases and rejected two; it does not establish security-diagnosis accuracy.
 There is no validated credential-stuffing classifier or automatic blocking/remediation.
-This is development software, not a deployed customer security service.
+This is development software, not a deployed customer security service. Review access is
+single-owner, not tenant-isolated, and automated retention is not implemented.
 
-Reports must cite delivered evidence, but membership does not establish semantic support.
-Earlier investigator experiments produced unsupported claims and unsafe advice despite
-valid citations. The [experimental verifier](evals/report-verifier-v2/README.md) is not a
+Code-generated facts describe supplied logs, not independently verified reality. Earlier
+model-written reports produced unsupported claims and unsafe advice despite valid citations. The [experimental verifier](evals/report-verifier-v2/README.md) is not a
 production gate. Human review, consent, retention policy, independent labels and workload
 measurement remain necessary before a customer pilot.
 
@@ -388,6 +431,7 @@ Security evidence, protected by the review key:
 - `POST /security/cases`: bounded import with an Idempotency-Key
 - `GET /security/cases`: saved review summaries
 - `GET /security/cases/{id}`: normalized timeline, counts, gaps and source snapshot
+- `GET /security/cases/{id}/assessment`: deterministic facts, coverage and citations; no writes or model calls
 
 Explicit execution, protected by the investigation key:
 
@@ -573,9 +617,11 @@ Things that are wrong or missing, in roughly the order they'd bite:
 
 ## Next
 
-- [ ] Prepare a fresh business-security evaluation corpus with benign counterexamples
-  and independently reviewed expected judgments.
-- [ ] Freeze the candidate and obtain explicit per-batch approval before a real-model pilot.
+- [ ] Find a design partner with a recurring log-review task and compare review time,
+  incorrect claims and missing evidence against their existing workflow.
+- [ ] Test onboarding from an owner-approved export before adding more collectors or AI.
+- [ ] Use a fresh corpus and independent judgments before claiming diagnosis accuracy.
+  Any further paid model batch requires a frozen candidate and explicit authorization.
 - [ ] Define consent, retention, collection coverage and deployment security for any
   customer-data trial. There is no current deployment authorization.
 - [ ] Measure workload limits before adding collectors, distributed rate limits or

@@ -1,0 +1,259 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.baseline
+#1 transferring dockerfile: 194B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24
+#2 DONE 1.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 resolve docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4 done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 29.67MB 0.3s done
+#5 DONE 0.3s
+
+#4 [1/6] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 sha256:243b062857a5929fa9c3f6c0601e4a173c232953b85140f9e9ebfd207c89ca52 446B / 446B 0.1s done
+#4 sha256:aa78086cb2f5474b0b9b9de8f9ba11bfa750687dc71c2f490d29646e2c0fa7ba 1.25MB / 1.25MB 0.2s done
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 2.10MB / 59.81MB 0.3s
+#4 sha256:93de12f00ca7f28ece93f4bb9e907c62ef0a3598f6f205c65e1bf72b31ac466d 0B / 3.32kB 0.2s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 0B / 203.42MB 0.2s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 11.53MB / 59.81MB 0.5s
+#4 sha256:93de12f00ca7f28ece93f4bb9e907c62ef0a3598f6f205c65e1bf72b31ac466d 3.32kB / 3.32kB 0.3s done
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 0B / 64.50MB 0.2s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 19.92MB / 59.81MB 0.6s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 0B / 48.39MB 0.2s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 24.12MB / 59.81MB 0.9s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 27.26MB / 59.81MB 1.2s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 30.41MB / 59.81MB 1.5s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 3.15MB / 48.39MB 1.4s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 34.60MB / 59.81MB 2.0s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 4.19MB / 64.50MB 1.8s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 38.80MB / 59.81MB 2.4s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 41.94MB / 59.81MB 2.9s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 10.49MB / 203.42MB 2.7s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 6.29MB / 48.39MB 2.4s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 8.39MB / 64.50MB 2.9s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 45.09MB / 59.81MB 3.5s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 9.44MB / 48.39MB 3.3s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 48.23MB / 59.81MB 3.9s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 12.58MB / 64.50MB 3.6s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 51.38MB / 59.81MB 4.5s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 12.58MB / 48.39MB 4.1s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 16.78MB / 64.50MB 4.5s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 54.53MB / 59.81MB 5.1s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 20.97MB / 203.42MB 5.3s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 15.73MB / 48.39MB 5.0s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 20.97MB / 64.50MB 5.4s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 57.67MB / 59.81MB 5.9s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 18.87MB / 48.39MB 5.7s
+#4 sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 59.81MB / 59.81MB 6.4s done
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 25.17MB / 64.50MB 6.3s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 0B / 23.63MB 0.2s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 22.02MB / 48.39MB 6.6s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 2.10MB / 23.63MB 0.6s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 31.46MB / 203.42MB 7.2s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 29.36MB / 64.50MB 7.1s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 4.19MB / 23.63MB 0.9s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 25.17MB / 48.39MB 7.4s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 6.29MB / 23.63MB 1.4s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 33.55MB / 64.50MB 8.0s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 8.39MB / 23.63MB 1.8s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 28.31MB / 48.39MB 8.3s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 10.49MB / 23.63MB 2.3s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 31.46MB / 48.39MB 8.7s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 37.75MB / 64.50MB 8.9s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 12.58MB / 23.63MB 2.9s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 34.60MB / 48.39MB 9.2s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 41.94MB / 203.42MB 9.5s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 14.68MB / 23.63MB 3.5s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 41.94MB / 64.50MB 9.8s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 37.75MB / 48.39MB 9.8s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 16.78MB / 23.63MB 4.1s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 46.14MB / 64.50MB 10.5s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 40.89MB / 48.39MB 10.5s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 18.87MB / 23.63MB 4.5s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 52.43MB / 203.42MB 11.4s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 50.33MB / 64.50MB 11.3s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 44.04MB / 48.39MB 11.3s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 20.97MB / 23.63MB 5.1s
+#4 sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 23.63MB / 23.63MB 5.6s done
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 47.19MB / 48.39MB 11.9s
+#4 sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 48.39MB / 48.39MB 12.0s done
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 55.57MB / 64.50MB 12.3s
+#4 extracting sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 63.96MB / 203.42MB 12.9s
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 59.77MB / 64.50MB 12.9s
+#4 extracting sha256:450fe15cad1eddfa7c19e4191f4de2d5c46b0c201ddee1db8d6f41d2fec7a742 0.9s done
+#4 extracting sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8
+#4 extracting sha256:e528fa46febdafdfec8e02c978fc9de14e76dd532505c33472d8f915ac27a2f8 0.3s done
+#4 sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 64.50MB / 64.50MB 13.5s done
+#4 extracting sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 76.55MB / 203.42MB 14.0s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 88.08MB / 203.42MB 14.6s
+#4 extracting sha256:328a0fa474a1ca8d79c015c72bce6d935298ea38f98b4e04dec9e350442e03d7 0.9s done
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 98.57MB / 203.42MB 15.2s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 110.10MB / 203.42MB 15.8s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 120.59MB / 203.42MB 16.4s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 131.07MB / 203.42MB 17.0s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 144.70MB / 203.42MB 17.7s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 156.24MB / 203.42MB 18.3s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 168.82MB / 203.42MB 19.1s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 179.31MB / 203.42MB 19.7s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 190.84MB / 203.42MB 20.3s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 201.33MB / 203.42MB 20.9s
+#4 sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 203.42MB / 203.42MB 21.1s done
+#4 DONE 21.3s
+
+#4 [1/6] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 extracting sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad
+#4 extracting sha256:4d3ba406c16b69d4aa51efbc3e6261745f96834c1468f508f6c0eedfc94b57ad 2.8s done
+#4 DONE 24.2s
+
+#4 [1/6] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 extracting sha256:93de12f00ca7f28ece93f4bb9e907c62ef0a3598f6f205c65e1bf72b31ac466d done
+#4 extracting sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55
+#4 extracting sha256:f1ef69d04a21a080d62ce6a9e3aaf8f30d7639c89a78fb7a10417f20f0d59d55 1.7s done
+#4 DONE 25.9s
+
+#4 [1/6] FROM docker.io/library/node:24@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4
+#4 extracting sha256:aa78086cb2f5474b0b9b9de8f9ba11bfa750687dc71c2f490d29646e2c0fa7ba 0.0s done
+#4 extracting sha256:243b062857a5929fa9c3f6c0601e4a173c232953b85140f9e9ebfd207c89ca52 done
+#4 DONE 25.9s
+
+#6 [2/6] WORKDIR /juice-shop
+#6 DONE 0.4s
+
+#7 [3/6] ADD baseline.tar /juice-shop/
+#7 DONE 0.2s
+
+#8 [4/6] RUN npm ci
+#8 0.543 npm error code EUSAGE
+#8 0.550 npm error
+#8 0.550 npm error The `npm ci` command can only install with an existing package-lock.json or
+#8 0.550 npm error npm-shrinkwrap.json with lockfileVersion >= 1. Run an install with npm@5 or
+#8 0.550 npm error later to generate a package-lock.json file, then try again.
+#8 0.550 npm error
+#8 0.550 npm error Clean install a project
+#8 0.550 npm error
+#8 0.550 npm error Usage:
+#8 0.550 npm error npm ci
+#8 0.550 npm error
+#8 0.550 npm error Options:
+#8 0.550 npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+#8 0.550 npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+#8 0.550 npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+#8 0.550 npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts]
+#8 0.550 npm error [--allow-directory <all|none|root>] [--allow-file <all|none|root>]
+#8 0.550 npm error [--allow-git <all|none|root>] [--allow-remote <all|none|root>]
+#8 0.550 npm error [--allow-scripts <package-list> [--allow-scripts <package-list> ...]]
+#8 0.550 npm error [--strict-allow-scripts] [--dangerously-allow-all-scripts] [--no-audit]
+#8 0.550 npm error [--no-bin-links] [--no-fund] [--dry-run]
+#8 0.550 npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+#8 0.550 npm error [--workspaces] [--include-workspace-root] [--install-links]
+#8 0.550 npm error
+#8 0.550 npm error   --install-strategy
+#8 0.550 npm error     Sets the strategy for installing packages in node_modules.
+#8 0.550 npm error
+#8 0.550 npm error   --legacy-bundling
+#8 0.550 npm error     Instead of hoisting package installs in `node_modules`, install packages
+#8 0.550 npm error
+#8 0.550 npm error   --global-style
+#8 0.550 npm error     Only install direct dependencies in the top level `node_modules`,
+#8 0.550 npm error
+#8 0.550 npm error   --omit
+#8 0.550 npm error     Dependency types to omit from the installation tree on disk.
+#8 0.550 npm error
+#8 0.550 npm error   --include
+#8 0.550 npm error     Option that allows for defining which types of dependencies to install.
+#8 0.550 npm error
+#8 0.550 npm error   --strict-peer-deps
+#8 0.550 npm error     If set to `true`, and `--legacy-peer-deps` is not set, then _any_
+#8 0.550 npm error
+#8 0.550 npm error   --foreground-scripts
+#8 0.550 npm error     Run all build scripts (ie, `preinstall`, `install`, and
+#8 0.550 npm error
+#8 0.550 npm error   --ignore-scripts
+#8 0.550 npm error     If true, npm does not run scripts specified in package.json files.
+#8 0.550 npm error
+#8 0.550 npm error   --allow-directory
+#8 0.550 npm error     Limits the ability for npm to install dependencies from directories.
+#8 0.550 npm error
+#8 0.550 npm error   --allow-file
+#8 0.550 npm error     Limits the ability for npm to install dependencies from tarball files.
+#8 0.550 npm error
+#8 0.550 npm error   --allow-git
+#8 0.550 npm error     Limits the ability for npm to fetch dependencies from git references.
+#8 0.550 npm error
+#8 0.550 npm error   --allow-remote
+#8 0.550 npm error     Limits the ability for npm to fetch dependencies from urls.
+#8 0.550 npm error
+#8 0.550 npm error   --allow-scripts
+#8 0.550 npm error     Comma-separated list of packages whose install-time lifecycle scripts
+#8 0.550 npm error
+#8 0.550 npm error   --strict-allow-scripts
+#8 0.550 npm error     If `true`, turn the install-script policy from a warning into a hard
+#8 0.550 npm error
+#8 0.550 npm error   --dangerously-allow-all-scripts
+#8 0.550 npm error     If `true`, bypass the `allowScripts` policy entirely and run every
+#8 0.550 npm error
+#8 0.550 npm error   --audit
+#8 0.550 npm error     When "true" submit audit reports alongside the current npm command to the
+#8 0.550 npm error
+#8 0.550 npm error   --bin-links
+#8 0.550 npm error     Tells npm to create symlinks (or `.cmd` shims on Windows) for package
+#8 0.550 npm error
+#8 0.550 npm error   --fund
+#8 0.550 npm error     When "true" displays the message at the end of each `npm install`
+#8 0.550 npm error
+#8 0.550 npm error   --dry-run
+#8 0.550 npm error     Indicates that you don't want npm to make any changes and that it should
+#8 0.550 npm error
+#8 0.550 npm error   -w|--workspace
+#8 0.550 npm error     Enable running a command in the context of the configured workspaces of the
+#8 0.550 npm error
+#8 0.550 npm error   --workspaces
+#8 0.550 npm error     Set to true to run the command in the context of **all** configured
+#8 0.550 npm error
+#8 0.550 npm error   --include-workspace-root
+#8 0.550 npm error     Include the workspace root when workspaces are enabled for a command.
+#8 0.550 npm error
+#8 0.550 npm error   --install-links
+#8 0.550 npm error     When set file: protocol dependencies will be packed and installed as
+#8 0.550 npm error
+#8 0.550 npm error
+#8 0.550 npm error aliases: clean-install, ic, install-clean, isntall-clean
+#8 0.550 npm error
+#8 0.550 npm error Run "npm help ci" for more info
+#8 0.551 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-09-30T21_34_33_542Z-debug-0.log
+#8 ERROR: process "/bin/sh -c npm ci" did not complete successfully: exit code: 1
+------
+ > [4/6] RUN npm ci:
+0.550 npm error     Include the workspace root when workspaces are enabled for a command.
+0.550 npm error
+0.550 npm error   --install-links
+0.550 npm error     When set file: protocol dependencies will be packed and installed as
+0.550 npm error
+0.550 npm error
+0.550 npm error aliases: clean-install, ic, install-clean, isntall-clean
+0.550 npm error
+0.550 npm error Run "npm help ci" for more info
+0.551 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-09-30T21_34_33_542Z-debug-0.log
+------
+Dockerfile.baseline:5
+--------------------
+   3 |     ENV CYPRESS_INSTALL_BINARY=0
+   4 |     ADD baseline.tar /juice-shop/
+   5 | >>> RUN npm ci
+   6 |     RUN npm run build:server
+   7 |     RUN mkdir -p logs
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm ci" did not complete successfully: exit code: 1
+BASELINE_BUILD_EXIT=1

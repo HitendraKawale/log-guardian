@@ -1,0 +1,89 @@
+[
+  {
+    "case": "normal-customer",
+    "case_id": "aaab58c2-b764-419b-a02b-b1627a92c99d",
+    "gateway_records": 28,
+    "auth_outcomes": {
+      "success": 1
+    },
+    "links": 1,
+    "coverage": {
+      "saved_records": 29,
+      "reviewed_records": 29,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 18,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  },
+  {
+    "case": "wrong-password",
+    "case_id": "e01e7511-7a3d-448e-941e-5526d74c519d",
+    "gateway_records": 32,
+    "auth_outcomes": {
+      "failure": 1
+    },
+    "links": 1,
+    "coverage": {
+      "saved_records": 33,
+      "reviewed_records": 33,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 22,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  },
+  {
+    "case": "retry",
+    "case_id": "99584fc1-afa9-4038-a38d-338a5c927da7",
+    "gateway_records": 43,
+    "auth_outcomes": {
+      "failure": 2,
+      "success": 1
+    },
+    "links": 3,
+    "coverage": {
+      "saved_records": 46,
+      "reviewed_records": 46,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 35,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  },
+  {
+    "case": "guest",
+    "case_id": "0d781846-a7ee-450d-89a4-0125fd843fa2",
+    "gateway_records": 46,
+    "auth_outcomes": {},
+    "links": 0,
+    "coverage": {
+      "saved_records": 46,
+      "reviewed_records": 46,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 35,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  },
+  {
+    "case": "missing-auth",
+    "case_id": "c538e0be-41af-47de-8fa5-978e88c7eb6e",
+    "gateway_records": 28,
+    "auth_outcomes": {},
+    "links": 0,
+    "coverage": {
+      "saved_records": 28,
+      "reviewed_records": 28,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 17,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  }
+]

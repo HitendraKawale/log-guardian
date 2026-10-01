@@ -1,0 +1,62 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.runtime
+#1 transferring dockerfile: 199B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/lg-juice-instrumented:20.2.0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM docker.io/library/lg-juice-instrumented:20.2.0@sha256:0f61bc6ee818abde53f2b33ee7bcab151661acf46cb1898ee69ab570708f2bf6
+#4 resolve docker.io/library/lg-juice-instrumented:20.2.0@sha256:0f61bc6ee818abde53f2b33ee7bcab151661acf46cb1898ee69ab570708f2bf6 done
+#4 DONE 0.0s
+
+#5 [2/2] RUN chown -R 65532:0 ftp frontend/dist logs data i18n
+#5 DONE 0.9s
+
+#6 exporting to image
+#6 exporting layers
+#6 exporting layers 0.9s done
+#6 exporting manifest sha256:7050c26a57a5814ff6a24cd48781d31e3b66e2fcb9578ca2b5913c7e752bf8f1 done
+#6 exporting config sha256:2c77b4ec99b86f8b0dd9d5ec988cee5c61a3e86102a8bac70c1adb96d41d8128 done
+#6 exporting attestation manifest sha256:158f8b2c9015b586d54cb9957efac0e8b9c48c9e1c21f8ecd8694a690d42e584 0.0s done
+#6 exporting manifest list sha256:3acd31d048eaece01972652aba765038b9c189556608a7a7301072de27190b02 done
+#6 naming to docker.io/library/lg-juice-business:20.2.0 done
+#6 unpacking to docker.io/library/lg-juice-business:20.2.0
+#6 unpacking to docker.io/library/lg-juice-business:20.2.0 0.2s done
+#6 DONE 1.1s
+stable-alpine: Pulling from library/nginx
+a9986cd6f37d: Pulling fs layer
+e5cd9cbe35d3: Pulling fs layer
+5e7de8c59e40: Pulling fs layer
+de314aae67cd: Pulling fs layer
+28a16c1011b2: Pulling fs layer
+a8783588284d: Pulling fs layer
+5ba288929352: Pulling fs layer
+08c08ab5f9f7: Pulling fs layer
+5e7de8c59e40: Download complete
+e5cd9cbe35d3: Download complete
+08c08ab5f9f7: Download complete
+a9986cd6f37d: Download complete
+a8783588284d: Download complete
+5ba288929352: Download complete
+28a16c1011b2: Download complete
+73cb13f3e34f: Download complete
+a9986cd6f37d: Pull complete
+a8783588284d: Pull complete
+57c6cc1fca9e: Download complete
+5e7de8c59e40: Pull complete
+e5cd9cbe35d3: Pull complete
+08c08ab5f9f7: Pull complete
+5ba288929352: Pull complete
+28a16c1011b2: Pull complete
+de314aae67cd: Download complete
+de314aae67cd: Pull complete
+Digest: sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+Status: Downloaded newer image for nginx:stable-alpine
+docker.io/library/nginx:stable-alpine
+RUNTIME_BUILD_EXIT=0

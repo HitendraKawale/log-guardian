@@ -1,0 +1,4 @@
+{
+  "type": "AssertionError",
+  "message": "Traceback (most recent call last):\n  File \"/tmp/lg-juice-business/run.py\", line 232, in <module>\n    main()\n  File \"/tmp/lg-juice-business/run.py\", line 199, in main\n    add_cart(page, True)\n  File \"/tmp/lg-juice-business/run.py\", line 119, in add_cart\n    assert response.value.status == 201\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}

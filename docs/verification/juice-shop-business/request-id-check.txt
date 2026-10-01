@@ -1,0 +1,1 @@
+PASS: nginx replaced the caller-selected request ID; gateway and actual auth decision share the generated ID.

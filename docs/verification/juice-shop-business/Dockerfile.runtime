@@ -1,0 +1,5 @@
+FROM lg-juice-instrumented:20.2.0
+RUN chown -R 65532:0 ftp frontend/dist logs data i18n
+USER 65532
+ENV NODE_ENV=production
+CMD ["node", "build/app.js"]

@@ -1,0 +1,82 @@
+"""Check database effects, history persistence, runtime isolation and network limitations."""
+
+import json
+import sqlite3
+import subprocess
+from collections import Counter
+from pathlib import Path
+from urllib.parse import urlsplit
+
+from playwright.sync_api import expect, sync_playwright
+import run
+
+root = Path('/tmp/lg-juice-business')
+result = {}
+with sqlite3.connect(f'file:{root}/lg.sqlite?mode=ro', uri=True) as db:
+    result['database'] = {table: db.execute(f'SELECT count(*) FROM {table}').fetchone()[0] for table in ['security_cases', 'security_evidence', 'investigations', 'investigation_events']}
+    assert result['database']['investigations'] == result['database']['investigation_events'] == 0
+    assert result['database']['security_cases'] == 6, 'Five final cases plus the preserved partial-run case'
+    for row in json.loads((run.OUT / 'observations.json').read_text()):
+        report = json.loads(db.execute('SELECT report FROM security_cases WHERE id = ?', (row['case_id'],)).fetchone()[0])
+        assert len(report['timeline']) == row['coverage']['saved_records']
+        assert report == json.loads((run.OUT / f'{row["case"]}-case.json').read_text())['report']
+result['history_reload'] = False
+network = []
+console_errors = []
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    try:
+        ctx = run.context(browser)
+        page = ctx.new_page()
+        page.goto(run.R['review_url'])
+        page.get_by_label('Security API key', exact=True).fill(run.R['review_key'])
+        page.get_by_role('button', name='Connect', exact=True).click()
+        expect(page.locator('#security-history button')).to_have_count(6)
+        identity = next(row['case_id'] for row in json.loads((run.OUT / 'observations.json').read_text()) if row['case'] == 'retry')
+        page.locator('#security-history button').filter(has_text=identity[:8]).click()
+        expect(page.locator('#security-outcomes')).to_have_text('2 failures, 1 success, 0 unavailable.')
+        expect(page.locator('#security-assessment-status')).to_contain_text('Reviewed 46 of 46')
+        page.reload()
+        expect(page.get_by_label('Security API key', exact=True)).to_have_value('')
+        page.get_by_label('Security API key', exact=True).fill(run.R['review_key'])
+        page.get_by_role('button', name='Connect', exact=True).click()
+        page.locator('#security-history button').filter(has_text=identity[:8]).click()
+        expect(page.locator('#security-outcomes')).to_have_text('2 failures, 1 success, 0 unavailable.')
+        assert page.evaluate('JSON.stringify(localStorage)+JSON.stringify(sessionStorage)') == '{}{}'
+        page.set_viewport_size({'width': 390, 'height': 844})
+        page.locator('#security-assessment-report').scroll_into_view_if_needed()
+        page.screenshot(path=str(run.OUT / 'history-reload-mobile.png'))
+        result['history_reload'] = True
+        ctx.close()
+        ctx = run.context(browser)
+        page = ctx.new_page()
+        page.on('response', lambda response: network.append({'path': urlsplit(response.url).path, 'status': response.status}) if response.status >= 400 else None)
+        page.on('console', lambda message: console_errors.append(message.type) if message.type == 'error' else None)
+        page.on('websocket', lambda socket: socket.on('socketerror', lambda error: network.append({'path': urlsplit(socket.url).path, 'websocket_error': 'handshake 400' if '400' in str(error) else 'other error'})))
+        page.goto(run.R['shop_url'] + '/#/search')
+        expect(page.get_by_role('button', name='Close Welcome Banner', exact=True)).to_be_visible()
+        page.get_by_role('button', name='Close Welcome Banner', exact=True).click()
+        expect(page.get_by_text('All Products', exact=True)).to_be_visible()
+        page.get_by_role('button', name='Show/hide account menu', exact=True).click()
+        expect(page.get_by_role('menu')).to_be_visible()
+        ctx.close()
+    finally:
+        browser.close()
+result['network_observation'] = network
+result['shop_console_error_count'] = len(console_errors)
+result['page_errors'] = run.errors
+assert not run.errors
+shop = json.loads(subprocess.check_output(['docker', 'inspect', 'lg-juice-business-shop-1']))[0]
+gateway = json.loads(subprocess.check_output(['docker', 'inspect', 'lg-juice-business-gateway-1']))[0]
+assert shop['Config']['User'] == '65532'
+assert not shop['HostConfig']['PortBindings']
+assert set(shop['NetworkSettings']['Networks']) == {'lg-juice-business_lab'}
+assert gateway['HostConfig']['PortBindings']['8080/tcp'][0]['HostIp'] == '127.0.0.1'
+env = dict(value.split('=', 1) for value in shop['Config']['Env'] if '=' in value)
+assert not env.get('OPENAI_API_KEY') and not env.get('LLM_API_KEY')
+log = subprocess.check_output(['docker', 'logs', 'lg-juice-business-shop-1'], stderr=subprocess.STDOUT)
+assert b'LG_AUTH_AUDIT_FAILED' not in log
+result['isolation'] = {'shop_user': '65532', 'shop_published_ports': [], 'shop_networks': list(shop['NetworkSettings']['Networks']), 'gateway_binding': gateway['HostConfig']['PortBindings'], 'provider_keys_present': False, 'audit_write_failure': False}
+result['http_status_counts'] = {name: dict(Counter(json.loads(line)['status'] for line in (run.OUT / f'{name}-edge.jsonl').read_text().splitlines())) for name in ['normal-customer', 'wrong-password', 'retry', 'guest', 'missing-auth']}
+(root / 'postchecks.json').write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps(result, indent=2))

@@ -1,0 +1,27 @@
+▶ securityAudit
+  ✔ writes typed decisions without identity or credential material (3.467417ms)
+  ✔ does not conflate distinct case-sensitive account identifiers (0.590083ms)
+  ✔ leaves invalid account references unavailable without stringifying objects (0.6215ms)
+  ✔ does not trust malformed or multi-valued request IDs (0.57125ms)
+  ✔ stays disabled when no audit path is configured (0.267458ms)
+  ✔ reports incomplete configuration without leaking account data (0.865125ms)
+  ✔ reports write failure without changing authentication or exposing an exception (0.445167ms)
+✔ securityAudit (7.947292ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 225.708291
+ℹ start of coverage report
+ℹ ------------------------------------------------------------------
+ℹ file              | line % | branch % | funcs % | uncovered lines
+ℹ ------------------------------------------------------------------
+ℹ lib               |        |          |         | 
+ℹ  securityAudit.ts | 100.00 |    95.65 |  100.00 | 
+ℹ ------------------------------------------------------------------
+ℹ all files         | 100.00 |    95.65 |  100.00 | 
+ℹ ------------------------------------------------------------------
+ℹ end of coverage report

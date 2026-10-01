@@ -1,0 +1,20 @@
+[
+  {
+    "case": "normal-customer",
+    "case_id": "a14cad7a-dc27-4165-96e1-7108aeb65430",
+    "gateway_records": 28,
+    "auth_outcomes": {
+      "success": 1
+    },
+    "links": 1,
+    "coverage": {
+      "saved_records": 29,
+      "reviewed_records": 29,
+      "displayed_event_facts": 11,
+      "omitted_event_facts": 18,
+      "fact_limit": 12,
+      "display_limited": true
+    },
+    "browser_review": "passed"
+  }
+]
